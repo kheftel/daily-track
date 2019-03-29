@@ -20,7 +20,8 @@ app.get('/', (request, response) => {
     response.json(users);
 });*/
 
-//Binding to localhost://3000
-app.listen(3000, () => {
-    console.log('Express server started at port 3000');
+var port = process.env.PORT || 8080;
+
+app.listen(port, () => {
+    console.log('Express server started at port port');
 });
