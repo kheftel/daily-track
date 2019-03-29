@@ -10,7 +10,7 @@
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
     integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
 
-  <link rel="stylesheet" href="static/style.css">
+  <link rel="stylesheet" href="static/css/style.css">
 
   <title>DailyTrack</title>
 </head>
@@ -25,6 +25,11 @@
         <canvas id="mainChart"></canvas>
       </div>
     </div>
+    <div id="footer">
+        <button id="getData" class="btn btn-primary">Get data</button>
+        <button id="line" class="btn btn-primary">Line</button>
+        <button id="bar" class="btn btn-primary">Bar</button>
+      </div>
   </div>
 
 
@@ -44,50 +49,81 @@
 
   <!-- app script -->
   <script>
-    $(function () {
-      new Chart(document.getElementById("mainChart"), {
-        "type": "line",
-        "data": {
-          "labels": ["January", "February", "March", "April", "May", "June", "July"],
-          "datasets": [{
-            "label": "My First Dataset",
-            "data": [65, 59, 80, 81, 56, 55, 40],
-            "fill": false,
-            "borderColor": "rgb(75, 192, 192)",
-            "lineTension": 0
-          }]
+
+    //$(function () {
+    var config = {
+      "type": "bar",
+      "data": {
+        "datasets": []
+      },
+      "options": {
+        maintainAspectRatio: false,
+        title: {
+          display: false,
+          text: 'DailyTrack'
         },
-        "options": {
-          maintainAspectRatio: false,
-          title: {
-            display: false,
-            text: 'DailyTrack'
-          }
+        scales: {
+          xAxes: [{
+            type: 'time',
+            distribution: 'linear',
+            display: true,
+            scaleLabel: {
+              display: true,
+              labelString: 'Date'
+            },
+          }],
+          yAxes: [{
+            display: true,
+            scaleLabel: {
+              display: true,
+              labelString: 'Minutes'
+            }
+          }]
         }
-      });
-    });
+      }
+    };
+
+    var mainChart = new Chart("mainChart", config);
+    console.log(config);
+    
+    //});
+
+    $(() => {
+      getData();
+    })
   </script>
 
-  <!--<button>Get data</button>
 
   <script type="text/javascript">
-  const btn = document.querySelector('button');
-  btn.addEventListener('click', getData);
+  $('#getData').click(() => {
+    getData();
+  })
+
+  $('#line').click(() => {  
+    config.data.datasets[0].type = 'line';
+    mainChart.update(0);
+  })
+
+  $('#bar').click(() => {  
+    config.data.datasets[0].type = 'bar';
+    mainChart.update(0);
+  })
 
   function getData(e) {
     $.ajax({
-      url: '/users',
+      url: '/api/data',
       method: 'GET',
-      success: function (data) {
-        console.log(data);
+      success: (data) => {
+        config.data.datasets = [data];
+        mainChart.update();
       },
 
-      error: function (err) {
+      error: (err) => {
         console.log('Failed');
       }
     });
   }
-</script>-->
+</script>
 
 </body>
 

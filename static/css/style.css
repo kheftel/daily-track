@@ -4,7 +4,7 @@ body {
 }
 
 #container {
-    padding: 0 15px 15px 15px;
+    padding: 0;
 }
 
 /* header height specified in px */
@@ -14,7 +14,12 @@ body {
 
 /* main occupies the rest */
 #main {
-    height: calc(100vh - 60px - 15px);
+    height: calc(100vh - 60px - 15px - 60px);
+}
+
+#footer {
+    height: 60px;
+    padding-bottom: 15px;
 }
 
 .fill-all {
