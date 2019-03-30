@@ -10,26 +10,32 @@
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
     integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
 
-  <link rel="stylesheet" href="static/css/style.css">
+  <link rel="stylesheet" href="css/style.css">
 
   <title>DailyTrack</title>
 </head>
 
 <body>
-  <div id="container">
-    <div id="top">
-      <h1>DailyTrack</h1>
-    </div>
-    <div id="main">
-      <div class="fill-all">
-        <canvas id="mainChart"></canvas>
+  <div class="container-fluid h-100">
+    <div class="row" id="top">
+      <div class="col">
+        <h1>DailyTrack</h1>
       </div>
     </div>
-    <div id="footer">
+    <div id="main" class="row">
+      <div class="col h-100">
+        <div class="fill-all">
+          <canvas id="mainChart"></canvas>
+        </div>
+      </div>
+    </div>
+    <div class="row" id="footer">
+      <div class="col">
         <button id="getData" class="btn btn-primary">Get data</button>
         <button id="line" class="btn btn-primary">Line</button>
         <button id="bar" class="btn btn-primary">Bar</button>
       </div>
+    </div>
   </div>
 
 
@@ -48,83 +54,7 @@
     integrity="sha256-xKeoJ50pzbUGkpQxDYHD7o7hxe0LaOGeguUidbq6vis=" crossorigin="anonymous"></script>
 
   <!-- app script -->
-  <script>
-
-    //$(function () {
-    var config = {
-      "type": "bar",
-      "data": {
-        "datasets": []
-      },
-      "options": {
-        maintainAspectRatio: false,
-        title: {
-          display: false,
-          text: 'DailyTrack'
-        },
-        scales: {
-          xAxes: [{
-            type: 'time',
-            distribution: 'linear',
-            display: true,
-            scaleLabel: {
-              display: true,
-              labelString: 'Date'
-            },
-          }],
-          yAxes: [{
-            display: true,
-            scaleLabel: {
-              display: true,
-              labelString: 'Minutes'
-            }
-          }]
-        }
-      }
-    };
-
-    var mainChart = new Chart("mainChart", config);
-    console.log(config);
-    
-    //});
-
-    $(() => {
-      getData();
-    })
-  </script>
-
-
-  <script type="text/javascript">
-  $('#getData').click(() => {
-    getData();
-  })
-
-  $('#line').click(() => {  
-    config.data.datasets[0].type = 'line';
-    mainChart.update(0);
-  })
-
-  $('#bar').click(() => {  
-    config.data.datasets[0].type = 'bar';
-    mainChart.update(0);
-  })
-
-  function getData(e) {
-    $.ajax({
-      url: '/api/data',
-      method: 'GET',
-      success: (data) => {
-        config.data.datasets = [data];
-        mainChart.update();
-      },
-
-      error: (err) => {
-        console.log('Failed');
-      }
-    });
-  }
-</script>
-
+  <script src="js/bundle.js"></script>
 </body>
 
 </html>

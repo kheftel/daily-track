@@ -2,7 +2,7 @@
 const express = require('express'),
     app = express(),
     path = require('path'),
-    moment = require('moment')
+    moment = require('moment');
 
 // const users = require('./users');
 
@@ -19,13 +19,13 @@ function generateDataSet(type = "line", label = "Meditation") {
     return tempData;
 }
 
-function generateTempData(numDays = 30, missPercentage = .3, maxValue = 30) {
+function generateTempData(numDays = 30, missPercentage = 0.3, maxValue = 30) {
     var tempData = [];
     for (var days = -numDays + 1; days <= 0; days++) {
         tempData.push({
             x: relativeDateString(days),
             y: (Math.random() < missPercentage) ? 0 : Math.ceil(Math.random() * maxValue)
-        })
+        });
     }
     return tempData;
 }
@@ -40,7 +40,7 @@ function relativeDateString(daysFromNow) {
 app.set('port', process.env.PORT || 3000);
 
 // serve static files
-app.use('/static', express.static(path.join(__dirname, 'static')));
+app.use(express.static(path.join(__dirname, 'public')));
 
 //Adding routes
 app.get('/', (request, response) => {
