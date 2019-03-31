@@ -1,3 +1,8 @@
+// VARIABLES /////////////////////
+@header-height: 60px;
+@footer-height: 60px;
+
+// RULES /////////////////
 body {
     width: 100%;
     height: 100%;
@@ -10,18 +15,17 @@ body {
     padding: 0 15px;
 }
 
-/* header height specified in px */
 #top {
-    height: 60px;
+    height: @header-height;
 }
 
-/* main occupies the rest */
+/* main occupies the whole screen except for header and footer */
 #main {
-    height: calc(100vh - 60px - 60px);
+    height: calc(100vh - @header-height - @footer-height);
 }
 
 #footer {
-    height: 60px;
+    height: @footer-height;
     padding: 10px 0;
     bottom: 0;
     text-align: center;

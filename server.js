@@ -1,58 +1,45 @@
-// requires
+// REQUIRES /////////////////////////////
 const express = require('express'),
-    app = express(),
     path = require('path'),
-    moment = require('moment');
+    mongoose = require('mongoose'),
+    moment = require('moment'),
+    apiRouter = require('./routes/api'),
+    config = require('./config.json');
+
+var port = process.env.PORT || 8080;
+
+// DATABASE ////////////////////////
+var mongoDB = config.db.dev;
+mongoose.connect(mongoDB, {
+    useNewUrlParser: true
+});
+var db = mongoose.connection;
+db.on('error', console.error.bind(console, 'MongoDB connection error:'));
+module.exports = db;
+
+// more routes for our API will happen here
 
 // const users = require('./users');
 
-// generate some data
-function generateDataSet(type = "line", label = "Meditation") {
-    var tempData = {
-        "type": type,
-        "label": label,
-        "data": generateTempData(),
-        "fill": false,
-        "borderColor": "rgb(75, 192, 192)",
-        "lineTension": 0
-    };
-    return tempData;
-}
+// APP /////////////
+var app = express();
 
-function generateTempData(numDays = 30, missPercentage = 0.3, maxValue = 30) {
-    var tempData = [];
-    for (var days = -numDays + 1; days <= 0; days++) {
-        tempData.push({
-            x: relativeDateString(days),
-            y: (Math.random() < missPercentage) ? 0 : Math.ceil(Math.random() * maxValue)
-        });
-    }
-    return tempData;
-}
-
-function relativeDateString(daysFromNow) {
-    return moment().add(daysFromNow, 'd').format('YYYY-MM-DD');
-}
-
-//var data = generateDataSet();
-
-//setting the port.
-app.set('port', process.env.PORT || 3000);
-
+// ROUTES //////////////////////
 // serve static files
 app.use(express.static(path.join(__dirname, 'public')));
 
-//Adding routes
+// add index route
 app.get('/', (request, response) => {
     response.sendFile(__dirname + '/index.html');
 });
 
-app.get('/api/data', (request, response) => {
-    response.json(generateDataSet());
-});
+// register /api routes
+app.use('/api', apiRouter);
 
-var port = process.env.PORT || 8080;
+
+// START SERVER ////////////////////////////
+app.set('port', port);
 
 app.listen(port, () => {
-    console.log('Express server started at port ' + port);
+    console.log('Dailytrack listening on port ' + port);
 });

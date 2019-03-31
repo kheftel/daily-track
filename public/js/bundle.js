@@ -64,7 +64,7 @@ $(() => {
     function getData(e) {
         console.log('getData');
         $.ajax({
-            url: '/api/data',
+            url: '/api/sampledata',
             method: 'GET',
             success: (data) => {
                 config.data.datasets = [data];

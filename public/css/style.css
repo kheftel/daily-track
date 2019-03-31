@@ -8,11 +8,10 @@ body {
   height: 100%;
   padding: 0 15px;
 }
-/* header height specified in px */
 #top {
   height: 60px;
 }
-/* main occupies the rest */
+/* main occupies the whole screen except for header and footer */
 #main {
   height: calc(100vh - 60px - 60px);
 }
