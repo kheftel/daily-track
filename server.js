@@ -9,7 +9,7 @@ const express = require('express'),
 var port = process.env.PORT || 8080;
 
 // DATABASE ////////////////////////
-var mongoDB = config.db.dev;
+var mongoDB = process.env.MONGODB_URI || config.db.dev;
 mongoose.connect(mongoDB, {
     useNewUrlParser: true
 });
