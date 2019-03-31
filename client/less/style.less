@@ -4,9 +4,19 @@
 @ios-bar-height: 60px;
 
 // RULES /////////////////
+@media screen and (orientation:portrait) {
+    body {
+        height: calc(100vh - @ios-bar-height) !important;
+    }
+
+    #main {
+        height: calc(100vh - @header-height - @footer-height - @ios-bar-height) !important;
+    }
+}
+
 body {
     width: 100%;
-    height: calc(100vh - @ios-bar-height);
+    height: calc(100vh);
     position: absolute;
 }
 
@@ -22,13 +32,12 @@ body {
 
 /* main occupies the whole screen except for header and footer */
 #main {
-    height: calc(100vh - @header-height - @footer-height - @ios-bar-height);
+    height: calc(100vh - @header-height - @footer-height);
 }
 
 #footer {
     height: @footer-height;
     padding: 10px 0;
-    bottom: 0;
     text-align: center;
 }
 

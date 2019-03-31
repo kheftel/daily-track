@@ -1,6 +1,14 @@
+@media screen and (orientation: portrait) {
+  body {
+    height: calc(100vh - 60px) !important;
+  }
+  #main {
+    height: calc(100vh - 60px - 60px - 60px) !important;
+  }
+}
 body {
   width: 100%;
-  height: calc(100vh - 60px);
+  height: calc(100vh);
   position: absolute;
 }
 #container {
@@ -13,12 +21,11 @@ body {
 }
 /* main occupies the whole screen except for header and footer */
 #main {
-  height: calc(100vh - 60px - 60px - 60px);
+  height: calc(100vh - 60px - 60px);
 }
 #footer {
   height: 60px;
   padding: 10px 0;
-  bottom: 0;
   text-align: center;
 }
 .fill-all {
