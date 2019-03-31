@@ -27,6 +27,10 @@ $(() => {
             scales: {
                 xAxes: [{
                     type: 'time',
+                    time: {
+                        minUnit: 'day',
+                        tooltipFormat: 'MM/DD/YYYY'
+                    },
                     distribution: 'linear',
                     display: true,
                     scaleLabel: {
@@ -41,9 +45,23 @@ $(() => {
                         labelString: 'Minutes'
                     }
                 }]
+            },
+            plugins: {
+                zoom: {
+                    pan: {
+                        enabled: true,
+                        mode: 'x'
+                    },
+                    zoom: {
+                        enabled: true,
+                        mode: 'x'
+                    }
+                }
             }
         }
     };
+
+    window.config = config;
 
     var mainChart = new Chart("mainChart", config);
 
@@ -68,13 +86,18 @@ $(() => {
         mainChart.update(0);
     });
 
+    $('#reset').click(() => {
+        mainChart.resetZoom();
+    });
+
     function getData(e) {
         console.log('getData');
         $.ajax({
-            url: '/api/datasets/5ca00f23f968e4b0a2f36e0e/datapoints',
+            url: '/api/sets/5ca00f23f968e4b0a2f36e0e/points',
             method: 'GET',
             success: (data) => {
-                //console.log(data);
+                // format data received
+                normalizeDates(data);
                 config.data.datasets[0].data = data;
                 mainChart.update();
             },
@@ -83,6 +106,14 @@ $(() => {
                 console.log('Failed');
             }
         });
+    }
+
+    function normalizeDates(data) {
+        for (var i = 0; i < data.length; i++) {
+            var datum = data[i];
+            datum.x = moment(datum.x).utc().format('YYYY-MM-DD');
+        }
+        return data;
     }
 });
 },{"./modules/samplemodule":2}],2:[function(require,module,exports){

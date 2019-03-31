@@ -21,8 +21,11 @@
   "license": "ISC",
   "dependencies": {
     "body-parser": "^1.18.3",
+    "chartjs-plugin-zoom": "^0.7.0",
     "express": "^4.16.4",
+    "lodash": "^4.17.11",
     "moment": "^2.24.0",
+    "moment-round": "^1.0.1",
     "mongoose": "^5.4.20"
   },
   "devDependencies": {
