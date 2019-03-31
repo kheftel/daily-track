@@ -3,13 +3,17 @@ const express = require('express'),
     path = require('path'),
     mongoose = require('mongoose'),
     moment = require('moment'),
-    apiRouter = require('./routes/api'),
-    config = require('./config.json');
+    apiRouter = require('./routes/api');
 
 var port = process.env.PORT || 8080;
 
 // DATABASE ////////////////////////
-var mongoDB = process.env.MONGODB_URI || config.db.dev;
+var mongoDB = process.env.MONGODB_URI;
+if(!mongoDB)
+{
+    var config = require('./config.json');
+    mongoDB = config.db.dev;
+}
 mongoose.connect(mongoDB, {
     useNewUrlParser: true
 });
