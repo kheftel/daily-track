@@ -63,7 +63,7 @@ var config = {
             pointBackgroundColor: window.chartColors.orange,
             pointBorderColor: window.chartColors.orange,
             backgroundColor: Color(window.chartColors.orange).alpha(0.5).rgbString(),
-            borderColor: window.chartColors.orange
+            borderColor: Color(window.chartColors.orange).alpha(0.5).rgbString()
         }]
     },
     options: {
@@ -74,7 +74,7 @@ var config = {
             text: ''
         },
         layout: {
-            padding: 15
+            padding: 0
         },
         elements: {
             point: {
