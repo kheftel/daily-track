@@ -1,8 +1,9 @@
 // REQUIRES /////////////////////////////
-const   express =       require('express'),
-        moment =        require('moment'),
-        bodyParser =    require('body-parser'),
-        Dataset =       require('../models/dataset');
+const express = require('express'),
+    moment = require('moment'),
+    bodyParser = require('body-parser'),
+    Dataset = require('../models/dataset'),
+    Datapoint = require('../models/datapoint');
 
 // API /////////////////////////////
 var apiRouter = express.Router();
@@ -108,6 +109,64 @@ apiRouter.route('/datasets/:dataset_id')
 
             res.json({
                 message: 'Successfully deleted'
+            });
+        });
+    });
+
+// on routes that end in /datasets/:dataset_id/datapoints
+// ----------------------------------------------------
+apiRouter.route('/datasets/:dataset_id/datapoints')
+
+    // create a datapoint (accessed at POST http://localhost:8080/api/datasets/:dataset_id/datapoints)
+    .post(function (req, res) {
+
+        Dataset.findById(req.params.dataset_id, function (err, dataset) {
+            if (err)
+                res.send(err);
+
+            var datapoint = new Datapoint();
+            datapoint.dataset = req.params.dataset_id;
+            datapoint.x = req.body.x;
+            datapoint.y = req.body.y;
+
+            // save the datapoint and check for errors
+            datapoint.save(function (err) {
+                if (err)
+                    res.send(err);
+
+                res.json({
+                    message: 'Datapoint created!'
+                });
+            });
+        });
+    })
+
+    // get all the datapoints for a dataset (accessed at GET http://localhost:8080/api/datasets/:dataset_id/datapoints/)
+    .get(function (req, res) {
+        Dataset.findById(req.params.dataset_id, function (err, dataset) {
+            if (err)
+                res.send(err);
+
+            Datapoint.find({ 'dataset':req.params.dataset_id }, function (err, datapoints) {
+                if (err)
+                    res.send(err);
+                
+                /*var retval = [];
+                for(var i = 0; i < datapoints.length; i++) {
+                    var formattedDateString = moment(datapoints[i].x).format("YYYY-MM-DD");
+                    
+                    retval.push({
+                        _id: datapoints[i]._id,
+                        x: formattedDateString,
+                        y: datapoints[i].y
+                    });
+
+                    console.log(datapoints[i]);
+                }
+
+                res.json(retval);*/
+
+                res.json(datapoints);
             });
         });
     });

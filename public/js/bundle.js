@@ -9,7 +9,14 @@ $(() => {
     var config = {
         "type": "bar",
         "data": {
-            "datasets": []
+            "datasets": [{
+                "type": "line",
+                "label": "Meditation",
+                "data": [],
+                "fill": false,
+                "borderColor": "rgb(75, 192, 192)",
+                "lineTension": 0
+            }]
         },
         "options": {
             maintainAspectRatio: false,
@@ -39,12 +46,12 @@ $(() => {
     };
 
     var mainChart = new Chart("mainChart", config);
-    
+
     getData();
 
     console.log('setting up interactivity');
 
-    $('#getData').click(function() {
+    $('#getData').click(function () {
         console.log('click getData');
         getData();
     });
@@ -64,10 +71,11 @@ $(() => {
     function getData(e) {
         console.log('getData');
         $.ajax({
-            url: '/api/sampledata',
+            url: '/api/datasets/5ca00f23f968e4b0a2f36e0e/datapoints',
             method: 'GET',
             success: (data) => {
-                config.data.datasets = [data];
+                //console.log(data);
+                config.data.datasets[0].data = data;
                 mainChart.update();
             },
 
