@@ -4,7 +4,7 @@ var Viewport = require('./modules/viewport');
 
 // set up variables ///////////////
 
-window.chartColors = {
+var chartColors = {
     red: 'rgb(255, 99, 132)',
     orange: 'rgb(255, 159, 64)',
     yellow: 'rgb(255, 205, 86)',
@@ -13,21 +13,11 @@ window.chartColors = {
     purple: 'rgb(153, 102, 255)',
     grey: 'rgb(201, 203, 207)'
 };
-window.chartColorsArray = [
-    /*'#4dc9f6',
-    '#f67019',
-    '#f53794',
-    '#537bc4',
-    '#acc236',
-    '#166a8f',
-    '#00a950',
-    '#58595b',
-    '#8549ba'*/
-];
 
-window.getColor = function (i) {
-    return window.chartColorsArray[i % window.chartColorsArray.length];
-};
+var colorSchemes = {
+    vividRainbow: ['#00AAEE', '#A6D608', '#FFE302', '#FF5F00', '#F70D1A', '#9F00FF'],
+    chartjs: [chartColors.red, chartColors.orange, chartColors.yellow, chartColors.green, chartColors.blue, chartColors.purple, chartColors.grey]
+}
 
 var xAxis = {
     type: 'time',
@@ -54,19 +44,7 @@ var yAxis = {
 window.yAxis = yAxis;
 
 var config = {
-    type: "bar",
-    data: {
-        datasets: [{
-            type: "line",
-            label: "Meditation",
-            data: [],
-            fill: false,
-            pointBackgroundColor: window.chartColors.orange,
-            pointBorderColor: window.chartColors.orange,
-            backgroundColor: Color(window.chartColors.orange).alpha(0.5).rgbString(),
-            borderColor: Color(window.chartColors.orange).alpha(0.5).rgbString()
-        }]
-    },
+    type: "line",
     options: {
         maintainAspectRatio: false,
         title: {
@@ -119,7 +97,7 @@ $(() => {
     var viewport = new Viewport(mainChart);
     window.viewport = viewport;
 
-    getData();
+    //getData();
 
     console.log('setting up interactivity');
 
@@ -194,13 +172,6 @@ $(() => {
         });
     }
 
-    function normalizeDates(data) {
-        for (var i = 0; i < data.length; i++) {
-            var datum = data[i];
-            datum.x = moment(datum.x).utc().format('YYYY-MM-DD');
-        }
-        return data;
-    }
 });
 },{"./modules/samplemodule":2,"./modules/viewport":3}],2:[function(require,module,exports){
 module.exports = {
@@ -214,10 +185,124 @@ Viewport = function (chart) {
 
     this._right = moment.utc();
 
+    this._colorOffset = 0;
+    this._colorScheme = this.defaultColorScheme;
+
     this.setZoomLevel(this.defaultZoomLevel, false);
+
+    // add a dataset
+    $.ajax({
+        url: '/api/sets/5ca00f23f968e4b0a2f36e0e/points',
+        method: 'GET',
+        success: (data) => {
+            var dataset = {
+                type: "line",
+                label: "Meditation",
+                data: this.normalizeDates(data),
+                fill: false,
+                pointBackgroundColor: this.getColor(),
+                pointBorderColor: this.getColor(),
+                borderColor: this.getColor()
+            };
+            this._chart.data.datasets.push(dataset);
+            this.updateChart();
+        },
+
+        error: (err) => {
+            console.log('Failed');
+        }
+    });
 };
 
-Viewport.prototype.zooms = [{
+var p = Viewport.prototype;
+
+// COLORS //////////
+var chartColors = {
+    red: 'rgb(255, 99, 132)',
+    orange: 'rgb(255, 159, 64)',
+    yellow: 'rgb(255, 205, 86)',
+    green: 'rgb(75, 192, 192)',
+    blue: 'rgb(54, 162, 235)',
+    purple: 'rgb(153, 102, 255)',
+    grey: 'rgb(201, 203, 207)'
+};
+
+p.colorSchemes = {
+    vividRainbow: ['#00AAEE', '#A6D608', '#FFE302', '#FF5F00', '#F70D1A', '#9F00FF'],
+    chartjs: [chartColors.red, chartColors.orange, chartColors.yellow, chartColors.green, chartColors.blue, chartColors.purple, chartColors.grey]
+}
+
+p.defaultColorScheme = 'vividRainbow';
+
+Object.defineProperty(p, 'schemeNames', {
+    get() {
+        return Object.keys(p.colorSchemes);
+    }
+});
+
+Object.defineProperty(p, 'colorScheme', {
+    get() {
+        return this._colorScheme;
+    },
+    set(value) {
+        if (p.schemeNames.indexOf(value) == -1)
+            throw new Error('schemeName must be one of: ' + p.schemeNames.toString());
+
+        this._colorScheme = value;
+        this._colorOffset = 0;
+        this.refreshColorsFromScheme();
+        this.updateChart();
+    }
+});
+
+Object.defineProperty(p, 'datasets', {
+    get() {
+        return this._chart.data.datasets;
+    }
+});
+
+p.refreshColorsFromScheme = function() {
+    for(var i = 0; i < this.datasets.length; i++) {
+        var set = this.datasets[i];
+        set.pointBackgroundColor = this.getColor(i);
+        set.pointBorderColor = this.getColor(i);
+        set.borderColor = this.getColor(i);
+    }
+}
+
+Object.defineProperty(p, 'colorOffset', {
+    get() {
+        return this._colorOffset
+    },
+    set(i) {
+        this._colorOffset = i;
+
+        this.refreshColorsFromScheme();
+        this.updateChart();
+    }
+});
+
+p.getColor = function (i = 0) {
+    var scheme = this.colorSchemes[this._colorScheme];
+    return scheme[(i + this._colorOffset) % scheme.length];
+}
+
+/*p.setColorScheme = function(scheme) {
+    this._colorScheme = scheme;
+
+    this._chart.data.datasets.foreach(function(v, i, a) {
+        v.
+    });
+
+    pointBackgroundColor: window.chartColors.orange,
+    pointBorderColor: window.chartColors.orange,
+    borderColor: Color(window.chartColors.orange)
+
+}*/
+
+// ZOOMING and PANNING //////////
+
+p.zooms = [{
         'years': 1
     },
     {
@@ -237,16 +322,16 @@ Viewport.prototype.zooms = [{
     }
 ];
 
-Viewport.prototype.zoomLabels = [
+p.zoomLabels = [
     '1 Year',
     '6 Months',
     '3 Months',
     '1 Month',
-    '2 Weeks', 
+    '2 Weeks',
     '1 Week'
 ];
 
-Viewport.prototype.pans = [{
+p.pans = [{
         'months': 1
     },
     {
@@ -266,11 +351,11 @@ Viewport.prototype.pans = [{
     }
 ];
 
-Viewport.prototype.dateFormat = 'MM/DD/YYYY';
+p.dateFormat = 'MM/DD/YYYY';
 
-Viewport.prototype.defaultZoomLevel = 3;
+p.defaultZoomLevel = 3;
 
-Viewport.prototype.setZoomLevel = function (val, update = true) {
+p.setZoomLevel = function (val, update = true) {
     val = Math.max(0, Math.min(val, this.zooms.length - 1));
     this._zoomLevel = val;
     console.log('zoom level: ' + this._zoomLevel);
@@ -279,39 +364,39 @@ Viewport.prototype.setZoomLevel = function (val, update = true) {
         this.updateChart();
 };
 
-Viewport.prototype.getZoomLevel = function () {
+p.getZoomLevel = function () {
     return this._zoomLevel;
 };
 
-Viewport.prototype.zoomIn = function (update = true) {
+p.zoomIn = function (update = true) {
     this.setZoomLevel(this._zoomLevel + 1, update);
 };
 
-Viewport.prototype.zoomOut = function (update = true) {
+p.zoomOut = function (update = true) {
     this.setZoomLevel(this._zoomLevel - 1, update);
 };
 
-Viewport.prototype.getZoomParams = function () {
+p.getZoomParams = function () {
     return this.zooms[this._zoomLevel];
 };
 
-Viewport.prototype.getRightEdge = function () {
+p.getRightEdge = function () {
     return this._right;
 }
 
-Viewport.prototype.panRight = function (update = true) {
+p.panRight = function (update = true) {
     this._right.add(this.pans[this._zoomLevel]);
     if (update)
         this.updateChart();
 }
 
-Viewport.prototype.panLeft = function (update = true) {
+p.panLeft = function (update = true) {
     this._right.subtract(this.pans[this._zoomLevel]);
     if (update)
         this.updateChart();
 }
 
-Viewport.prototype.showAll = function (update = true) {
+p.showAll = function (update = true) {
     var data = this._chart.data.datasets[0].data;
     var first = data[0].x;
     var last = data[data.length - 1].x;
@@ -321,13 +406,15 @@ Viewport.prototype.showAll = function (update = true) {
         this._chart.update();
 }
 
-Viewport.prototype.getRangeString = function () {
+p.getRangeString = function () {
     var rightString = this._right.format(this.dateFormat);
     var leftString = moment.utc(this._right).subtract(this.zooms[this._zoomLevel]).format(this.dateFormat);
     return leftString + ' - ' + rightString + ' - (' + this.zoomLabels[this._zoomLevel] + ')';
 }
 
-Viewport.prototype.updateChart = function (t) {
+// CHART MANIPULATION /////////
+
+p.updateChart = function (t) {
     // set viewport on chart
     if (!this._chart) return;
 
@@ -348,6 +435,16 @@ Viewport.prototype.updateChart = function (t) {
 
     console.log(this.getRangeString());
 }
+
+// UTILITY FUNCTIONS
+p.normalizeDates = function (data) {
+    for (var i = 0; i < data.length; i++) {
+        var datum = data[i];
+        datum.x = moment(datum.x).utc().format('YYYY-MM-DD');
+    }
+    return data;
+}
+
 
 module.exports = Viewport;
 },{}]},{},[1]);

@@ -3,7 +3,7 @@ var Viewport = require('./modules/viewport');
 
 // set up variables ///////////////
 
-window.chartColors = {
+var chartColors = {
     red: 'rgb(255, 99, 132)',
     orange: 'rgb(255, 159, 64)',
     yellow: 'rgb(255, 205, 86)',
@@ -12,21 +12,11 @@ window.chartColors = {
     purple: 'rgb(153, 102, 255)',
     grey: 'rgb(201, 203, 207)'
 };
-window.chartColorsArray = [
-    /*'#4dc9f6',
-    '#f67019',
-    '#f53794',
-    '#537bc4',
-    '#acc236',
-    '#166a8f',
-    '#00a950',
-    '#58595b',
-    '#8549ba'*/
-];
 
-window.getColor = function (i) {
-    return window.chartColorsArray[i % window.chartColorsArray.length];
-};
+var colorSchemes = {
+    vividRainbow: ['#00AAEE', '#A6D608', '#FFE302', '#FF5F00', '#F70D1A', '#9F00FF'],
+    chartjs: [chartColors.red, chartColors.orange, chartColors.yellow, chartColors.green, chartColors.blue, chartColors.purple, chartColors.grey]
+}
 
 var xAxis = {
     type: 'time',
@@ -53,19 +43,7 @@ var yAxis = {
 window.yAxis = yAxis;
 
 var config = {
-    type: "bar",
-    data: {
-        datasets: [{
-            type: "line",
-            label: "Meditation",
-            data: [],
-            fill: false,
-            pointBackgroundColor: window.chartColors.orange,
-            pointBorderColor: window.chartColors.orange,
-            backgroundColor: Color(window.chartColors.orange).alpha(0.5).rgbString(),
-            borderColor: Color(window.chartColors.orange).alpha(0.5).rgbString()
-        }]
-    },
+    type: "line",
     options: {
         maintainAspectRatio: false,
         title: {
@@ -118,7 +96,7 @@ $(() => {
     var viewport = new Viewport(mainChart);
     window.viewport = viewport;
 
-    getData();
+    //getData();
 
     console.log('setting up interactivity');
 
@@ -193,11 +171,4 @@ $(() => {
         });
     }
 
-    function normalizeDates(data) {
-        for (var i = 0; i < data.length; i++) {
-            var datum = data[i];
-            datum.x = moment(datum.x).utc().format('YYYY-MM-DD');
-        }
-        return data;
-    }
 });
