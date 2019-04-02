@@ -1,5 +1,5 @@
-Viewport = function (chart) {
-    this._chart = chart;
+ChartController = function (canvas) {
+    this._chart = new Chart(canvas, this.defaultConfig);
 
     this._right = moment.utc();
 
@@ -32,7 +32,73 @@ Viewport = function (chart) {
     });
 };
 
-var p = Viewport.prototype;
+var p = ChartController.prototype;
+
+p.xAxis = {
+    type: 'time',
+    time: {
+        minUnit: 'day',
+        tooltipFormat: 'MM/DD/YYYY'
+    },
+    distribution: 'linear',
+    display: true,
+    scaleLabel: {
+        display: true,
+        labelString: 'Date'
+    },
+};
+
+p.yAxis = {
+    display: true,
+    scaleLabel: {
+        display: true,
+        labelString: 'Minutes'
+    }
+};
+
+p.defaultConfig = {
+    type: "line",
+    options: {
+        maintainAspectRatio: false,
+        title: {
+            display: true,
+            fontSize: 20,
+            text: ''
+        },
+        layout: {
+            padding: 0
+        },
+        elements: {
+            point: {
+                radius: 5,
+                hoverRadius: 10
+            },
+            line: {
+                tension: 0
+            },
+            rectangle: {
+                borderWidth: 2
+            }
+        },
+        scales: {
+            xAxes: [p.xAxis],
+            yAxes: [p.yAxis]
+        },
+        plugins: {
+            /*zoom: {
+                pan: {
+                    enabled: true,
+                    mode: 'x'
+                },
+                zoom: {
+                    enabled: true,
+                    mode: 'x'
+                }
+            }*/
+        }
+    }
+};
+
 
 // COLORS //////////
 var chartColors = {
@@ -251,7 +317,7 @@ p.updateChart = function (t) {
 
     this._chart.update(t);
 
-    console.log(this.getRangeString());
+    //console.log(this.getRangeString());
 }
 
 // UTILITY FUNCTIONS
@@ -263,5 +329,4 @@ p.normalizeDates = function (data) {
     return data;
 }
 
-
-module.exports = Viewport;
+module.exports = ChartController;
