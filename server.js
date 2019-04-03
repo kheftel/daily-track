@@ -34,7 +34,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 // add index route
 app.get('/', (request, response) => {
-    response.sendFile(__dirname + '/index.html');
+    response.sendFile(__dirname + 'public/index.html');
 });
 
 // register /api routes

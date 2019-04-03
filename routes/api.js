@@ -27,7 +27,7 @@ apiRouter.get('/', function (req, res) {
 // ----------------------------------------------------
 apiRouter.route('/sets')
 
-    // create a dataset (accessed at POST http://localhost:8080/api/sets)
+    // POST = create a dataset
     .post(function (req, res) {
 
         var dataset = new Dataset(); // create instance of model
@@ -50,7 +50,7 @@ apiRouter.route('/sets')
 
     })
 
-    // get all the datasets (accessed at GET http://localhost:8080/api/sets)
+    // GET = get all the datasets
     .get(function (req, res) {
         Dataset.find(function (err, datasets) {
             if (err)
@@ -64,16 +64,33 @@ apiRouter.route('/sets')
 // ----------------------------------------------------
 apiRouter.route('/sets/:id')
 
-    // get the dataset with that id (accessed at GET http://localhost:8080/api/sets/:id)
+    // GET = get the dataset (including data)
     .get(function (req, res) {
+        // grab the dataset from the db
         Dataset.findById(req.params.id, function (err, dataset) {
             if (err)
                 res.send(err);
-            res.json(dataset);
+
+            // populate its datapoints
+            Datapoint.find({
+                    'dataset': req.params.id,
+                })
+                .sort({
+                    x: 'asc'
+                })
+                .exec(function (err, datapoints) {
+                    if (err)
+                        res.send(err);
+
+                    var result = dataset.toObject();
+                    result.data = datapoints;
+
+                    res.json(result);
+                });
         });
     })
 
-    // update the dataset with this id (accessed at PUT http://localhost:8080/api/sets/:id)
+    // PUT = update the dataset
     .put(function (req, res) {
 
         // use our dataset model to find the dataset we want
@@ -99,27 +116,28 @@ apiRouter.route('/sets/:id')
             });
 
         });
-    })
+    }); //,
 
-    // delete the dataset with this id (accessed at DELETE http://localhost:8080/api/sets/:id)
-    .delete(function (req, res) {
-        Dataset.remove({
-            _id: req.params.id
-        }, function (err, dataset) {
-            if (err)
-                res.send(err);
+// DELETE = delete the dataset
+// TO DO: what to do about the points?
+// .delete(function (req, res) {
+//     Dataset.remove({
+//         _id: req.params.id
+//     }, function (err, dataset) {
+//         if (err)
+//             res.send(err);
 
-            res.json({
-                message: 'Successfully deleted'
-            });
-        });
-    });
+//         res.json({
+//             message: 'Successfully deleted'
+//         });
+//     });
+// });
 
-// on routes that end in /sets/:id/points
+// on routes that end in /sets/:id/data
 // ----------------------------------------------------
-apiRouter.route('/sets/:id/points')
+apiRouter.route('/sets/:id/data')
 
-    // create a datapoint (accessed at POST http://localhost:8080/api/sets/:id/points)
+    // POST = create a datapoint
     .post(function (req, res) {
 
         Dataset.findById(req.params.id, function (err, dataset) {
@@ -169,7 +187,7 @@ apiRouter.route('/sets/:id/points')
         });
     })
 
-    // get all the datapoints for a dataset (accessed at GET http://localhost:8080/api/sets/:id/points/)
+    // GET = get all the datapoints for this set (obsolete)
     .get(function (req, res) {
         Datapoint.find({
                 'dataset': req.params.id,
@@ -184,11 +202,11 @@ apiRouter.route('/sets/:id/points')
             });
     });
 
-// on routes that end in /sets/:id/points/:start/:end
+// on routes that end in /sets/:id/range/:start/:end
 // ----------------------------------------------------
-apiRouter.route('/sets/:id/points/:start/:end')
+apiRouter.route('/sets/:id/range/:start/:end')
 
-    // get a range of datapoints for a dataset (accessed at GET http://localhost:8080/api/sets/:id/points/:start/:end)
+    // get a range of datapoints for a dataset
     .get(function (req, res) {
         Datapoint.find({
                 'dataset': req.params.id,
@@ -204,6 +222,45 @@ apiRouter.route('/sets/:id/points/:start/:end')
             });
     });
 
+// on routes that end in /points/:id
+// ----------------------------------------------------
+apiRouter.route('/points/:id')
+
+    // GET = get a single datapoint - kinda redundant
+    .get(function (req, res) {
+        // grab the dataset from the db
+        Datapoint.findById(req.params.id, function (err, datapoint) {
+            if (err)
+                res.send(err);
+
+            res.json(datapoint);
+        });
+    })
+
+    // PUT = update the datapoint
+    .put(function (req, res) {
+        Datapoint.findById(req.params.id, function (err, datapoint) {
+            if (err)
+                res.send(err);
+            
+            // update the datapoint's info - for now, only y supported
+            // TO DO: update datapoint's x value, but test for dups
+            ['y'].forEach(function (element) {
+                if (req.body[element] !== undefined)
+                    datapoint[element] = req.body[element];
+            });
+
+            // save the datapoint
+            datapoint.save(function (err) {
+                if (err)
+                    res.send(err);
+
+                res.json({
+                    message: 'Datapoint updated!'
+                });
+            });
+        });
+    });
 
 // sample data
 apiRouter.get('/sampledata', (request, response) => {

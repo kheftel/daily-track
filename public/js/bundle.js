@@ -9,9 +9,10 @@ $(() => {
 
     // controller for chart
     var controller = new ChartController('mainChart');
+    controller.addDataset('5ca00f23f968e4b0a2f36e0e', function() {
+        controller.addDataset('5ca4dc5a85df2293711ef8a8');
+    });
     window.controller = controller;
-
-    //getData();
 
     console.log('setting up interactivity');
 
@@ -38,105 +39,59 @@ $(() => {
 },{"./modules/ChartController":2,"./modules/samplemodule":3}],2:[function(require,module,exports){
 ChartController = function (canvas) {
     this._chart = new Chart(canvas, this.defaultConfig);
-
+    this._datasetIds = [];
     this._right = moment.utc();
 
     this._colorOffset = 0;
     this._colorScheme = this.defaultColorScheme;
 
     this.setZoomLevel(this.defaultZoomLevel, false);
-
-    // add a dataset
-    $.ajax({
-        url: '/api/sets/5ca00f23f968e4b0a2f36e0e/points',
-        method: 'GET',
-        success: (data) => {
-            var dataset = {
-                type: "line",
-                label: "Meditation",
-                data: this.normalizeDates(data),
-                fill: false,
-                pointBackgroundColor: this.getColor(),
-                pointBorderColor: this.getColor(),
-                borderColor: this.getColor()
-            };
-            this._chart.data.datasets.push(dataset);
-            this.updateChart();
-        },
-
-        error: (err) => {
-            console.log('Failed');
-        }
-    });
 };
 
 var p = ChartController.prototype;
 
-p.xAxis = {
-    type: 'time',
-    time: {
-        minUnit: 'day',
-        tooltipFormat: 'MM/DD/YYYY'
-    },
-    distribution: 'linear',
-    display: true,
-    scaleLabel: {
-        display: true,
-        labelString: 'Date'
-    },
-};
+// DATA, LOADING /////////
+p.addDataset = function (id, complete) {
+    $.ajax({
+        url: '/api/sets/' + id,
+        method: 'GET',
+        success: (dataset) => {
+            // translate for chart dataset object
+            dataset.type = dataset.chartType;
+            dataset.label = dataset.name;
+            dataset.data = this.normalizeDates(dataset.data);
+            dataset.fill = false;
+            dataset.pointBackgroundColor = this.getColor(this.datasets.length);
+            dataset.pointBorderColor = this.getColor(this.datasets.length);
+            dataset.borderColor = this.getColor(this.datasets.length);
 
-p.yAxis = {
-    display: true,
-    scaleLabel: {
-        display: true,
-        labelString: 'Minutes'
-    }
-};
+            // don't trigger a chart update yet
+            // TO DO: what if different charts have different y axis labels?
+            this.xAxis.scaleLabel.labelString = dataset.xAxisLabel;
+            this.yAxis.scaleLabel.labelString = dataset.yAxisLabel;
 
-p.defaultConfig = {
-    type: "line",
-    options: {
-        maintainAspectRatio: false,
-        title: {
-            display: true,
-            fontSize: 20,
-            text: ''
+            this.datasets.push(dataset);
+            this._datasetIds.push(id);
+
+            // update chart
+            this.updateChart();
+
+            if(complete) complete();
         },
-        layout: {
-            padding: 0
-        },
-        elements: {
-            point: {
-                radius: 5,
-                hoverRadius: 10
-            },
-            line: {
-                tension: 0
-            },
-            rectangle: {
-                borderWidth: 2
-            }
-        },
-        scales: {
-            xAxes: [p.xAxis],
-            yAxes: [p.yAxis]
-        },
-        plugins: {
-            /*zoom: {
-                pan: {
-                    enabled: true,
-                    mode: 'x'
-                },
-                zoom: {
-                    enabled: true,
-                    mode: 'x'
-                }
-            }*/
+
+        error: (err) => {
+            console.log('Failed');
+            
+            if(complete) complete();
         }
-    }
-};
+    });
+}
 
+Object.defineProperty(p, 'datasets', {
+    get() {
+        return this._chart.data.datasets;
+    }
+})
 
 // COLORS //////////
 var chartColors = {
@@ -177,14 +132,8 @@ Object.defineProperty(p, 'colorScheme', {
     }
 });
 
-Object.defineProperty(p, 'datasets', {
-    get() {
-        return this._chart.data.datasets;
-    }
-});
-
-p.refreshColorsFromScheme = function() {
-    for(var i = 0; i < this.datasets.length; i++) {
+p.refreshColorsFromScheme = function () {
+    for (var i = 0; i < this.datasets.length; i++) {
         var set = this.datasets[i];
         set.pointBackgroundColor = this.getColor(i);
         set.pointBorderColor = this.getColor(i);
@@ -277,6 +226,42 @@ p.dateFormat = 'MM/DD/YYYY';
 
 p.defaultZoomLevel = 3;
 
+/** xAxis */
+Object.defineProperty(p, 'xAxis', {
+    get() {
+        return this._chart.options.scales.xAxes[0];
+    }
+});
+
+/** xAxisLabel */
+Object.defineProperty(p, 'xAxisLabel', {
+    get() {
+        return this.xAxis.scaleLabel.labelString;
+    },
+    set(val) {
+        this.xAxis.scaleLabel.labelString = val;
+        this.updateChart();
+    }
+});
+
+/** yAxis */
+Object.defineProperty(p, 'yAxis', {
+    get() {
+        return this._chart.options.scales.yAxes[0];
+    }
+});
+
+/** yAxisLabel */
+Object.defineProperty(p, 'yAxisLabel', {
+    get() {
+        return this.yAxis.scaleLabel.labelString;
+    },
+    set(val) {
+        this.yAxis.scaleLabel.labelString = val;
+        this.updateChart();
+    }
+});
+
 p.setZoomLevel = function (val, update = true) {
     val = Math.max(0, Math.min(val, this.zooms.length - 1));
     this._zoomLevel = val;
@@ -366,6 +351,72 @@ p.normalizeDates = function (data) {
     }
     return data;
 }
+
+// INTERNALS
+p.defaultXAxis = {
+    type: 'time',
+    time: {
+        minUnit: 'day',
+        tooltipFormat: 'MM/DD/YYYY'
+    },
+    distribution: 'linear',
+    display: true,
+    scaleLabel: {
+        display: true,
+        labelString: 'no data'
+    },
+};
+
+p.defaultYAxis = {
+    display: true,
+    scaleLabel: {
+        display: true,
+        labelString: 'no data'
+    }
+};
+
+p.defaultConfig = {
+    type: "line",
+    options: {
+        maintainAspectRatio: false,
+        title: {
+            display: true,
+            fontSize: 20,
+            text: ''
+        },
+        layout: {
+            padding: 0
+        },
+        elements: {
+            point: {
+                radius: 5,
+                hoverRadius: 10
+            },
+            line: {
+                tension: 0
+            },
+            rectangle: {
+                borderWidth: 2
+            }
+        },
+        scales: {
+            xAxes: [p.defaultXAxis],
+            yAxes: [p.defaultYAxis]
+        },
+        plugins: {
+            /*zoom: {
+                pan: {
+                    enabled: true,
+                    mode: 'x'
+                },
+                zoom: {
+                    enabled: true,
+                    mode: 'x'
+                }
+            }*/
+        }
+    }
+};
 
 module.exports = ChartController;
 },{}],3:[function(require,module,exports){

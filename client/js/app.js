@@ -8,9 +8,10 @@ $(() => {
 
     // controller for chart
     var controller = new ChartController('mainChart');
+    controller.addDataset('5ca00f23f968e4b0a2f36e0e', function() {
+        controller.addDataset('5ca4dc5a85df2293711ef8a8');
+    });
     window.controller = controller;
-
-    //getData();
 
     console.log('setting up interactivity');
 
