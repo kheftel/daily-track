@@ -31,6 +31,9 @@ module.exports = db;
 // APP /////////////
 var app = express();
 app.use(logger('dev'));
+if (app.get('env') === 'development') {
+    app.locals.pretty = true;
+  }
 
 // VIEWS //////////
 app.set('views', path.join(__dirname, 'views'));

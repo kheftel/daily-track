@@ -2,25 +2,25 @@ extends layout
 
 block content
     div.container-fluid.h-100
-        div.row#top
+        div#top.row
             div.col
                 h1= title
-        div.row#main
+        div#main.row
             div.col.h-100
                 div.fill-all
                     canvas#mainChart
-        div.row#footer
+        div#footer.row
             div.col
-                button#showall.btn.btn-primary
-                    | Show All
-                button#left.btn.btn-primary
-                    | &lt;&lt;
-                button#right.btn.btn-primary
-                    | &gt;&gt;
-                button#minus.btn.btn-primary
-                    | -
-                button#plus.btn.btn-primary
-                    | +
+                button#showall.btn.btn-primary Show All
+
+                button#left.btn.btn-primary &lt;&lt;
+
+                button#right.btn.btn-primary &gt;&gt;
+
+                button#minus.btn.btn-primary -
+
+                button#plus.btn.btn-primary +
+block pagescript
     script.
         jQuery(function() {
             console.log('main onload');
