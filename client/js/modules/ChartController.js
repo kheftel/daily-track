@@ -41,7 +41,7 @@ p.addDataset = function (id, complete) {
         },
 
         error: (err) => {
-            console.log('Failed');
+            console.log(err);
             
             if(complete) complete();
         }

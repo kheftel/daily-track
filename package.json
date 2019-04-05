@@ -23,10 +23,13 @@
     "body-parser": "^1.18.3",
     "chartjs-plugin-zoom": "^0.7.0",
     "express": "^4.16.4",
+    "http-errors": "^1.7.2",
     "lodash": "^4.17.11",
     "moment": "^2.24.0",
     "moment-round": "^1.0.1",
-    "mongoose": "^5.4.20"
+    "mongoose": "^5.4.20",
+    "morgan": "^1.9.1",
+    "pug": "^2.0.3"
   },
   "devDependencies": {
     "browserify": "^16.2.3",

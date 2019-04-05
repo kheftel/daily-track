@@ -1,16 +1,19 @@
 // REQUIRES /////////////////////////////
-const express = require('express'),
-    path = require('path'),
-    mongoose = require('mongoose'),
-    moment = require('moment'),
-    apiRouter = require('./routes/api');
+const express = require('express');
+const path = require('path');
+const mongoose = require('mongoose');
+const moment = require('moment');
+const apiRouter = require('./routes/api');
+const indexRouter = require('./routes/index');
+const createError = require('http-errors');
+const logger = require('morgan');
+
 
 var port = process.env.PORT || 8080;
 
 // DATABASE ////////////////////////
 var mongoDB = process.env.MONGODB_URI;
-if(!mongoDB)
-{
+if (!mongoDB) {
     var config = require('./config.json');
     mongoDB = config.db.dev;
 }
@@ -27,19 +30,40 @@ module.exports = db;
 
 // APP /////////////
 var app = express();
+app.use(logger('dev'));
+
+// VIEWS //////////
+app.set('views', path.join(__dirname, 'views'));
+app.set('view engine', 'pug');
 
 // ROUTES //////////////////////
 // serve static files
 app.use(express.static(path.join(__dirname, 'public')));
 
-// add index route
-app.get('/', (request, response) => {
-    response.sendFile(__dirname + 'public/index.html');
-});
+// add index router
+app.use('/', indexRouter);
+// app.get('/', (request, response) => {
+//     response.sendFile(__dirname + 'public/index.html');
+// });
 
 // register /api routes
 app.use('/api', apiRouter);
 
+// catch 404 and forward to error handler
+app.use(function (req, res, next) {
+    next(createError(404));
+});
+
+// error handler
+app.use(function (err, req, res, next) {
+    // set locals, only providing error in development
+    res.locals.message = err.message;
+    res.locals.error = req.app.get('env') === 'development' ? err : {};
+
+    // render the error page
+    res.status(err.status || 500);
+    res.render('error');
+});
 
 // START SERVER ////////////////////////////
 app.set('port', port);
