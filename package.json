@@ -15,7 +15,8 @@
     "build:clean": "rimraf public/css/*, public/js/*",
     "prebuild": "npm run build:clean",
     "build": "npm run build:less && npm run build:bundle",
-    "watch:bundle": "watchify ./client/js/app.js -o ./public/js/bundle.js -v"
+    "watch:bundle": "watchify ./client/js/app.js -o ./public/js/bundle.js -v",
+    "heroku": "git push heroku master"
   },
   "author": "Kawika Heftel",
   "license": "ISC",
