@@ -2,6 +2,20 @@ var module = require('./modules/samplemodule');
 var ChartController = require('./modules/ChartController');
 var Controller = require('./modules/ChartController');
 
+window.helpers = window.helpers || {};
+
+window.helpers.createChartControllerFromModel = function(canvas, dataset) {
+    var controller = new ChartController(canvas);
+    controller.addDatasetFromModel(dataset);
+    return controller;
+}
+
+window.helpers.createChartControllerFromId = function(canvas, id) {
+    var controller = new ChartController(canvas);
+    controller.addDataset(id);
+    return controller;
+}
+
 // set up variables ///////////////
 
 // $(() => {

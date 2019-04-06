@@ -1,0 +1,49 @@
+extends layout
+
+block content
+    div.container-fluid.h-100
+        div#top.row
+            div.col
+                h1= title
+        div#main.row
+            div.col.h-100
+                div.fill-all
+                    canvas#mainChart
+        div#footer.row
+            div.col
+                button#showall.btn.btn-primary Show All
+
+                button#left.btn.btn-primary &lt;&lt;
+
+                button#right.btn.btn-primary &gt;&gt;
+
+                button#minus.btn.btn-primary -
+
+                button#plus.btn.btn-primary +
+
+block pagescript
+    script.
+
+        window.controller = window.helpers.createChartControllerFromId('mainChart', '#{dataset._id}');
+
+        console.log('setting up interactivity');
+
+        $('#minus').click(function() {
+            controller.zoomOut();
+        });
+
+        $('#plus').click(function() {
+            controller.zoomIn();
+        });
+
+        $('#left').click(function() {
+            controller.panLeft();
+        });
+
+        $('#right').click(function() {
+            controller.panRight();
+        });
+
+        $('#showall').click(function() {
+            controller.showAll();
+        });

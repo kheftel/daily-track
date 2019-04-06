@@ -1,5 +1,8 @@
 ChartController = function (canvas) {
-    this._chart = new Chart(canvas, this.defaultConfig);
+    // copy config
+    this._config = JSON.parse(JSON.stringify(p.defaultConfig));
+
+    this._chart = new Chart(canvas, this._config);
     this._datasetIds = [];
     this._right = moment.utc();
 
@@ -17,35 +20,38 @@ p.addDataset = function (id, complete) {
         url: '/api/sets/' + id,
         method: 'GET',
         success: (dataset) => {
-            // translate for chart dataset object
-            dataset.type = dataset.chartType;
-            dataset.label = dataset.name;
-            dataset.data = this.normalizeDates(dataset.data);
-            dataset.fill = false;
-            dataset.pointBackgroundColor = this.getColor(this.datasets.length);
-            dataset.pointBorderColor = this.getColor(this.datasets.length);
-            dataset.borderColor = this.getColor(this.datasets.length);
-
-            // don't trigger a chart update yet
-            // TO DO: what if different charts have different y axis labels?
-            this.xAxis.scaleLabel.labelString = dataset.xAxisLabel;
-            this.yAxis.scaleLabel.labelString = dataset.yAxisLabel;
-
-            this.datasets.push(dataset);
-            this._datasetIds.push(id);
-
-            // update chart
-            this.updateChart();
-
-            if(complete) complete();
+            this.addDatasetFromModel(dataset, complete);
         },
-
         error: (err) => {
             console.log(err);
-            
-            if(complete) complete();
+
+            if (complete) complete();
         }
     });
+}
+
+p.addDatasetFromModel = function (dataset, complete) {
+    // translate for chart dataset object
+    dataset.type = dataset.chartType;
+    dataset.label = dataset.name;
+    dataset.data = this.normalizeDates(dataset.data);
+    dataset.fill = false;
+    dataset.pointBackgroundColor = this.getColor(this.datasets.length);
+    dataset.pointBorderColor = this.getColor(this.datasets.length);
+    dataset.borderColor = this.getColor(this.datasets.length);
+
+    // don't trigger a chart update yet
+    // TO DO: what if different charts have different y axis labels?
+    this.xAxis.scaleLabel.labelString = dataset.xAxisLabel;
+    this.yAxis.scaleLabel.labelString = dataset.yAxisLabel;
+
+    this.datasets.push(dataset);
+    this._datasetIds.push(dataset._id);
+
+    // update chart
+    this.updateChart();
+
+    if (complete) complete();
 }
 
 Object.defineProperty(p, 'datasets', {
