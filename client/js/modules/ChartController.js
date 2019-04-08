@@ -1,8 +1,15 @@
-ChartController = function (canvas) {
+ChartController = function (container) {
     // copy config
     this._config = JSON.parse(JSON.stringify(p.defaultConfig));
 
-    this._chart = new Chart(canvas, this._config);
+    if(typeof container == 'string')
+        container = document.getElementById(container);
+
+    this._canvas = document.createElement('canvas');
+    container.appendChild(this._canvas);
+    this._container = container;
+
+    this._chart = new Chart(this._canvas, this._config);
     this._datasetIds = [];
     this._right = moment.utc();
 

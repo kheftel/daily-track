@@ -5,14 +5,14 @@ var Controller = require('./modules/ChartController');
 
 window.helpers = window.helpers || {};
 
-window.helpers.createChartControllerFromModel = function(canvas, dataset) {
-    var controller = new ChartController(canvas);
+window.helpers.createChartControllerFromModel = function(container, dataset) {
+    var controller = new ChartController(container);
     controller.addDatasetFromModel(dataset);
     return controller;
 }
 
-window.helpers.createChartControllerFromId = function(canvas, id) {
-    var controller = new ChartController(canvas);
+window.helpers.createChartControllerFromId = function(container, id) {
+    var controller = new ChartController(container);
     controller.addDataset(id);
     return controller;
 }
@@ -52,11 +52,18 @@ window.helpers.createChartControllerFromId = function(canvas, id) {
 //     });
 // });
 },{"./modules/ChartController":2,"./modules/samplemodule":3}],2:[function(require,module,exports){
-ChartController = function (canvas) {
+ChartController = function (container) {
     // copy config
     this._config = JSON.parse(JSON.stringify(p.defaultConfig));
 
-    this._chart = new Chart(canvas, this._config);
+    if(typeof container == 'string')
+        container = document.getElementById(container);
+
+    this._canvas = document.createElement('canvas');
+    container.appendChild(this._canvas);
+    this._container = container;
+
+    this._chart = new Chart(this._canvas, this._config);
     this._datasetIds = [];
     this._right = moment.utc();
 

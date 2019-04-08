@@ -4,14 +4,14 @@ var Controller = require('./modules/ChartController');
 
 window.helpers = window.helpers || {};
 
-window.helpers.createChartControllerFromModel = function(canvas, dataset) {
-    var controller = new ChartController(canvas);
+window.helpers.createChartControllerFromModel = function(container, dataset) {
+    var controller = new ChartController(container);
     controller.addDatasetFromModel(dataset);
     return controller;
 }
 
-window.helpers.createChartControllerFromId = function(canvas, id) {
-    var controller = new ChartController(canvas);
+window.helpers.createChartControllerFromId = function(container, id) {
+    var controller = new ChartController(container);
     controller.addDataset(id);
     return controller;
 }

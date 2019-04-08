@@ -7,8 +7,7 @@ block content
                 each set in datasets
                     h4
                         a(href="/chart/" + set.id)= set.name
-                    div(style="height: 300px")
-                        canvas(id=set.id)
+                    div(style="height: 300px", id=set.id)
 
         //- div.row#footer
         //-     div.col
