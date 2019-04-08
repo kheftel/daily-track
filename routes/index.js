@@ -4,19 +4,52 @@ const router = express.Router();
 const mongoose = require('mongoose');
 const Dataset = require('../models/dataset');
 const Datapoint = require('../models/datapoint');
+const _ = require('lodash');
 
-/* GET home page. */
-router.get('/', function (req, res, next) {
-    res.render('index', {
-        title: 'DailyTrack'
+// template data
+var state = {
+    siteTitle: 'DailyTrack',
+    nav: [{
+            title: 'Overview',
+            href: '/'
+        },
+        {
+            title: 'Charts',
+            href: '/charts'
+        }
+    ]
+};
+
+// prep state
+router.use(function (req, res, next) {
+    // reset active states
+    state.nav.forEach(element => {
+        element.active = undefined;
     });
+    // mark current page as active
+    let activenav = _.find(state.nav, {
+        href: req.path
+    });
+    if(activenav) activenav.active = true;
+
+    // console.log(req.path);
+    // console.log(req.baseUrl);
+    // console.log(req.originalUrl);
+
+    next();
+});
+
+// home page
+router.get('/', function (req, res, next) {
+    _.find(state.nav, {
+        href: '/'
+    }).active = true;
+    res.render('index', state);
 });
 
 // chart detail page
 router.get('/chart', function (req, res, next) {
-    res.render('chart', {
-        title: 'DailyTrack'
-    });
+    res.render('chart', state);
 });
 
 // charts list
@@ -28,9 +61,7 @@ router.get('/charts', function (req, res, next) {
 
         res.locals.datasets = datasets;
 
-        res.render('charts', {
-            title: 'DailyTrack'
-        });
+        res.render('charts', state);
     });
 });
 
@@ -57,10 +88,9 @@ router.get('/chart/:id', function (req, res, next) {
                 var result = dataset.toObject();
                 result.data = datapoints;
 
-                res.render('chart', {
-                    title: 'DailyTrack',
-                    dataset: result
-                });
+                state.dataset = result;
+
+                res.render('chart', state);
             });
     });
 });

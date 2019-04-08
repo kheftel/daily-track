@@ -39,6 +39,7 @@ p.addDatasetFromModel = function (dataset, complete) {
     dataset.pointBackgroundColor = this.getColor(this.datasets.length);
     dataset.pointBorderColor = this.getColor(this.datasets.length);
     dataset.borderColor = this.getColor(this.datasets.length);
+    dataset.backgroundColor = Chart.helpers.color(this.getColor(this.datasets.length)).alpha(0.6).rgbString();
 
     // don't trigger a chart update yet
     // TO DO: what if different charts have different y axis labels?
@@ -345,27 +346,6 @@ p.defaultYAxis = {
 p.defaultConfig = {
     type: "line",
     options: {
-        maintainAspectRatio: false,
-        title: {
-            display: true,
-            fontSize: 20,
-            text: ''
-        },
-        layout: {
-            padding: 0
-        },
-        elements: {
-            point: {
-                radius: 5,
-                hoverRadius: 10
-            },
-            line: {
-                tension: 0
-            },
-            rectangle: {
-                borderWidth: 2
-            }
-        },
         scales: {
             xAxes: [p.defaultXAxis],
             yAxes: [p.defaultYAxis]
@@ -384,5 +364,59 @@ p.defaultConfig = {
         }
     }
 };
+
+Chart.defaults.global.maintainAspectRatio = false;
+Chart.defaults.global.layout.padding = 0;
+
+Chart.defaults.global.legend.position = 'top';
+Chart.defaults.global.legend.labels.fontColor = 'white';
+
+Chart.defaults.global.title.display = true;
+Chart.defaults.global.title.fontColor = 'white';
+Chart.defaults.global.title.fontSize = 20;
+
+Chart.defaults.global.elements.point.radius = 5;
+Chart.defaults.global.elements.point.hoverRadius = 10;
+Chart.defaults.global.elements.line.tension = 0;
+Chart.defaults.global.elements.rectangle.borderWidth = 2;
+
+Chart.scaleService.updateScaleDefaults('linear', {
+    ticks: {
+        fontColor: 'white', // labels such as 10, 20, etc
+        showLabelBackdrop: false // hide square behind text
+    },
+    gridLines: {
+        color: 'rgba(255, 255, 255, 0.2)'
+    },
+    scaleLabel: {
+        display: true,
+        fontColor: 'white',
+        labelString: 'no data'
+    },
+});
+
+Chart.scaleService.updateScaleDefaults('time', {
+    ticks: {
+        fontColor: 'white', // labels such as 10, 20, etc
+        showLabelBackdrop: false // hide square behind text
+    },
+    gridLines: {
+        color: 'rgba(255, 255, 255, 0.2)'
+    },
+    scaleLabel: {
+        display: true,
+        fontColor: 'white',
+        labelString: 'no data'
+    },
+});
+
+Chart.scaleService.updateScaleDefaults('radial', {
+    angleLines: {
+        color: 'white' // lines radiating from the center
+    },
+    pointLabels: {
+        fontColor: 'white' // labels around the edge like 'Running'
+    }
+});
 
 module.exports = ChartController;

@@ -43,14 +43,15 @@ app.set('view engine', 'pug');
 // serve static files
 app.use(express.static(path.join(__dirname, 'public')));
 
-// add index router
-app.use('/', indexRouter);
 // app.get('/', (request, response) => {
 //     response.sendFile(__dirname + 'public/index.html');
 // });
 
 // register /api routes
 app.use('/api', apiRouter);
+
+// add index router
+app.use('/', indexRouter);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {

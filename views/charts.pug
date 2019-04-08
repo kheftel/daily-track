@@ -2,9 +2,6 @@ extends layout
 
 block content
     div.container-fluid.h-100
-        div.row#top
-            div.col
-                h1= title
         div.row#main
             div.col.h-100
                 each set in datasets
@@ -36,6 +33,7 @@ block pagescript
                 for(var i = 0; i < datasets.length; i++) {
                     var set = datasets[i];
                     var controller = new ChartController(set._id);
+                    controller.colorOffset = i;
                     controller.addDataset(set._id);
                 }
             },

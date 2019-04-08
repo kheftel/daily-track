@@ -1,3 +1,14 @@
+.navbar-brand {
+  background-image: url(/img/dailytracklogo.png);
+  background-repeat: no-repeat;
+  background-position: 0 0;
+  padding-left: 3.5rem;
+  font-size: 1.5rem;
+  background-size: 3rem 3rem;
+}
+.navbar {
+  padding: 0.5rem;
+}
 @media screen and (orientation: portrait) {
   body {
     height: calc(100vh - 60px) !important;
