@@ -34,7 +34,8 @@ body {
 #main {
   height: calc(100vh - 60px - 60px);
 }
-#footer {
+#footer,
+.controlbar {
   height: 60px;
   padding: 10px 0;
   text-align: center;

@@ -5,17 +5,17 @@ block content
         div#main.row
             div.col.h-100
                 div#mainChart.fill-all
-        div#footer.row
-            div.col
-                button#showall.btn.btn-primary Show All
+        //- div#footer.row
+        //-     div.col
+        //-         button#showall.btn.btn-primary Show All
 
-                button#left.btn.btn-primary &lt;&lt;
+        //-         button#left.btn.btn-primary &lt;&lt;
 
-                button#right.btn.btn-primary &gt;&gt;
+        //-         button#right.btn.btn-primary &gt;&gt;
 
-                button#minus.btn.btn-primary -
+        //-         button#minus.btn.btn-primary -
 
-                button#plus.btn.btn-primary +
+        //-         button#plus.btn.btn-primary +
 
 block pagescript
     script.
@@ -24,22 +24,22 @@ block pagescript
 
         console.log('setting up interactivity');
 
-        $('#minus').click(function() {
-            controller.zoomOut();
-        });
+        //- $('#minus').click(function() {
+        //-     controller.zoomOut();
+        //- });
 
-        $('#plus').click(function() {
-            controller.zoomIn();
-        });
+        //- $('#plus').click(function() {
+        //-     controller.zoomIn();
+        //- });
 
-        $('#left').click(function() {
-            controller.panLeft();
-        });
+        //- $('#left').click(function() {
+        //-     controller.panLeft();
+        //- });
 
-        $('#right').click(function() {
-            controller.panRight();
-        });
+        //- $('#right').click(function() {
+        //-     controller.panRight();
+        //- });
 
-        $('#showall').click(function() {
-            controller.showAll();
-        });
+        //- $('#showall').click(function() {
+        //-     controller.showAll();
+        //- });

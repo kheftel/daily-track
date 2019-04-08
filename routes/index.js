@@ -10,12 +10,12 @@ const _ = require('lodash');
 var state = {
     siteTitle: 'DailyTrack',
     nav: [{
-            title: 'Overview',
+            title: 'Charts',
             href: '/'
         },
         {
-            title: 'Charts',
-            href: '/charts'
+            title: 'Multi-View',
+            href: '/multi'
         }
     ]
 };
@@ -39,21 +39,8 @@ router.use(function (req, res, next) {
     next();
 });
 
-// home page
+// charts
 router.get('/', function (req, res, next) {
-    _.find(state.nav, {
-        href: '/'
-    }).active = true;
-    res.render('index', state);
-});
-
-// chart detail page
-router.get('/chart', function (req, res, next) {
-    res.render('chart', state);
-});
-
-// charts list
-router.get('/charts', function (req, res, next) {
     Dataset.find(function (err, datasets) {
         //to do: do something useful with error
         // if (err)
@@ -61,8 +48,18 @@ router.get('/charts', function (req, res, next) {
 
         res.locals.datasets = datasets;
 
-        res.render('charts', state);
+        res.render('index', state);
     });
+});
+
+// chart detail page
+router.get('/chart', function (req, res, next) {
+    res.render('chart', state);
+});
+
+// multi view
+router.get('/multi', function (req, res, next) {
+    res.render('multi', state);
 });
 
 // chart detail

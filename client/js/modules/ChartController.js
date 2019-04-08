@@ -5,9 +5,58 @@ ChartController = function (container) {
     if(typeof container == 'string')
         container = document.getElementById(container);
 
-    this._canvas = document.createElement('canvas');
-    container.appendChild(this._canvas);
+    this._element = document.createElement('div');
+    this._element.style.height = 'calc(100% - 60px)';
+    container.appendChild(this._element);
     this._container = container;
+
+    this._canvas = document.createElement('canvas');
+    this._element.appendChild(this._canvas);
+
+    this._footer = document.createElement('div');
+    this._footer.classList.add('controlbar');
+    this._container.appendChild(this._footer);
+
+    var that = this;
+    this._btnLeft = document.createElement('button');
+    this._btnLeft.classList.add('btn', 'btn-primary');
+    this._btnLeft.id = 'left';
+    this._btnLeft.innerHTML = '&lt;&lt;';
+    this._btnLeft.addEventListener('click', function() { that.panLeft(); } );
+    this._footer.appendChild(this._btnLeft);
+
+    this._btnRight = document.createElement('button');
+    this._btnRight.classList.add('btn', 'btn-primary');
+    this._btnRight.id = 'right';
+    this._btnRight.innerHTML = '&gt;&gt;';
+    this._btnRight.addEventListener('click', function() { that.panRight(); } );
+    this._footer.appendChild(this._btnRight);
+
+    this._btnZoomIn = document.createElement('button');
+    this._btnZoomIn.classList.add('btn', 'btn-primary');
+    this._btnZoomIn.id = 'plus';
+    this._btnZoomIn.innerHTML = '+';
+    this._btnZoomIn.addEventListener('click', function() { that.zoomIn(); } );
+    this._footer.appendChild(this._btnZoomIn);
+
+    this._btnZoomOut = document.createElement('button');
+    this._btnZoomOut.classList.add('btn', 'btn-primary');
+    this._btnZoomOut.id = 'minus';
+    this._btnZoomOut.innerHTML = '-';
+    this._btnZoomOut.addEventListener('click', function() { that.zoomOut(); } );
+    this._footer.appendChild(this._btnZoomOut);
+
+    
+        //button#showall.btn.btn-primary Show All
+
+        // button#left.btn.btn-primary &lt;&lt;
+
+        // button#right.btn.btn-primary &gt;&gt;
+
+        // button#minus.btn.btn-primary -
+
+        // button#plus.btn.btn-primary +
+
 
     this._chart = new Chart(this._canvas, this._config);
     this._datasetIds = [];

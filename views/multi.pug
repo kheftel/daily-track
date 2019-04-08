@@ -1,0 +1,52 @@
+extends layout
+
+block content
+    div.container-fluid.h-100
+        div#main.row
+            div.col.h-100
+                div#mainChart.fill-all
+        //- div#footer.row
+        //-     div.col
+        //-         button#showall.btn.btn-primary Show All
+
+        //-         button#left.btn.btn-primary &lt;&lt;
+
+        //-         button#right.btn.btn-primary &gt;&gt;
+
+        //-         button#minus.btn.btn-primary -
+
+        //-         button#plus.btn.btn-primary +
+block pagescript
+    script.
+        jQuery(function() {
+            console.log('main onload');
+            // controller for chart
+            var controller = new ChartController('mainChart');
+            controller.addDataset('5ca00f23f968e4b0a2f36e0e', function() {
+                controller.addDataset('5ca4dc5a85df2293711ef8a8');
+            });
+            window.controller = controller;
+
+            //- console.log('setting up interactivity');
+
+            //- $('#minus').click(function() {
+            //-     controller.zoomOut();
+            //- });
+
+            //- $('#plus').click(function() {
+            //-     controller.zoomIn();
+            //- });
+
+            //- $('#left').click(function() {
+            //-     controller.panLeft();
+            //- });
+
+            //- $('#right').click(function() {
+            //-     controller.panRight();
+            //- });
+
+            //- $('#showall').click(function() {
+            //-     controller.showAll();
+            //- });
+
+        })
