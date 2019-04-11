@@ -40,6 +40,9 @@ body {
   padding: 10px 0;
   text-align: center;
 }
+.controlbar button {
+  margin: 0 0.25rem;
+}
 .fill-all {
   position: relative;
   width: 100%;

@@ -30,7 +30,8 @@ router.use(function (req, res, next) {
     let activenav = _.find(state.nav, {
         href: req.path
     });
-    if(activenav) activenav.active = true;
+    if(activenav)
+        activenav.active = true;
 
     // console.log(req.path);
     // console.log(req.baseUrl);

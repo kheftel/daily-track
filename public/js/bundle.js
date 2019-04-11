@@ -56,7 +56,7 @@ ChartController = function (container) {
     // copy config
     this._config = JSON.parse(JSON.stringify(p.defaultConfig));
 
-    if(typeof container == 'string')
+    if (typeof container == 'string')
         container = document.getElementById(container);
 
     this._element = document.createElement('div');
@@ -75,42 +75,38 @@ ChartController = function (container) {
     this._btnLeft = document.createElement('button');
     this._btnLeft.classList.add('btn', 'btn-primary');
     this._btnLeft.id = 'left';
-    this._btnLeft.innerHTML = '&lt;&lt;';
-    this._btnLeft.addEventListener('click', function() { that.panLeft(); } );
+    this._btnLeft.innerHTML = '<i class="fas fa-angle-double-left"></i>'; //'&lt;&lt;';
+    this._btnLeft.addEventListener('click', function () {
+        that.panLeft();
+    });
     this._footer.appendChild(this._btnLeft);
 
     this._btnRight = document.createElement('button');
     this._btnRight.classList.add('btn', 'btn-primary');
     this._btnRight.id = 'right';
-    this._btnRight.innerHTML = '&gt;&gt;';
-    this._btnRight.addEventListener('click', function() { that.panRight(); } );
+    this._btnRight.innerHTML = '<i class="fas fa-angle-double-right"></i>'; //'&gt;&gt;';
+    this._btnRight.addEventListener('click', function () {
+        that.panRight();
+    });
     this._footer.appendChild(this._btnRight);
-
-    this._btnZoomIn = document.createElement('button');
-    this._btnZoomIn.classList.add('btn', 'btn-primary');
-    this._btnZoomIn.id = 'plus';
-    this._btnZoomIn.innerHTML = '+';
-    this._btnZoomIn.addEventListener('click', function() { that.zoomIn(); } );
-    this._footer.appendChild(this._btnZoomIn);
 
     this._btnZoomOut = document.createElement('button');
     this._btnZoomOut.classList.add('btn', 'btn-primary');
     this._btnZoomOut.id = 'minus';
-    this._btnZoomOut.innerHTML = '-';
-    this._btnZoomOut.addEventListener('click', function() { that.zoomOut(); } );
+    this._btnZoomOut.innerHTML = '<i class="fas fa-search-minus"></i>'; //'-';
+    this._btnZoomOut.addEventListener('click', function () {
+        that.zoomOut();
+    });
     this._footer.appendChild(this._btnZoomOut);
 
-    
-        //button#showall.btn.btn-primary Show All
-
-        // button#left.btn.btn-primary &lt;&lt;
-
-        // button#right.btn.btn-primary &gt;&gt;
-
-        // button#minus.btn.btn-primary -
-
-        // button#plus.btn.btn-primary +
-
+    this._btnZoomIn = document.createElement('button');
+    this._btnZoomIn.classList.add('btn', 'btn-primary');
+    this._btnZoomIn.id = 'plus';
+    this._btnZoomIn.innerHTML = '<i class="fas fa-search-plus"></i>'; //'+';
+    this._btnZoomIn.addEventListener('click', function () {
+        that.zoomIn();
+    });
+    this._footer.appendChild(this._btnZoomIn);
 
     this._chart = new Chart(this._canvas, this._config);
     this._datasetIds = [];
@@ -251,6 +247,71 @@ p.getColor = function (i = 0) {
 
 // ZOOMING and PANNING //////////
 
+p.timeScales = [
+
+    {
+        label: '1 year',
+        zoom: {
+            'years': 1
+        },
+        pan: {
+            'months': 1
+        },
+        unit: 'month'
+    },
+    {
+        label: '6 months',
+        zoom: {
+            'months': 6
+        },
+        pan: {
+            'months': 1
+        },
+        unit: 'month'
+    },
+    {
+        label: '3 months',
+        zoom: {
+            'months': 3
+        },
+        pan: {
+            'weeks': 1
+        },
+        unit: 'week'
+    },
+    {
+        label: '1 month',
+        zoom: {
+            'months': 1
+        },
+        pan: {
+            'weeks': 1
+        },
+        unit: 'week'
+    },
+    {
+        label: '2 weeks',
+        zoom: {
+            'weeks': 2
+        },
+        pan: {
+            'days': 1
+        },
+        unit: 'day'
+    },
+    {
+        label: '1 week',
+        zoom: {
+            'weeks': 1
+        },
+        pan: {
+            'days': 1
+        },
+        unit: 'day'
+    }
+
+]
+
 p.zooms = [{
         'years': 1
     },
@@ -341,7 +402,7 @@ Object.defineProperty(p, 'yAxisLabel', {
 });
 
 p.setZoomLevel = function (val, update = true) {
-    val = Math.max(0, Math.min(val, this.zooms.length - 1));
+    val = Math.max(0, Math.min(val, this.timeScales.length - 1));
     this._zoomLevel = val;
     console.log('zoom level: ' + this._zoomLevel);
 
@@ -361,22 +422,27 @@ p.zoomOut = function (update = true) {
     this.setZoomLevel(this._zoomLevel - 1, update);
 };
 
-p.getZoomParams = function () {
-    return this.zooms[this._zoomLevel];
-};
+/** timeScale */
+Object.defineProperty(p, 'timeScale', {
+    get() {
+        return this.timeScales[this._zoomLevel];
+    }
+});
 
 p.getRightEdge = function () {
     return this._right;
 }
 
 p.panRight = function (update = true) {
-    this._right.add(this.pans[this._zoomLevel]);
+    // this._right.add(this.pans[this._zoomLevel]);
+    this._right.add(this.timeScale.pan);
     if (update)
         this.updateChart();
 }
 
 p.panLeft = function (update = true) {
-    this._right.subtract(this.pans[this._zoomLevel]);
+    // this._right.subtract(this.pans[this._zoomLevel]);
+    this._right.subtract(this.timeScale.pan);
     if (update)
         this.updateChart();
 }
@@ -393,8 +459,8 @@ p.showAll = function (update = true) {
 
 p.getRangeString = function () {
     var rightString = this._right.format(this.dateFormat);
-    var leftString = moment.utc(this._right).subtract(this.zooms[this._zoomLevel]).format(this.dateFormat);
-    return leftString + ' - ' + rightString + ' - (' + this.zoomLabels[this._zoomLevel] + ')';
+    var leftString = moment.utc(this._right).subtract(this.timeScale.zoom).format(this.dateFormat);
+    return leftString + ' - ' + rightString + ' - (' + this.timeScale.label + ')';
 }
 
 // CHART MANIPULATION /////////
@@ -403,8 +469,21 @@ p.updateChart = function (t) {
     // set viewport on chart
     if (!this._chart) return;
 
-    this._chart.options.scales.xAxes[0].time.min = moment.utc(this._right).subtract(this.zooms[this._zoomLevel]).format();
-    this._chart.options.scales.xAxes[0].time.max = this._right.format();
+    var halfWidth = JSON.parse(JSON.stringify(this.timeScale.zoom));
+    for (var k in halfWidth) {
+        halfWidth[k] /= 2;
+    }
+    console.log(this.timeScale.zoom);
+    console.log(halfWidth);
+
+    // this._chart.options.scales.xAxes[0].time.min = moment.utc(this._right).subtract(this.timeScale.zoom).add(halfWidth).format();
+    this.xAxis.time.min = moment.utc(this._right).subtract(halfWidth).format();
+    this.xAxis.time.max = moment.utc(this._right).add(halfWidth).format();
+    this.xAxis.time.unit = this.timeScale.unit;
+
+    console.log(this.xAxis.time.min);
+    console.log(this.xAxis.time.max);
+
     //console.log(this._chart.options.scales.xAxes[0].time.min + ', ' + this._chart.options.scales.xAxes[0].time.max)
     //console.log(this.zooms[this._zoomLevel]);
 
@@ -434,7 +513,7 @@ p.normalizeDates = function (data) {
 p.defaultXAxis = {
     type: 'time',
     time: {
-        minUnit: 'day',
+        unit: 'day',
         tooltipFormat: 'MM/DD/YYYY'
     },
     distribution: 'linear',
@@ -443,6 +522,10 @@ p.defaultXAxis = {
         display: true,
         labelString: 'no data'
     },
+    ticks: {
+        autoSkip: true,
+        source: 'auto'
+    }
 };
 
 p.defaultYAxis = {
