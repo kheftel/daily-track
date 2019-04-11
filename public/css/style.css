@@ -34,7 +34,7 @@
 #sidebar.active {
   margin-left: -250px;
 }
-@media (max-width: 768px) {
+@media (max-width: 767px) {
   #sidebar {
     margin-left: -250px;
     position: absolute;
