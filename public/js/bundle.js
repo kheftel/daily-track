@@ -17,6 +17,14 @@ window.helpers.createChartControllerFromId = function(container, id) {
     return controller;
 }
 
+
+$(document).ready(function () {
+    $('#sidebarCollapse').on('click', function () {
+        $('#sidebar').toggleClass('active');
+    });
+});
+
+
 // set up variables ///////////////
 
 // $(() => {
@@ -59,13 +67,15 @@ ChartController = function (container) {
     if (typeof container == 'string')
         container = document.getElementById(container);
 
-    this._element = document.createElement('div');
-    this._element.style.height = 'calc(100% - 60px)';
-    container.appendChild(this._element);
+    this._chartContainer = document.createElement('div');
+    this._chartContainer.style.height = 'calc(100% - 60px)';
+    this._chartContainer.style.width = "100%";
+    this._chartContainer.style.position = 'relative';
+    container.appendChild(this._chartContainer);
     this._container = container;
 
     this._canvas = document.createElement('canvas');
-    this._element.appendChild(this._canvas);
+    this._chartContainer.appendChild(this._canvas);
 
     this._footer = document.createElement('div');
     this._footer.classList.add('controlbar');
@@ -74,7 +84,6 @@ ChartController = function (container) {
     var that = this;
     this._btnLeft = document.createElement('button');
     this._btnLeft.classList.add('btn', 'btn-primary');
-    this._btnLeft.id = 'left';
     this._btnLeft.innerHTML = '<i class="fas fa-angle-double-left"></i>'; //'&lt;&lt;';
     this._btnLeft.addEventListener('click', function () {
         that.panLeft();
@@ -83,7 +92,6 @@ ChartController = function (container) {
 
     this._btnRight = document.createElement('button');
     this._btnRight.classList.add('btn', 'btn-primary');
-    this._btnRight.id = 'right';
     this._btnRight.innerHTML = '<i class="fas fa-angle-double-right"></i>'; //'&gt;&gt;';
     this._btnRight.addEventListener('click', function () {
         that.panRight();
@@ -92,7 +100,6 @@ ChartController = function (container) {
 
     this._btnZoomOut = document.createElement('button');
     this._btnZoomOut.classList.add('btn', 'btn-primary');
-    this._btnZoomOut.id = 'minus';
     this._btnZoomOut.innerHTML = '<i class="fas fa-search-minus"></i>'; //'-';
     this._btnZoomOut.addEventListener('click', function () {
         that.zoomOut();
@@ -101,12 +108,19 @@ ChartController = function (container) {
 
     this._btnZoomIn = document.createElement('button');
     this._btnZoomIn.classList.add('btn', 'btn-primary');
-    this._btnZoomIn.id = 'plus';
     this._btnZoomIn.innerHTML = '<i class="fas fa-search-plus"></i>'; //'+';
     this._btnZoomIn.addEventListener('click', function () {
         that.zoomIn();
     });
     this._footer.appendChild(this._btnZoomIn);
+
+    this._btnAdd = document.createElement('button');
+    this._btnAdd.classList.add('btn', 'btn-primary');
+    this._btnAdd.innerHTML = '<i class="fas fa-pencil-alt"></i>';
+    this._btnAdd.addEventListener('click', function () {
+        //that.zoomIn();
+    });
+    this._footer.appendChild(this._btnAdd);
 
     this._chart = new Chart(this._canvas, this._config);
     this._datasetIds = [];
@@ -542,6 +556,7 @@ p.defaultConfig = {
 };
 
 Chart.defaults.global.maintainAspectRatio = false;
+Chart.defaults.global.responsive = true;
 Chart.defaults.global.layout.padding = 0;
 
 Chart.defaults.global.legend.position = 'top';

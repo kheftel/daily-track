@@ -5,6 +5,24 @@
 
 // RULES /////////////////
 
+.wrapper {
+    display: flex;
+    width: 100%;
+    align-items: stretch;
+}
+
+#content {
+    width: 100%;
+    padding: 20px;
+    transition: all 0.3s;
+}
+
+.chartcontainer {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+}
+
 // header
 .navbar-brand {
     background-image: url(/img/dailytracklogo.png);
@@ -19,6 +37,35 @@
     padding: 0.5rem;
 }
 
+//sidebar
+#sidebar {
+    position: relative;
+    min-width: 250px;
+    max-width: 250px;
+    background: #282828;
+    transition: all 0.3s;
+}
+
+#sidebar.active {
+    margin-left: -250px;
+}
+
+@media (max-width: 768px) {
+    #sidebar {
+        margin-left: -250px;
+        position: absolute;
+        z-index: 2;
+    }
+
+    #sidebar.active {
+        margin-left: 0;
+    }
+
+    #sidebarCollapse span {
+        display: none;
+    }
+}
+
 @media screen and (orientation:portrait) {
     body {
         height: calc(100vh - @ios-bar-height) !important;
@@ -31,8 +78,7 @@
 
 body {
     width: 100%;
-    height: calc(100vh);
-    position: absolute;
+    min-height: 100vh;
 }
 
 #container {
@@ -50,7 +96,8 @@ body {
     height: calc(100vh - @header-height - @footer-height);
 }
 
-#footer, .controlbar {
+#footer,
+.controlbar {
     height: @footer-height;
     padding: 10px 0;
     text-align: center;

@@ -9,7 +9,9 @@ block content
                         .col
                             h4
                                 a(href="/chart/" + set.id)= set.name
-                            div(style="height: 300px", id=set.id)
+                    .row
+                        .col(style="height: 300px")
+                            div(class="chartcontainer" id=set.id)
 
         //- div.row#footer
         //-     div.col

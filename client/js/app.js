@@ -16,6 +16,14 @@ window.helpers.createChartControllerFromId = function(container, id) {
     return controller;
 }
 
+
+$(document).ready(function () {
+    $('#sidebarCollapse').on('click', function () {
+        $('#sidebar').toggleClass('active');
+    });
+});
+
+
 // set up variables ///////////////
 
 // $(() => {
