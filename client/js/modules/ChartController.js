@@ -199,6 +199,9 @@ p.timeScales = [
         zoom: {
             'years': 1
         },
+        half: {
+            'months': 6
+        },
         pan: {
             'months': 1
         },
@@ -208,6 +211,9 @@ p.timeScales = [
         label: '6 months',
         zoom: {
             'months': 6
+        },
+        half: {
+            'months': 3
         },
         pan: {
             'months': 1
@@ -219,6 +225,22 @@ p.timeScales = [
         zoom: {
             'months': 3
         },
+        half: {
+            'weeks': 6
+        },
+        pan: {
+            'weeks': 2
+        },
+        unit: 'week'
+    },
+    {
+        label: '2 months',
+        zoom: {
+            'months': 2
+        },
+        half: {
+            'months': 1
+        },
         pan: {
             'weeks': 1
         },
@@ -228,6 +250,9 @@ p.timeScales = [
         label: '1 month',
         zoom: {
             'months': 1
+        },
+        half: {
+            'weeks': 2
         },
         pan: {
             'weeks': 1
@@ -239,6 +264,9 @@ p.timeScales = [
         zoom: {
             'weeks': 2
         },
+        half: {
+            'weeks': 1
+        },
         pan: {
             'days': 1
         },
@@ -248,6 +276,9 @@ p.timeScales = [
         label: '1 week',
         zoom: {
             'weeks': 1
+        },
+        half: {
+            'days': 3
         },
         pan: {
             'days': 1
@@ -353,27 +384,30 @@ p.showAll = function (update = true) {
 }
 
 p.getRangeString = function () {
-    var rightString = this._right.format(this.dateFormat);
-    var leftString = moment.utc(this._right).subtract(this.timeScale.zoom).format(this.dateFormat);
+    var leftString = moment.utc(this._right).subtract(this.timeScale.half).format(this.dateFormat);
+    var rightString = moment.utc(this._right).add(this.timeScale.half).format(this.dateFormat);
+
+    // var rightString = this._right.format(this.dateFormat);
+    // var leftString = moment.utc(this._right).subtract(this.timeScale.zoom).format(this.dateFormat);
     return leftString + ' - ' + rightString + ' - (' + this.timeScale.label + ')';
 }
 
 // CHART MANIPULATION /////////
 
+// p.getHalfWidth = function() {
+//     var halfWidth = {};
+//     for (var k in this.timeScale.zoom) {
+//         halfWidth[k] = this.timeScale.zoom[k] / 2;
+//     }
+//     return halfWidth;
+// }
+
 p.updateChart = function (t) {
     // set viewport on chart
     if (!this._chart) return;
 
-    var halfWidth = JSON.parse(JSON.stringify(this.timeScale.zoom));
-    for (var k in halfWidth) {
-        halfWidth[k] /= 2;
-    }
-    console.log(this.timeScale.zoom);
-    console.log(halfWidth);
-
-    // this._chart.options.scales.xAxes[0].time.min = moment.utc(this._right).subtract(this.timeScale.zoom).add(halfWidth).format();
-    this.xAxis.time.min = moment.utc(this._right).subtract(halfWidth).format();
-    this.xAxis.time.max = moment.utc(this._right).add(halfWidth).format();
+    this.xAxis.time.min = moment.utc(this._right).subtract(this.timeScale.half).format();
+    this.xAxis.time.max = moment.utc(this._right).add(this.timeScale.half).format();
     this.xAxis.time.unit = this.timeScale.unit;
 
     console.log(this.xAxis.time.min);

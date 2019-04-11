@@ -248,11 +248,13 @@ p.getColor = function (i = 0) {
 // ZOOMING and PANNING //////////
 
 p.timeScales = [
-
     {
         label: '1 year',
         zoom: {
             'years': 1
+        },
+        half: {
+            'months': 6
         },
         pan: {
             'months': 1
@@ -264,6 +266,9 @@ p.timeScales = [
         zoom: {
             'months': 6
         },
+        half: {
+            'months': 3
+        },
         pan: {
             'months': 1
         },
@@ -273,6 +278,22 @@ p.timeScales = [
         label: '3 months',
         zoom: {
             'months': 3
+        },
+        half: {
+            'weeks': 6
+        },
+        pan: {
+            'weeks': 2
+        },
+        unit: 'week'
+    },
+    {
+        label: '2 months',
+        zoom: {
+            'months': 2
+        },
+        half: {
+            'months': 1
         },
         pan: {
             'weeks': 1
@@ -284,6 +305,9 @@ p.timeScales = [
         zoom: {
             'months': 1
         },
+        half: {
+            'weeks': 2
+        },
         pan: {
             'weeks': 1
         },
@@ -293,6 +317,9 @@ p.timeScales = [
         label: '2 weeks',
         zoom: {
             'weeks': 2
+        },
+        half: {
+            'weeks': 1
         },
         pan: {
             'days': 1
@@ -304,62 +331,15 @@ p.timeScales = [
         zoom: {
             'weeks': 1
         },
+        half: {
+            'days': 3
+        },
         pan: {
             'days': 1
         },
         unit: 'day'
     }
-
 ]
-
-p.zooms = [{
-        'years': 1
-    },
-    {
-        'months': 6
-    },
-    {
-        'months': 3
-    },
-    {
-        'months': 1
-    },
-    {
-        'weeks': 2
-    },
-    {
-        'weeks': 1
-    }
-];
-
-p.zoomLabels = [
-    '1 Year',
-    '6 Months',
-    '3 Months',
-    '1 Month',
-    '2 Weeks',
-    '1 Week'
-];
-
-p.pans = [{
-        'months': 1
-    },
-    {
-        'months': 1
-    },
-    {
-        'weeks': 2
-    },
-    {
-        'weeks': 1
-    },
-    {
-        'days': 2
-    },
-    {
-        'days': 1
-    }
-];
 
 p.dateFormat = 'MM/DD/YYYY';
 
@@ -458,27 +438,30 @@ p.showAll = function (update = true) {
 }
 
 p.getRangeString = function () {
-    var rightString = this._right.format(this.dateFormat);
-    var leftString = moment.utc(this._right).subtract(this.timeScale.zoom).format(this.dateFormat);
+    var leftString = moment.utc(this._right).subtract(this.timeScale.half).format(this.dateFormat);
+    var rightString = moment.utc(this._right).add(this.timeScale.half).format(this.dateFormat);
+
+    // var rightString = this._right.format(this.dateFormat);
+    // var leftString = moment.utc(this._right).subtract(this.timeScale.zoom).format(this.dateFormat);
     return leftString + ' - ' + rightString + ' - (' + this.timeScale.label + ')';
 }
 
 // CHART MANIPULATION /////////
 
+// p.getHalfWidth = function() {
+//     var halfWidth = {};
+//     for (var k in this.timeScale.zoom) {
+//         halfWidth[k] = this.timeScale.zoom[k] / 2;
+//     }
+//     return halfWidth;
+// }
+
 p.updateChart = function (t) {
     // set viewport on chart
     if (!this._chart) return;
 
-    var halfWidth = JSON.parse(JSON.stringify(this.timeScale.zoom));
-    for (var k in halfWidth) {
-        halfWidth[k] /= 2;
-    }
-    console.log(this.timeScale.zoom);
-    console.log(halfWidth);
-
-    // this._chart.options.scales.xAxes[0].time.min = moment.utc(this._right).subtract(this.timeScale.zoom).add(halfWidth).format();
-    this.xAxis.time.min = moment.utc(this._right).subtract(halfWidth).format();
-    this.xAxis.time.max = moment.utc(this._right).add(halfWidth).format();
+    this.xAxis.time.min = moment.utc(this._right).subtract(this.timeScale.half).format();
+    this.xAxis.time.max = moment.utc(this._right).add(this.timeScale.half).format();
     this.xAxis.time.unit = this.timeScale.unit;
 
     console.log(this.xAxis.time.min);
