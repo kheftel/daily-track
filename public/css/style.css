@@ -1,7 +1,33 @@
-.wrapper {
+body,
+html {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+#page-container {
+  height: 100%;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+}
+.navbar-brand {
+  background-image: url(/img/dailytracklogo.png);
+  background-repeat: no-repeat;
+  background-position: 0 0;
+  padding-left: 3.5rem;
+  font-size: 1.5rem;
+  background-size: 3rem 3rem;
+}
+.navbar {
+  padding: 0.5rem;
+}
+#content-container {
   display: flex;
   width: 100%;
   align-items: stretch;
+  flex: 1;
+  position: relative;
 }
 #content {
   width: 100%;
@@ -16,65 +42,20 @@
 .toast-body {
   color: #444;
 }
-.navbar-brand {
-  background-image: url(/img/dailytracklogo.png);
-  background-repeat: no-repeat;
-  background-position: 0 0;
-  padding-left: 3.5rem;
-  font-size: 1.5rem;
-  background-size: 3rem 3rem;
-}
-.navbar {
-  padding: 0.5rem;
+.fx-blur {
+  filter: blur(8px);
+  -webkit-filter: blur(8px);
 }
 #sidebar {
   position: relative;
-  min-width: 250px;
-  max-width: 250px;
+  min-width: 200px;
+  max-width: 200px;
   background: #282828;
   transition: all 0.3s;
 }
 #sidebar.active {
-  margin-left: -250px;
+  margin-left: -200px;
 }
-@media (max-width: 767px) {
-  #sidebar {
-    margin-left: -250px;
-    position: absolute;
-    z-index: 2;
-  }
-  #sidebar.active {
-    margin-left: 0;
-  }
-  #sidebarCollapse span {
-    display: none;
-  }
-}
-@media screen and (orientation: portrait) {
-  body {
-    height: calc(100vh - 60px) !important;
-  }
-  #main {
-    height: calc(100vh - 60px - 60px - 60px) !important;
-  }
-}
-body {
-  width: 100%;
-  min-height: 100vh;
-}
-#container {
-  width: 100%;
-  height: 100%;
-  padding: 0 15px;
-}
-#top {
-  height: 60px;
-}
-/* main occupies the whole screen except for header and footer */
-#main {
-  height: calc(100vh - 60px - 60px);
-}
-#footer,
 .controlbar {
   height: 60px;
   padding: 10px 0;
@@ -83,8 +64,22 @@ body {
 .controlbar button {
   margin: 0 0.25rem;
 }
-.fill-all {
-  position: relative;
-  width: 100%;
-  height: 100%;
+@media (max-width: 767px) {
+  #sidebar {
+    margin-left: -200px;
+    position: absolute;
+    height: 100%;
+    z-index: 20;
+  }
+  #sidebar.active {
+    margin-left: 0;
+  }
+  #sidebarCollapse span {
+    display: none;
+  }
+  .fx-blur-when-small {
+    filter: blur(8px);
+    -webkit-filter: blur(8px);
+  }
 }
+/* main occupies the whole screen except for header and footer */

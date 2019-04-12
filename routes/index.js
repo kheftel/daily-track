@@ -13,14 +13,17 @@ var state = {
     siteTitle: 'DailyTrack',
     nav: [{
             title: 'Datasets',
+            icon: 'fa-list',
             href: '/'
         },
         {
             title: 'New Dataset',
+            icon: 'fa-plus',
             href: '/set/create'
         },
         {
             title: 'Multi-View',
+            icon: 'fa-chart-pie',
             href: '/multi'
         }
     ]
@@ -55,15 +58,19 @@ router.use(function (req, res, next) {
 
 // charts overview page
 router.get('/', function (req, res, next) {
-    Dataset.find(function (err, datasets) {
-        //to do: do something useful with error
-        if (err)
-            res.send(err);
+    Dataset.find()
+        .sort({
+            name: 'asc'
+        })
+        .exec(function (err, datasets) {
+            //to do: do something useful with error
+            if (err)
+                res.send(err);
 
-        res.locals.datasets = datasets;
+            res.locals.datasets = datasets;
 
-        res.render('index', state);
-    });
+            res.render('index', state);
+        });
 });
 
 router.get('/set/create', set_controller.create_get);

@@ -22,7 +22,7 @@ ChartController = function (container) {
     var that = this;
     this._btnLeft = document.createElement('button');
     this._btnLeft.classList.add('btn', 'btn-primary');
-    this._btnLeft.innerHTML = '<i class="fas fa-angle-double-left"></i>'; //'&lt;&lt;';
+    this._btnLeft.innerHTML = '<span class="fas fa-angle-double-left"></i>'; //'&lt;&lt;';
     this._btnLeft.addEventListener('click', function () {
         that.panLeft();
     });
@@ -30,7 +30,7 @@ ChartController = function (container) {
 
     this._btnRight = document.createElement('button');
     this._btnRight.classList.add('btn', 'btn-primary');
-    this._btnRight.innerHTML = '<i class="fas fa-angle-double-right"></i>'; //'&gt;&gt;';
+    this._btnRight.innerHTML = '<span class="fas fa-angle-double-right"></i>'; //'&gt;&gt;';
     this._btnRight.addEventListener('click', function () {
         that.panRight();
     });
@@ -38,7 +38,7 @@ ChartController = function (container) {
 
     this._btnZoomOut = document.createElement('button');
     this._btnZoomOut.classList.add('btn', 'btn-primary');
-    this._btnZoomOut.innerHTML = '<i class="fas fa-search-minus"></i>'; //'-';
+    this._btnZoomOut.innerHTML = '<span class="fas fa-search-minus"></i>'; //'-';
     this._btnZoomOut.addEventListener('click', function () {
         that.zoomOut();
     });
@@ -46,20 +46,20 @@ ChartController = function (container) {
 
     this._btnZoomIn = document.createElement('button');
     this._btnZoomIn.classList.add('btn', 'btn-primary');
-    this._btnZoomIn.innerHTML = '<i class="fas fa-search-plus"></i>'; //'+';
+    this._btnZoomIn.innerHTML = '<span class="fas fa-search-plus"></i>'; //'+';
     this._btnZoomIn.addEventListener('click', function () {
         that.zoomIn();
     });
     this._footer.appendChild(this._btnZoomIn);
 
     this._toggleHTML = {
-        'line': '<i class="fas fa-chart-line"></i>',
-        'bar': '<i class="fas fa-chart-bar"></i>'
+        'line': '<span class="fas fa-chart-line"></i>',
+        'bar': '<span class="fas fa-chart-bar"></i>'
     };
     this._btnType = document.createElement('button');
     this._btnType.classList.add('btn', 'btn-primary');
     this._btnType.classList.add('d-none');
-    this._btnType.innerHTML = '<i class="fas fa-chart-line"></i>';
+    this._btnType.innerHTML = '<span class="fas fa-chart-line"></i>';
     this._btnType.addEventListener('click', () => {
         if(this.datasets.length == 1) {
             var set = this.datasets[0];
@@ -76,7 +76,7 @@ ChartController = function (container) {
 
     // this._btnAdd = document.createElement('button');
     // this._btnAdd.classList.add('btn', 'btn-primary');
-    // this._btnAdd.innerHTML = '<i class="fas fa-pencil-alt"></i>';
+    // this._btnAdd.innerHTML = '<span class="fas fa-pencil-alt"></i>';
     // this._btnAdd.addEventListener('click', function () {
     // });
     // this._footer.appendChild(this._btnAdd);

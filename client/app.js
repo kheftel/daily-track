@@ -7,18 +7,20 @@ window.helpers.createChartControllerFromModel = function(container, dataset) {
     var controller = new ChartController(container);
     controller.addDatasetFromModel(dataset);
     return controller;
-}
+};
 
 window.helpers.createChartControllerFromId = function(container, id) {
     var controller = new ChartController(container);
     controller.addDataset(id);
     return controller;
-}
+};
 
 
 $(document).ready(function () {
     $('#sidebarCollapse').on('click', function () {
         $('#sidebar').toggleClass('active');
+
+        $('#content').toggleClass('fx-blur-when-small');
     });
 });
 

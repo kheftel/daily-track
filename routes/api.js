@@ -113,6 +113,14 @@ apiRouter.route('/sets/:id')
         Dataset.findById(req.params.id, function (err, dataset) {
             if (err)
                 res.send(err);
+            
+            // bad id? no dataset found?
+            if(!dataset) {
+                res.json({
+                    success: false,
+                    message: "no dataset found for id " + req.params.id
+                });
+            }
 
             // populate its datapoints
             Datapoint.find({
