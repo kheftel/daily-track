@@ -12,8 +12,12 @@ const set_controller = require('../controllers/datasetController');
 var state = {
     siteTitle: 'DailyTrack',
     nav: [{
-            title: 'Charts',
+            title: 'Datasets',
             href: '/'
+        },
+        {
+            title: 'New Dataset',
+            href: '/set/create'
         },
         {
             title: 'Multi-View',
@@ -40,7 +44,8 @@ router.use(function (req, res, next) {
     // add nav, site title to locals
     res.locals.siteTitle = state.siteTitle;
     res.locals.nav = state.nav;
-    console.log('locals: ' + JSON.stringify(res.locals));
+    console.log('locals:');
+    console.log(res.locals);
 
     // console.log(req.baseUrl);
     // console.log(req.originalUrl);
@@ -48,7 +53,7 @@ router.use(function (req, res, next) {
     next();
 });
 
-// charts
+// charts overview page
 router.get('/', function (req, res, next) {
     Dataset.find(function (err, datasets) {
         //to do: do something useful with error

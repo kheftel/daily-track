@@ -5,6 +5,14 @@ const express = require('express'),
     Dataset = require('../models/dataset'),
     Datapoint = require('../models/datapoint');
 
+const {
+    body,
+    validationResult
+} = require('express-validator/check');
+const {
+    sanitizeBody
+} = require('express-validator/filter');
+
 require('moment-round');
 
 // API /////////////////////////////
@@ -28,36 +36,71 @@ apiRouter.get('/', function (req, res) {
 apiRouter.route('/sets')
 
     // POST = create a dataset
-    .post(function (req, res) {
+    .post([
+        // validate / sanitize name
+        body('name', 'Name is required.').isLength({
+            min: 1
+        }).trim(),
+        sanitizeBody('name').escape(),
 
-        var dataset = new Dataset(); // create instance of model
-        dataset.name = req.body.name; // set data from request
+        // validate / sanitize unit
+        body('yAxisLabel', 'Unit is required.').isLength({
+            min: 1
+        }).trim(),
+        sanitizeBody('yAxisLabel').escape(),
 
-        ['chartType', 'xAxisLabel', 'yAxisLabel', 'precision'].forEach(function (element) {
-            if (req.body[element] !== undefined)
-                dataset[element] = req.body[element];
-        });
+        // sanitize chartType
+        sanitizeBody('chartType').escape(),
 
-        // save the dataset and check for errors
-        dataset.save(function (err) {
-            if (err)
-                res.send(err);
+        // Process request after validation and sanitization.
+        (req, res, next) => {
+            // Extract the validation errors from a request.
+            const errors = validationResult(req);
 
-            res.json({
-                message: 'Dataset created!'
+            var data = {};
+
+            if (!errors.isEmpty()) {
+                console.log('validation errors:');
+                var arr = errors.array();
+                console.log(arr);
+
+                data.success = false;
+                data.errors = arr;
+
+                return res.json(data);
+            }
+
+            // Create dataset with validated / sanitized data
+            var dataset = new Dataset();
+            dataset.name = req.body.name;
+            dataset.yAxisLabel = req.body.yAxisLabel;
+            dataset.chartType = req.body.chartType;
+            dataset.precision = 'daily';
+            dataset.xAxisLabel = 'Date';
+
+            // save the dataset and check for errors
+            dataset.save(function (err) {
+                if (err)
+                    res.send(err);
+                data.success = true;
+                data.message = 'Dataset created!';
+                res.json(data);
             });
-        });
-
-    })
+        }
+    ])
 
     // GET = get all the datasets
     .get(function (req, res) {
-        Dataset.find(function (err, datasets) {
-            if (err)
-                res.send(err);
+        Dataset.find()
+            .sort({
+                name: 'asc'
+            })
+            .exec(function (err, datasets) {
+                if (err)
+                    res.send(err);
 
-            res.json(datasets);
-        });
+                res.json(datasets);
+            });
     });
 
 // on routes that end in /sets/:id
@@ -242,7 +285,7 @@ apiRouter.route('/points/:id')
         Datapoint.findById(req.params.id, function (err, datapoint) {
             if (err)
                 res.send(err);
-            
+
             // update the datapoint's info - for now, only y supported
             // TO DO: update datapoint's x value, but test for dups
             ['y'].forEach(function (element) {

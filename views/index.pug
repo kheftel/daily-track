@@ -4,7 +4,7 @@ block content
     div.container-fluid.h-100
         div.row#main
             div.col.h-100
-                each set in datasets
+                each set, index in datasets
                     .row
                         .col
                             h4
@@ -32,7 +32,7 @@ block pagescript
             url: '/api/sets',
             method: 'GET',
             success: (datasets) => {
-                console.log(JSON.stringify(datasets));
+                console.log(datasets);
                 for(var i = 0; i < datasets.length; i++) {
                     var set = datasets[i];
                     var controller = new ChartController(set._id);

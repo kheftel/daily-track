@@ -1,15 +1,129 @@
 extends layout
 
 block content
-  h1 #{title}
+    h1 #{title}
 
-  form(method='POST' action='')
-    div.form-group
-      label(for='name') Name:
-      input#name.form-control(type='text', placeholder='Meditation minutes, etc' name='name' value=(undefined===dataset ? '' : dataset.name))
-    button.btn.btn-primary(type='submit') Save
+    form#set-form(method='POST' action='/api/sets' novalidate)
+        div#name-group.form-group
+            label(for='name') Name:
+            input#name.form-control(type='text', placeholder='Meditation, sleep, mood, etc' name='name' value=(undefined===dataset ? '' : dataset.name) required)
+            #name-invalid.invalid-feedback
+            #name-valid.valid-feedback
+        div#yAxisLabel-group.form-group
+            label(for='yAxisLabel') Unit:
+            input#yAxisLabel.form-control(type='text', placeholder='Minutes, hours, pounds, etc' name='yAxisLabel' value=(undefined===dataset ? '' : dataset.yAxisLabel) required)
+            #yAxisLabel-invalid.invalid-feedback
+            #yAxisLabel-valid.valid-feedback
+        div#chartType-group.form-group
+            label(for='chartType') Chart Type:
+            select#chartType.form-control(name='chartType' value=(undefined===dataset ? '' : dataset.chartType) required)
+                option
+                    | line
+                option
+                    | bar
+            #chartType-invalid.invalid-feedback
+            #chartType-valid.valid-feedback
+        button#save.btn.btn-success(type='submit')
+            | Save
+            span.d-none.spinner-border.spinner-border-sm(role="status" aria-hidden="true" style="margin-left: 10px;")
+    if errors 
+        ul
+            for error in errors
+                li!= error.msg
+block pagescript
+    script.
 
-  if errors 
-   ul
-    for error in errors
-     li!= error.msg
+        // set all the valid feedback messages the same
+        $('.valid-feedback').html('OK');
+
+        $('#set-form').submit(function(event) {
+            // check client-side validation
+            //- var form = $('#set-form')[0];
+            //- if (form.checkValidity() === false) {
+            //-     event.preventDefault();
+            //-     event.stopPropagation();
+            //-     $('#set-form').addClass('was-validated');
+            //-     $('.invalid-feedback').html('This field is required.');
+            //-     return;
+            //- }
+
+            // server-size validation, reset validation state
+            //- $('#set-form').removeClass('was-validated');
+            //- $('#set-form').removeClass('needs-validation');
+            $('.form-control').removeClass('is-valid');
+            $('.form-control').removeClass('is-invalid');
+
+            // show the spinner
+            $('#save').addClass('disabled');
+            $('#save .spinner-border').removeClass('d-none');
+
+            // get the form data
+            // there are many ways to get this data using jQuery (you can use the class or id also)
+            var formData = {
+                'name':         $('input[name=name]').val(),
+                'yAxisLabel':   $('input[name=yAxisLabel]').val(),
+                'chartType':    $('select[name=chartType]').val()
+            };
+
+            // send data to server
+            $.ajax({
+                type        : 'POST', // define the type of HTTP verb we want to use (POST for our form)
+                url         : '/api/sets', // the url where we want to POST
+                data        : formData, // our data object
+                dataType    : 'json', // what type of data do we expect back from the server
+                encode      : true
+            })
+            .done(function(data) {
+                console.log(data); 
+
+                // hide the spinner
+                $('#save').removeClass('disabled');
+                $('#save .spinner-border').addClass('d-none');
+
+                if (!data.success) {
+                    // validation error
+                    //- $('#set-form').addClass('was-validated');
+
+                    if(data.errors)
+                    {
+                        data.errors.forEach(function(error) {
+                            // add the error message
+                            $('#' + error.param).addClass('is-invalid');
+                            $('#' + error.param + '-invalid').html(error.msg);
+                        });
+                    }
+                }
+                else {
+                    // success
+                    $.toast({
+                        title: 'Success!',
+                        content: data.message,
+                        type: 'success',
+                        delay: 5000
+                    });
+
+                    //- $('form').append('<div class="alert alert-success">' + data.message + '</div>');
+
+                    // usually after form submission, you'll want to redirect
+                    // window.location = '/thank-you'; // redirect a user to another page
+                }
+            })
+            .fail(function(data) {
+                // hide the spinner
+                $('#save').removeClass('disabled');
+                $('#save .spinner-border').addClass('d-none');
+
+                $.toast({
+                    title: 'Error!',
+                    content: 'Unable to save, please try again later',
+                    type: 'error',
+                    delay: 5000
+                });
+
+                // TO DO: show a user error
+                console.log(data);
+            });
+
+            // stop the form from submitting the normal way and refreshing the page
+            event.preventDefault();
+        });

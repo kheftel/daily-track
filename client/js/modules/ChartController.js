@@ -52,13 +52,34 @@ ChartController = function (container) {
     });
     this._footer.appendChild(this._btnZoomIn);
 
-    this._btnAdd = document.createElement('button');
-    this._btnAdd.classList.add('btn', 'btn-primary');
-    this._btnAdd.innerHTML = '<i class="fas fa-pencil-alt"></i>';
-    this._btnAdd.addEventListener('click', function () {
-        //that.zoomIn();
+    this._toggleHTML = {
+        'line': '<i class="fas fa-chart-line"></i>',
+        'bar': '<i class="fas fa-chart-bar"></i>'
+    };
+    this._btnType = document.createElement('button');
+    this._btnType.classList.add('btn', 'btn-primary');
+    this._btnType.classList.add('d-none');
+    this._btnType.innerHTML = '<i class="fas fa-chart-line"></i>';
+    this._btnType.addEventListener('click', () => {
+        if(this.datasets.length == 1) {
+            var set = this.datasets[0];
+            if(set.type == 'line')
+                set.type = 'bar';
+            else
+                set.type = 'line';
+            this._btnType.innerHTML = this._toggleHTML[set.type];
+
+            this.updateChart();
+        }
     });
-    this._footer.appendChild(this._btnAdd);
+    this._footer.appendChild(this._btnType);
+
+    // this._btnAdd = document.createElement('button');
+    // this._btnAdd.classList.add('btn', 'btn-primary');
+    // this._btnAdd.innerHTML = '<i class="fas fa-pencil-alt"></i>';
+    // this._btnAdd.addEventListener('click', function () {
+    // });
+    // this._footer.appendChild(this._btnAdd);
 
     this._chart = new Chart(this._canvas, this._config);
     this._datasetIds = [];
@@ -106,6 +127,14 @@ p.addDatasetFromModel = function (dataset, complete) {
 
     this.datasets.push(dataset);
     this._datasetIds.push(dataset._id);
+
+    // disable chart type toggle btn if multiple sets
+    if(this.datasets.length > 1) {
+        $(this._btnType).addClass('d-none');
+    }
+    else {
+        $(this._btnType).removeClass('d-none').html(this._toggleHTML[dataset.type]);
+    }
 
     // update chart
     this.updateChart();
@@ -336,7 +365,7 @@ Object.defineProperty(p, 'yAxisLabel', {
 p.setZoomLevel = function (val, update = true) {
     val = Math.max(0, Math.min(val, this.timeScales.length - 1));
     this._zoomLevel = val;
-    console.log('zoom level: ' + this._zoomLevel);
+    // console.log('zoom level: ' + this._zoomLevel);
 
     if (update)
         this.updateChart();
@@ -416,8 +445,8 @@ p.updateChart = function (t) {
     this.xAxis.time.max = moment.utc(this._right).add(this.timeScale.half).format();
     this.xAxis.time.unit = this.timeScale.unit;
 
-    console.log(this.xAxis.time.min);
-    console.log(this.xAxis.time.max);
+    // console.log(this.xAxis.time.min);
+    // console.log(this.xAxis.time.max);
 
     //console.log(this._chart.options.scales.xAxes[0].time.min + ', ' + this._chart.options.scales.xAxes[0].time.max)
     //console.log(this.zooms[this._zoomLevel]);
@@ -472,7 +501,7 @@ p.defaultYAxis = {
 };
 
 p.defaultConfig = {
-    type: "line",
+    type: "bar",
     options: {
         scales: {
             xAxes: [p.defaultXAxis],

@@ -1,7 +1,6 @@
 (function(){function r(e,n,t){function o(i,f){if(!n[i]){if(!e[i]){var c="function"==typeof require&&require;if(!f&&c)return c(i,!0);if(u)return u(i,!0);var a=new Error("Cannot find module '"+i+"'");throw a.code="MODULE_NOT_FOUND",a}var p=n[i]={exports:{}};e[i][0].call(p.exports,function(r){var n=e[i][1][r];return o(n||r)},p,p.exports,r,e,n,t)}return n[i].exports}for(var u="function"==typeof require&&require,i=0;i<t.length;i++)o(t[i]);return o}return r})()({1:[function(require,module,exports){
-var module = require('./modules/samplemodule');
-var ChartController = require('./modules/ChartController');
-var Controller = require('./modules/ChartController');
+var ChartController = require('./js/modules/ChartController');
+require('./js/toast.js');
 
 window.helpers = window.helpers || {};
 
@@ -59,7 +58,7 @@ $(document).ready(function () {
 //         controller.showAll();
 //     });
 // });
-},{"./modules/ChartController":2,"./modules/samplemodule":3}],2:[function(require,module,exports){
+},{"./js/modules/ChartController":2,"./js/toast.js":3}],2:[function(require,module,exports){
 ChartController = function (container) {
     // copy config
     this._config = JSON.parse(JSON.stringify(p.defaultConfig));
@@ -114,13 +113,34 @@ ChartController = function (container) {
     });
     this._footer.appendChild(this._btnZoomIn);
 
-    this._btnAdd = document.createElement('button');
-    this._btnAdd.classList.add('btn', 'btn-primary');
-    this._btnAdd.innerHTML = '<i class="fas fa-pencil-alt"></i>';
-    this._btnAdd.addEventListener('click', function () {
-        //that.zoomIn();
+    this._toggleHTML = {
+        'line': '<i class="fas fa-chart-line"></i>',
+        'bar': '<i class="fas fa-chart-bar"></i>'
+    };
+    this._btnType = document.createElement('button');
+    this._btnType.classList.add('btn', 'btn-primary');
+    this._btnType.classList.add('d-none');
+    this._btnType.innerHTML = '<i class="fas fa-chart-line"></i>';
+    this._btnType.addEventListener('click', () => {
+        if(this.datasets.length == 1) {
+            var set = this.datasets[0];
+            if(set.type == 'line')
+                set.type = 'bar';
+            else
+                set.type = 'line';
+            this._btnType.innerHTML = this._toggleHTML[set.type];
+
+            this.updateChart();
+        }
     });
-    this._footer.appendChild(this._btnAdd);
+    this._footer.appendChild(this._btnType);
+
+    // this._btnAdd = document.createElement('button');
+    // this._btnAdd.classList.add('btn', 'btn-primary');
+    // this._btnAdd.innerHTML = '<i class="fas fa-pencil-alt"></i>';
+    // this._btnAdd.addEventListener('click', function () {
+    // });
+    // this._footer.appendChild(this._btnAdd);
 
     this._chart = new Chart(this._canvas, this._config);
     this._datasetIds = [];
@@ -168,6 +188,14 @@ p.addDatasetFromModel = function (dataset, complete) {
 
     this.datasets.push(dataset);
     this._datasetIds.push(dataset._id);
+
+    // disable chart type toggle btn if multiple sets
+    if(this.datasets.length > 1) {
+        $(this._btnType).addClass('d-none');
+    }
+    else {
+        $(this._btnType).removeClass('d-none').html(this._toggleHTML[dataset.type]);
+    }
 
     // update chart
     this.updateChart();
@@ -398,7 +426,7 @@ Object.defineProperty(p, 'yAxisLabel', {
 p.setZoomLevel = function (val, update = true) {
     val = Math.max(0, Math.min(val, this.timeScales.length - 1));
     this._zoomLevel = val;
-    console.log('zoom level: ' + this._zoomLevel);
+    // console.log('zoom level: ' + this._zoomLevel);
 
     if (update)
         this.updateChart();
@@ -478,8 +506,8 @@ p.updateChart = function (t) {
     this.xAxis.time.max = moment.utc(this._right).add(this.timeScale.half).format();
     this.xAxis.time.unit = this.timeScale.unit;
 
-    console.log(this.xAxis.time.min);
-    console.log(this.xAxis.time.max);
+    // console.log(this.xAxis.time.min);
+    // console.log(this.xAxis.time.max);
 
     //console.log(this._chart.options.scales.xAxes[0].time.min + ', ' + this._chart.options.scales.xAxes[0].time.max)
     //console.log(this.zooms[this._zoomLevel]);
@@ -534,7 +562,7 @@ p.defaultYAxis = {
 };
 
 p.defaultConfig = {
-    type: "line",
+    type: "bar",
     options: {
         scales: {
             xAxes: [p.defaultXAxis],
@@ -612,9 +640,100 @@ Chart.scaleService.updateScaleDefaults('radial', {
 
 module.exports = ChartController;
 },{}],3:[function(require,module,exports){
-module.exports = {
-    getGreeting: function (name) {
-        return "Hello, " + name
+/**
+ * @author Script47 (https://github.com/Script47/Toast)
+ * @description Toast - A Bootstrap 4.2+ jQuery plugin for the toast component
+ * @version 0.6.0
+ **/
+(function ($) {
+    const TOAST_CONTAINER_HTML = '<div id="toast-container" aria-live="polite" aria-atomic="true"></div>';
+    const TOAST_WRAPPER_HTML = '<div id="toast-wrapper"></div>';
+
+    $.toast = function (opts) {
+        if (!$('#toast-container').length) {
+            $('body').prepend(TOAST_CONTAINER_HTML);
+            $('#toast-container').append(TOAST_WRAPPER_HTML);
+
+            $('body').on('hidden.bs.toast', '.toast', function () {
+                $(this).remove();
+            });
+        }
+
+        let bg_header_class = '',
+            fg_header_class = '',
+            fg_subtitle_class = 'text-muted',
+            fg_dismiss_class = '',
+            title = opts.title || 'Notice!',
+            subtitle = opts.subtitle || '',
+            content = opts.content || '',
+            type = opts.type || 'info',
+            delay = opts.delay || -1,
+            img = opts.img;
+
+        switch (type) {
+            case 'info':
+                bg_header_class = 'bg-info';
+                fg_header_class = 'text-white';
+                fg_subtitle_class = 'text-white';
+                fg_dismiss_class = 'text-white';
+                break;
+
+            case 'success':
+                bg_header_class = 'bg-success';
+                fg_header_class = 'text-white';
+                fg_subtitle_class = 'text-white';
+                fg_dismiss_class = 'text-white';
+                break;
+
+            case 'warning':
+            case 'warn':
+                bg_header_class = 'bg-warning';
+                fg_header_class = 'text-white';
+                fg_subtitle_class = 'text-white';
+                fg_dismiss_class = 'text-white';
+                break;
+
+            case 'error':
+            case 'danger':
+                bg_header_class = 'bg-danger';
+                fg_header_class = 'text-white';
+                fg_subtitle_class = 'text-white';
+                fg_dismiss_class = 'text-white';
+                break;
+        }
+
+        let delay_or_autohide = '';
+
+        if (delay === -1) {
+            delay_or_autohide = 'data-autohide="false"';
+        } else {
+            delay_or_autohide = 'data-delay="' + delay + '"';
+        }
+
+        let html = '<div class="toast" role="alert" aria-live="assertive" aria-atomic="true" ' + delay_or_autohide + '>';
+        html += '<div class="toast-header ' + bg_header_class + ' ' + fg_header_class + '">';
+
+        if (typeof img !== 'undefined') {
+            html += '<img src="' + img.src + '" class="' + (img.class || '') + ' mr-2" alt="' + (img.alt || 'Image') + '" ' + (typeof img.title !== 'undefined' ? 'data-toggle="tooltip" title="' + img.title + '"' : '') + '>';
+        }
+
+        html += '<strong class="mr-auto">' + title + '</strong>';
+        html += '<small class="' + fg_subtitle_class + '">' + subtitle + '</small>';
+        html += '<button type="button" class="ml-2 mb-1 close" data-dismiss="toast" aria-label="Close">';
+        html += '<span aria-hidden="true" class="' + fg_dismiss_class + '">&times;</span>';
+        html += '</button>';
+        html += '</div>';
+
+        if (content !== '') {
+            html += '<div class="toast-body">'
+            html += content
+            html += '</div>';
+        }
+
+        html += '</div>';
+
+        $('#toast-wrapper').append(html);
+        $('#toast-wrapper .toast:last').toast('show');
     }
-}
+}(jQuery));
 },{}]},{},[1]);

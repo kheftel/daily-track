@@ -1,6 +1,5 @@
-var module = require('./modules/samplemodule');
-var ChartController = require('./modules/ChartController');
-var Controller = require('./modules/ChartController');
+var ChartController = require('./js/modules/ChartController');
+require('./js/toast.js');
 
 window.helpers = window.helpers || {};
 
