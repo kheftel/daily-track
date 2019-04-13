@@ -79,7 +79,7 @@ ChartController = function (container) {
     this._chartContainer.appendChild(this._canvas);
 
     this._footer = document.createElement('div');
-    this._footer.classList.add('controlbar');
+    this._footer.classList.add('controlbar', 'd-flex', 'justify-content-center', 'align-items-center', 'py-2');
     this._container.appendChild(this._footer);
 
     this._btnLeft = document.createElement('button');
@@ -172,8 +172,6 @@ p.addDataset = function (id, complete) {
 }
 
 p.addDatasetsFromIds = function (ids) {
-    console.log(this);
-
     var which = 0;
     var datasets = [];
 
@@ -207,6 +205,8 @@ p.addDatasetsFromIds = function (ids) {
                 console.log('adding set ' + i + ', id=' + set._id);
                 this.addDatasetFromModel(set);
             });
+
+            this.updateChart();
         }
     }.bind(this);
 

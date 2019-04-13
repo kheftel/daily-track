@@ -16,7 +16,7 @@ ChartController = function (container) {
     this._chartContainer.appendChild(this._canvas);
 
     this._footer = document.createElement('div');
-    this._footer.classList.add('controlbar');
+    this._footer.classList.add('controlbar', 'd-flex', 'justify-content-center', 'align-items-center', 'py-2');
     this._container.appendChild(this._footer);
 
     this._btnLeft = document.createElement('button');
