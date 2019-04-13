@@ -83,8 +83,8 @@
         html += '</div>';
 
         if (content !== '') {
-            html += '<div class="toast-body">'
-            html += content
+            html += '<div class="toast-body">';
+            html += content;
             html += '</div>';
         }
 
@@ -92,5 +92,5 @@
 
         $('#toast-wrapper').append(html);
         $('#toast-wrapper .toast:last').toast('show');
-    }
+    };
 }(jQuery));

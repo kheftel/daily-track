@@ -177,7 +177,7 @@ p.addDataset = function (id, complete) {
             if (complete) complete();
         }
     });
-}
+};
 
 p.addDatasetsFromIds = function (ids) {
     var which = 0;
@@ -219,7 +219,7 @@ p.addDatasetsFromIds = function (ids) {
     }.bind(this);
 
     next();
-}
+};
 
 p.addDatasetFromModel = function (dataset, complete) {
     // translate for chart dataset object
@@ -252,13 +252,13 @@ p.addDatasetFromModel = function (dataset, complete) {
     this.updateChart();
 
     if (complete) complete();
-}
+};
 
 Object.defineProperty(p, 'datasets', {
     get() {
         return this._chart.data.datasets;
     }
-})
+});
 
 // COLORS //////////
 var chartColors = {
@@ -274,7 +274,7 @@ var chartColors = {
 p.colorSchemes = {
     vividRainbow: ['#00AAEE', '#A6D608', '#FFE302', '#FF5F00', '#F70D1A', '#9F00FF'],
     chartjs: [chartColors.red, chartColors.orange, chartColors.yellow, chartColors.green, chartColors.blue, chartColors.purple, chartColors.grey]
-}
+};
 
 p.defaultColorScheme = 'vividRainbow';
 
@@ -306,11 +306,11 @@ p.refreshColorsFromScheme = function () {
         set.pointBorderColor = this.getColor(i);
         set.borderColor = this.getColor(i);
     }
-}
+};
 
 Object.defineProperty(p, 'colorOffset', {
     get() {
-        return this._colorOffset
+        return this._colorOffset;
     },
     set(i) {
         this._colorOffset = i;
@@ -323,7 +323,7 @@ Object.defineProperty(p, 'colorOffset', {
 p.getColor = function (i = 0) {
     var scheme = this.colorSchemes[this._colorScheme];
     return scheme[(i + this._colorOffset) % scheme.length];
-}
+};
 
 /*p.setColorScheme = function(scheme) {
     this._colorScheme = scheme;
@@ -432,7 +432,7 @@ p.timeScales = [
         },
         unit: 'day'
     }
-]
+];
 
 p.dateFormat = 'MM/DD/YYYY';
 
@@ -504,21 +504,21 @@ Object.defineProperty(p, 'timeScale', {
 
 p.getRightEdge = function () {
     return this._right;
-}
+};
 
 p.panRight = function (update = true) {
     // this._right.add(this.pans[this._zoomLevel]);
     this._right.add(this.timeScale.pan);
     if (update)
         this.updateChart();
-}
+};
 
 p.panLeft = function (update = true) {
     // this._right.subtract(this.pans[this._zoomLevel]);
     this._right.subtract(this.timeScale.pan);
     if (update)
         this.updateChart();
-}
+};
 
 p.showAll = function (update = true) {
     var data = this._chart.data.datasets[0].data;
@@ -528,7 +528,7 @@ p.showAll = function (update = true) {
     this._chart.options.scales.xAxes[0].time.max = last;
     if (update)
         this._chart.update();
-}
+};
 
 p.getRangeString = function () {
     var leftString = moment.utc(this._right).subtract(this.timeScale.half).format(this.dateFormat);
@@ -537,7 +537,7 @@ p.getRangeString = function () {
     // var rightString = this._right.format(this.dateFormat);
     // var leftString = moment.utc(this._right).subtract(this.timeScale.zoom).format(this.dateFormat);
     return leftString + ' - ' + rightString + ' - (' + this.timeScale.label + ')';
-}
+};
 
 // CHART MANIPULATION /////////
 
@@ -574,7 +574,7 @@ p.updateChart = function (t) {
     this._chart.update(t);
 
     //console.log(this.getRangeString());
-}
+};
 
 // UTILITY FUNCTIONS
 p.normalizeDates = function (data) {
@@ -583,7 +583,7 @@ p.normalizeDates = function (data) {
         datum.x = moment(datum.x).utc().format('YYYY-MM-DD');
     }
     return data;
-}
+};
 
 // INTERNALS
 p.defaultXAxis = {
@@ -776,8 +776,8 @@ module.exports = ChartController;
         html += '</div>';
 
         if (content !== '') {
-            html += '<div class="toast-body">'
-            html += content
+            html += '<div class="toast-body">';
+            html += content;
             html += '</div>';
         }
 
@@ -785,6 +785,6 @@ module.exports = ChartController;
 
         $('#toast-wrapper').append(html);
         $('#toast-wrapper .toast:last').toast('show');
-    }
+    };
 }(jQuery));
 },{}]},{},[1]);
