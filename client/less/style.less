@@ -2,10 +2,8 @@
 @sidebar-width: 200px;
 @transition-duration: .2s;
 
-@header-height: 60px;
 @footer-height: 60px;
 @ios-bar-height: 60px;
-
 
 // RULES /////////////////
 
@@ -38,7 +36,6 @@ html {
 .navbar {
     padding: 0.5rem;
 }
-
 
 // holds sidebar and content, fills available space under header
 #content-container {
@@ -73,7 +70,6 @@ html {
 
 // sidebar //////////
 #sidebar {
-    position: relative;
     min-width: @sidebar-width;
     max-width: @sidebar-width;
     background: #282828;
@@ -93,7 +89,7 @@ html {
     margin: 0 .25rem;
 }
 
-// HELPER UTILITY CLASSES
+// UTILITY CLASSES
 // effects
 .fx-blur {
     filter: blur(8px);
@@ -101,7 +97,8 @@ html {
 }
 
 // flex classes
-.flex-1, .flex-expand {
+.flex-1,
+.flex-expand {
     -webkit-box-flex: 1;
     -ms-flex: 1 1 0%;
     flex: 1 1 0%;
@@ -113,6 +110,27 @@ html {
     transition: all @transition-duration;
 }
 
+.text-shadow {
+    text-shadow: 2px 2px 2px rgba(0, 0, 0, .5);
+}
+
+.btn-shadow {
+    -webkit-box-shadow: 2px 2px 2px rgba(0, 0, 0, .5);
+    box-shadow: 2px 2px 2px rgba(0, 0, 0, .5);
+}
+
+.shadow-down {
+    -webkit-box-shadow: 0rem 0.25rem 0.5rem rgba(0, 0, 0, .5) !important;
+    box-shadow: 0rem 0.25rem 0.5rem rgba(0, 0, 0, .5) !important;
+}
+
+.shadow-right {
+    -webkit-box-shadow: 0.25rem 0rem 0.5rem rgba(0, 0, 0, .5) !important;
+    box-shadow: 0.25rem 0rem 0.5rem rgba(0, 0, 0, .5) !important;
+}
+
+// END UTILITY CLASSES
+
 // media queries
 @media (max-width: 767px) {
 
@@ -121,7 +139,7 @@ html {
         margin-left: -@sidebar-width;
         position: absolute;
         height: 100%;
-        z-index: 50; //arbitrary!
+        z-index: 15; // above shade, below navbar
     }
 
     #sidebar.active {
@@ -138,44 +156,17 @@ html {
     }
 }
 
-.sidebar-shade {
-    position: fixed;
-    top: 0;
-    right: 0;
-    bottom: 0;
-    left: 0;
-    z-index: 40;
-    display: none;
-    overflow: hidden;
-    outline: 0;
+// above sidebar and shade
+#topnav {
+    z-index: 20;
 }
 
-// @media screen and (orientation:portrait) {
-//     body {
-//         height: calc(100vh - @ios-bar-height) !important;
-//     }
+#sidebar-shade {
+    z-index: 10; // between sidebar and content
+    // background-color: rgb(128, 0, 128);
+    display: none;
+}
 
-//     #main {
-//         height: calc(100vh - @header-height - @footer-height - @ios-bar-height) !important;
-//     }
-// }
-
-// body {
-//     width: 100%;
-//     min-height: 100vh;
-// }
-
-// #container {
-//     width: 100%;
-//     height: 100%;
-//     padding: 0 15px;
-// }
-
-// #top {
-//     height: @header-height;
-// }
-
-/* main occupies the whole screen except for header and footer */
-// #main {
-//     height: calc(100vh - @header-height - @footer-height);
-// }
+#sidebar-shade.show {
+    display: block;
+}

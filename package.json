@@ -16,7 +16,8 @@
     "prebuild": "npm run build:clean",
     "build": "npm run build:less && npm run build:bundle",
     "watch:bundle": "watchify ./client/js/app.js -o ./public/js/bundle.js -v -d",
-    "heroku": "git push heroku master"
+    "deploy":"npm run test && npm run build && npm run deploy:heroku",
+    "deploy:heroku": "git push heroku master"
   },
   "author": "Kawika Heftel",
   "license": "ISC",

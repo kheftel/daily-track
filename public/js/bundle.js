@@ -19,9 +19,17 @@ window.helpers.createChartControllerFromId = function(container, id) {
 
 $(document).ready(function () {
     $('#sidebarCollapse').on('click', function () {
+        // slide sidebar
         $('#sidebar').toggleClass('active');
 
+        // blur content
         $('#content').toggleClass('fx-blur-when-small');
+
+        // disable body scrolling
+        $('body').toggleClass('modal-open');
+
+        // show backdrop
+        $('#sidebar-shade').toggleClass('show');
     });
 });
 
