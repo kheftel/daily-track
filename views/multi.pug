@@ -1,11 +1,11 @@
 extends layout
 
 block content
-    .container-fluid.d-flex.flex-column.h-100
+    .container-fluid.d-flex.flex-column
         .row
             .col
                 h4 Multi-View
-        .row.flex-1
+        .row.flex-expand
             .col
                 - var ids = [];
                 each set, i in datasets
