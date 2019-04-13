@@ -1,45 +1,25 @@
 extends layout
 
 block content
-    div.container-fluid.h-100
-        div#main.row
-            div.col.h-100
-                div#mainChart.fill-all
-        //- div#footer.row
-        //-     div.col
-        //-         button#showall.btn.btn-primary Show All
-
-        //-         button#left.btn.btn-primary &lt;&lt;
-
-        //-         button#right.btn.btn-primary &gt;&gt;
-
-        //-         button#minus.btn.btn-primary -
-
-        //-         button#plus.btn.btn-primary +
+    .container-fluid.d-flex.flex-column.h-100
+        .row
+            .col
+                h4
+                    =dataset.name
+                    a(href="#") 
+                        span.fas.fa-edit
+        .row.flex-1
+            .col
+                div(class="chartcontainer" id="set-0-" + dataset._id data-setid=dataset._id)
 
 block pagescript
     script.
 
-        window.controller = window.helpers.createChartControllerFromId('mainChart', '#{dataset._id}');
+        $(".chartcontainer").each(function(i, container) {
+            var setid = container.dataset.setid;
+            var controller = new ChartController(container);
+            controller.colorOffset = 0;
+            controller.addDataset(setid);
+        });
 
-        console.log('setting up interactivity');
-
-        //- $('#minus').click(function() {
-        //-     controller.zoomOut();
-        //- });
-
-        //- $('#plus').click(function() {
-        //-     controller.zoomIn();
-        //- });
-
-        //- $('#left').click(function() {
-        //-     controller.panLeft();
-        //- });
-
-        //- $('#right').click(function() {
-        //-     controller.panRight();
-        //- });
-
-        //- $('#showall').click(function() {
-        //-     controller.showAll();
-        //- });
+        //- window.controller = window.helpers.createChartControllerFromId('mainChart', '#{dataset._id}');

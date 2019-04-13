@@ -84,7 +84,19 @@ router.get('/sets', set_controller.list);
 
 // multi view
 router.get('/multi', function (req, res, next) {
-    res.render('multi', state);
+    Dataset.find()
+        .sort({
+            name: 'asc'
+        })
+        .exec(function (err, datasets) {
+            //to do: do something useful with error
+            if (err)
+                res.send(err);
+
+            res.locals.datasets = datasets;
+
+            res.render('multi', state);
+        });
 });
 
 // chart detail

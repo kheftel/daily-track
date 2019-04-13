@@ -19,36 +19,35 @@ ChartController = function (container) {
     this._footer.classList.add('controlbar');
     this._container.appendChild(this._footer);
 
-    var that = this;
     this._btnLeft = document.createElement('button');
     this._btnLeft.classList.add('btn', 'btn-primary');
     this._btnLeft.innerHTML = '<span class="fas fa-angle-double-left"></i>'; //'&lt;&lt;';
-    this._btnLeft.addEventListener('click', function () {
-        that.panLeft();
+    this._btnLeft.addEventListener('click', () => {
+        this.panLeft();
     });
     this._footer.appendChild(this._btnLeft);
 
     this._btnRight = document.createElement('button');
     this._btnRight.classList.add('btn', 'btn-primary');
     this._btnRight.innerHTML = '<span class="fas fa-angle-double-right"></i>'; //'&gt;&gt;';
-    this._btnRight.addEventListener('click', function () {
-        that.panRight();
+    this._btnRight.addEventListener('click', () => {
+        this.panRight();
     });
     this._footer.appendChild(this._btnRight);
 
     this._btnZoomOut = document.createElement('button');
     this._btnZoomOut.classList.add('btn', 'btn-primary');
     this._btnZoomOut.innerHTML = '<span class="fas fa-search-minus"></i>'; //'-';
-    this._btnZoomOut.addEventListener('click', function () {
-        that.zoomOut();
+    this._btnZoomOut.addEventListener('click', () => {
+        this.zoomOut();
     });
     this._footer.appendChild(this._btnZoomOut);
 
     this._btnZoomIn = document.createElement('button');
     this._btnZoomIn.classList.add('btn', 'btn-primary');
     this._btnZoomIn.innerHTML = '<span class="fas fa-search-plus"></i>'; //'+';
-    this._btnZoomIn.addEventListener('click', function () {
-        that.zoomIn();
+    this._btnZoomIn.addEventListener('click', () => {
+        this.zoomIn();
     });
     this._footer.appendChild(this._btnZoomIn);
 
@@ -107,6 +106,48 @@ p.addDataset = function (id, complete) {
             if (complete) complete();
         }
     });
+}
+
+p.addDatasetsFromIds = function (ids) {
+    var which = 0;
+    var datasets = [];
+
+    function load(id) {
+        console.log('loading set ' + id);
+        $.ajax({
+            url: '/api/sets/' + id,
+            method: 'GET',
+            success: (dataset) => {
+                datasets.push(dataset);
+                next();
+            },
+            error: (err) => {
+                console.log(err);
+                next();
+            }
+        });
+    }
+
+    var next = function() {
+        console.log(which + '/' + ids.length);
+        if(which < ids.length)
+        {
+            load(ids[which]);
+            which++;
+        }
+        else if(which == ids.length)
+        {
+            // all done
+            datasets.forEach((set, i) => {
+                console.log('adding set ' + i + ', id=' + set._id);
+                this.addDatasetFromModel(set);
+            });
+
+            this.updateChart();
+        }
+    }.bind(this);
+
+    next();
 }
 
 p.addDatasetFromModel = function (dataset, complete) {
