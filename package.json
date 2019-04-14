@@ -14,9 +14,9 @@
 
     "lint": "clear && jshint .",
     "test": "npm run lint && mocha test -u bdd -R spec",
-    "build": "npm run test && npm run build:clean && npm run build:less && npm run build:bundle",
-    "start": "npm run build && node server.js",
-    "deploy": "npm run build && npm run deploy:heroku"
+    "build": "npm run build:clean && npm run build:less && npm run build:bundle",
+    "start": "npm run test && npm run build && node server.js",
+    "deploy": "npm run test && npm run build && npm run deploy:heroku"
   },
   "author": "Kawika Heftel",
   "license": "ISC",
