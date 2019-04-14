@@ -1,5 +1,5 @@
 (function(){function r(e,n,t){function o(i,f){if(!n[i]){if(!e[i]){var c="function"==typeof require&&require;if(!f&&c)return c(i,!0);if(u)return u(i,!0);var a=new Error("Cannot find module '"+i+"'");throw a.code="MODULE_NOT_FOUND",a}var p=n[i]={exports:{}};e[i][0].call(p.exports,function(r){var n=e[i][1][r];return o(n||r)},p,p.exports,r,e,n,t)}return n[i].exports}for(var u="function"==typeof require&&require,i=0;i<t.length;i++)o(t[i]);return o}return r})()({1:[function(require,module,exports){
-var ChartController = require('./js/modules/ChartController');
+var ChartController = require('./js/ChartController');
 require('./js/toast.js');
 
 window.helpers = window.helpers || {};
@@ -68,7 +68,7 @@ $(document).ready(function () {
 //         controller.showAll();
 //     });
 // });
-},{"./js/modules/ChartController":2,"./js/toast.js":3}],2:[function(require,module,exports){
+},{"./js/ChartController":2,"./js/toast.js":3}],2:[function(require,module,exports){
 ChartController = function (container) {
     // copy config
     this._config = JSON.parse(JSON.stringify(p.defaultConfig));
@@ -77,7 +77,7 @@ ChartController = function (container) {
         container = document.getElementById(container);
 
     this._chartContainer = document.createElement('div');
-    this._chartContainer.style.height = 'calc(100% - 60px)';
+    this._chartContainer.style.height = 'calc(100% - 48px)';
     this._chartContainer.style.width = "100%";
     this._chartContainer.style.position = 'relative';
     container.appendChild(this._chartContainer);
@@ -130,9 +130,9 @@ ChartController = function (container) {
     this._btnType.classList.add('btn', 'btn-primary', 'd-none', 'btn-shadow');
     this._btnType.innerHTML = '<span class="fas fa-chart-line"></i>';
     this._btnType.addEventListener('click', () => {
-        if(this.datasets.length == 1) {
+        if (this.datasets.length == 1) {
             var set = this.datasets[0];
-            if(set.type == 'line')
+            if (set.type == 'line')
                 set.type = 'bar';
             else
                 set.type = 'line';
@@ -196,15 +196,12 @@ p.addDatasetsFromIds = function (ids) {
         });
     }
 
-    var next = function() {
+    var next = function () {
         console.log(which + '/' + ids.length);
-        if(which < ids.length)
-        {
+        if (which < ids.length) {
             load(ids[which]);
             which++;
-        }
-        else if(which == ids.length)
-        {
+        } else if (which == ids.length) {
             // all done
             datasets.forEach((set, i) => {
                 console.log('adding set ' + i + ', id=' + set._id);
@@ -238,11 +235,10 @@ p.addDatasetFromModel = function (dataset, complete) {
     this._datasetIds.push(dataset._id);
 
     // disable chart type toggle btn if multiple sets
-    if(this.datasets.length > 1) {
+    if (this.datasets.length > 1) {
         $(this._btnType).addClass('d-none');
         $(this._btnAdd).addClass('d-none');
-    }
-    else {
+    } else {
         $(this._btnType).removeClass('d-none').html(this._toggleHTML[dataset.type]);
         $(this._btnAdd).removeClass('d-none').attr('href', '/set/' + dataset._id + '/new');
     }
@@ -272,7 +268,7 @@ var chartColors = {
 
 p.colorSchemes = {
     vividRainbow: ['#00AAEE', '#A6D608', '#FFE302', '#FF5F00', '#F70D1A', '#9F00FF'],
-    darkly:  ["#3498DB", "#00bc8c", "#ffef00", "#F39C12", "#fd7e14", "#E74C3C", "#e83e8c", "#6f42c1", "#6610f2", "#375a7f"],
+    darkly: ["#3498DB", "#00bc8c", "#ffef00", "#F39C12", "#fd7e14", "#E74C3C", "#e83e8c", "#6f42c1", "#6610f2", "#375a7f"],
     chartjs: [chartColors.red, chartColors.orange, chartColors.yellow, chartColors.green, chartColors.blue, chartColors.purple, chartColors.grey]
 };
 
@@ -340,8 +336,7 @@ p.getColor = function (i = 0) {
 
 // ZOOMING and PANNING //////////
 
-p.timeScales = [
-    {
+p.timeScales = [{
         label: '1 year',
         zoom: {
             'years': 1
@@ -537,6 +532,7 @@ p.getRangeString = function () {
     // var rightString = this._right.format(this.dateFormat);
     // var leftString = moment.utc(this._right).subtract(this.timeScale.zoom).format(this.dateFormat);
     return leftString + ' - ' + rightString + ' - (' + this.timeScale.label + ')';
+    // return [leftString, rightString, this.timeScale.label];
 };
 
 // CHART MANIPULATION /////////
@@ -595,7 +591,7 @@ p.defaultXAxis = {
     distribution: 'linear',
     display: true,
     scaleLabel: {
-        display: true,
+        display: false,
         labelString: 'no data'
     },
     ticks: {
@@ -636,14 +632,18 @@ p.defaultConfig = {
 
 Chart.defaults.global.maintainAspectRatio = false;
 Chart.defaults.global.responsive = true;
+Chart.defaults.global.defaultFontFamily = '"Lato", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol"';
 Chart.defaults.global.layout.padding = 0;
 
 Chart.defaults.global.legend.position = 'top';
+Chart.defaults.global.legend.labels.padding = 8;
+Chart.defaults.global.legend.labels.usePointStyle = true;
 Chart.defaults.global.legend.labels.fontColor = 'white';
 
 Chart.defaults.global.title.display = true;
 Chart.defaults.global.title.fontColor = 'white';
-Chart.defaults.global.title.fontSize = 20;
+Chart.defaults.global.title.fontSize = 16;
+Chart.defaults.global.title.padding = 4;
 
 Chart.defaults.global.elements.point.radius = 5;
 Chart.defaults.global.elements.point.hoverRadius = 10;
@@ -652,8 +652,14 @@ Chart.defaults.global.elements.rectangle.borderWidth = 2;
 
 Chart.scaleService.updateScaleDefaults('linear', {
     ticks: {
-        fontColor: 'white', // labels such as 10, 20, etc
-        showLabelBackdrop: false // hide square behind text
+        fontColor: 'white',
+        // callback: function (value, index, values) {
+        //     console.log('x-linear-tick: ' + value + ', ' + index + ', ' + values);
+        //     return value;
+        // },
+        maxRotation: 0
+
+        //showLabelBackdrop: false // hide square behind text
     },
     gridLines: {
         color: 'rgba(255, 255, 255, 0.2)'
@@ -667,8 +673,15 @@ Chart.scaleService.updateScaleDefaults('linear', {
 
 Chart.scaleService.updateScaleDefaults('time', {
     ticks: {
-        fontColor: 'white', // labels such as 10, 20, etc
-        showLabelBackdrop: false // hide square behind text
+        fontColor: 'white',
+        callback: function (value, index, values) {
+            console.log('x-time-tick:');
+            console.log(value);
+            console.log(index);
+            console.log(values);
+            return value;
+        },
+        maxRotation: 0
     },
     gridLines: {
         color: 'rgba(255, 255, 255, 0.2)'

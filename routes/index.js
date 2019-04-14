@@ -15,7 +15,8 @@ var state = {
     nav: [{
             title: 'Datasets',
             icon: 'fa-list',
-            path: '/'
+            path: '/',
+            notitle: true
         },
         {
             title: 'New Dataset',
@@ -27,15 +28,20 @@ var state = {
             title: 'Multi-View',
             icon: 'fa-chart-pie',
             path: '/multi',
-            noscroll: true
+            noscroll: true,
+            notitle: true
         }
     ],
     dynamic: [{
         regex: /^\/set\/.+/, //match /set/STUFF
         title: 'Dataset Detail',
         icon: '',
-        noscroll: true
-    }]
+        noscroll: true,
+        notitle: true
+    }],
+    style: {
+        chartRowHeight: '260px'
+    }
 };
 
 // prep state
@@ -45,6 +51,7 @@ router.use(function (req, res, next) {
     // configure template locals
     res.locals.siteTitle = state.siteTitle;
     res.locals.nav = state.nav;
+    res.locals.style = state.style;
     res.locals.req = {
         path: req.path
     };

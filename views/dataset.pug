@@ -6,10 +6,10 @@ block content
             //- div(class="chartcontainer" id="set-0-" + dataset._id data-setid=dataset._id)
 
             .card.border-light.h-100.shadow-rb
-                .card-header
+                .card-header.p-2
                     .card-title.m-0.d-flex.content-justify-between
-                        h4.text-shadow
-                            = dataset.name
+                        h4.m-0.text-shadow
+                            span.align-middle= dataset.name
                         button.ml-auto.btn.btn-primary.btn-shadow
                             span.fas.fa-edit
                 .card-body(style="position: relative;")

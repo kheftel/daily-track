@@ -2,7 +2,7 @@
 @sidebar-width: 200px;
 @transition-duration: 0.2s;
 
-@footer-height: 60px;
+@controlbar-height: 48px;
 @ios-bar-height: 60px;
 
 @shadow-color: rgba(0, 0, 0, 0.5);
@@ -66,14 +66,13 @@ html {
 .navbar-brand {
     background-image: url(/img/dailytracklogo.png);
     background-repeat: no-repeat;
-    background-position: 0 0;
-    padding-left: 3.5rem;
+    background-position: left center;
+    padding: 0.25rem 0 0.25rem 3rem;
     font-size: 1.5rem;
-    background-size: 3rem 3rem;
-}
-
-.navbar {
-    padding: 0.5rem;
+    background-size: 2.5rem;
+    position: absolute;
+    transform: translateX(-50%);
+    left: 50%;
 }
 
 // holds sidebar and content, fills available space under header
@@ -120,7 +119,7 @@ html {
 
 // chart controls
 .controlbar {
-    height: @footer-height;
+    height: @controlbar-height;
 }
 
 .controlbar .btn {
@@ -291,7 +290,7 @@ html {
 
 // END UTILITY CLASSES
 
-// bootstrap overrides
+// bootstrap/darkly overrides
 // sidebar link hover
 .navbar-light .navbar-nav .nav-link:hover {
     color: #fff;
@@ -308,6 +307,11 @@ html {
 
 .navbar-light .navbar-nav .active>.nav-link:hover {
     background-color: #3498DB;
+}
+
+// btn padding
+.btn {
+    padding: 0.25rem 0.75rem !important;
 }
 
 // media queries

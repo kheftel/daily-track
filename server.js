@@ -75,6 +75,7 @@ app.use(function (err, req, res, next) {
     res.locals.nav = [];
 
     // render the error page
+    err.status = err.status || 500;
     res.status(err.status || 500);
     res.render('error');
 });

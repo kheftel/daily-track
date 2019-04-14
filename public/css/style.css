@@ -12,13 +12,13 @@ html {
 .navbar-brand {
   background-image: url(/img/dailytracklogo.png);
   background-repeat: no-repeat;
-  background-position: 0 0;
-  padding-left: 3.5rem;
+  background-position: left center;
+  padding: 0.25rem 0 0.25rem 3rem;
   font-size: 1.5rem;
-  background-size: 3rem 3rem;
-}
-.navbar {
-  padding: 0.5rem;
+  background-size: 2.5rem;
+  position: absolute;
+  transform: translateX(-50%);
+  left: 50%;
 }
 .chartcontainer {
   position: absolute;
@@ -39,7 +39,7 @@ html {
   margin-left: -200px;
 }
 .controlbar {
-  height: 60px;
+  height: 48px;
 }
 .controlbar .btn {
   margin: 0 0.25rem;
@@ -176,6 +176,9 @@ html {
 }
 .navbar-light .navbar-nav .active > .nav-link:hover {
   background-color: #3498DB;
+}
+.btn {
+  padding: 0.25rem 0.75rem !important;
 }
 @media (max-width: 767px) {
   #sidebar {

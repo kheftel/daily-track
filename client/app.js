@@ -1,4 +1,4 @@
-var ChartController = require('./js/modules/ChartController');
+var ChartController = require('./js/ChartController');
 require('./js/toast.js');
 
 window.helpers = window.helpers || {};

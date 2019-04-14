@@ -2,17 +2,17 @@ extends layout
 
 block content
     each set, i in datasets
-        .row.my-3
+        .row.mb-2
             .col
                 .card.border-light.shadow-rb
-                    .card-header
+                    .card-header.p-2
                         .card-title.m-0.d-flex.content-justify-between
-                            h4.text-shadow
-                                a(href="/set/" + set._id)= set.name
+                            h4.m-0.text-shadow
+                                a.align-middle(href="/set/" + set._id)= set.name
                             button.ml-auto.btn.btn-primary.btn-shadow
                                 span.fas.fa-edit
-                    .card-body(style="position: relative; height: 300px;")
-                        .chartcontainer(style="height: 300px" id="set-" + i + "-" + set._id data-setid=set._id)
+                    .card-body(style='position: relative; height: ' + style.chartRowHeight + ';')
+                        .chartcontainer(style="height: " + style.chartRowHeight id="set-" + i + "-" + set._id data-setid=set._id)
 
 //- .card.border-light
 //-     .card-header hi there
@@ -22,16 +22,16 @@ block content
 
 
 
-                //- .container.rounded-2.bg-level-2.shadow-rb
-                //-     .row
-                //-         .col
-                //-             h5
-                //-                 a(href="/set/" + set._id)= set.name
-                //-                 a(href="#") 
-                //-                     span.fas.fa-edit
-                //-     .row
-                //-         .col(style="height: 300px")
-                //-             div(class="chartcontainer" id="set-" + i + "-" + set._id data-setid=set._id)
+    //- .container.rounded-2.bg-level-2.shadow-rb
+    //-     .row
+    //-         .col
+    //-             h5
+    //-                 a(href="/set/" + set._id)= set.name
+    //-                 a(href="#") 
+    //-                     span.fas.fa-edit
+    //-     .row
+    //-         .col(style="height: 300px")
+    //-             div(class="chartcontainer" id="set-" + i + "-" + set._id data-setid=set._id)
 
 block pagescript
     script.

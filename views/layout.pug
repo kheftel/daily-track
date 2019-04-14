@@ -15,7 +15,7 @@ html(lang='en')
 
     body
         #page-container.d-flex.flex-column
-            nav#topnav.navbar.navbar-expand-md.navbar-dark.bg-primary.shadow-b
+            nav#topnav.navbar.navbar-dark.p-1.bg-primary.shadow-b
                 button#sidebarCollapse.btn.btn-info.btn-shadow(type="button")
                     i.fas.fa-align-left
                 a.navbar-brand.mx-auto.text-shadow(href="/") DailyTrack
@@ -27,7 +27,7 @@ html(lang='en')
                 //-                 span(class="fas fa-fw mr-1 " + item.icon)
                 //-                 =item.title
 
-                nav#sidebar.navbar.navbar-light.flex-column.align-items-stretch.bg-gray-800.py-2.transition-animate.shadow-b
+                nav#sidebar.navbar.navbar-light.flex-column.align-items-stretch.bg-gray-800.px-0.py-2.transition-animate.shadow-b
                     block sidebar
                         ul.navbar-nav
                             li
@@ -40,8 +40,8 @@ html(lang='en')
                 #content.w-100.py-2.transition-animate.d-flex.align-items-stretch
                     #sidebar-shade.d-md-none.modal-backdrop.fade
                     div(class="container-fluid" + ((active && active.noscroll) ? " d-flex flex-column" : ''))
-                        if pageTitle
-                            h3.text-shadow= pageTitle
+                        if pageTitle && !(active && active.notitle)
+                            h4.text-shadow= pageTitle
                         block content
 
         script(src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous")
