@@ -12,7 +12,7 @@
     "watch:bundle": "watchify ./client/js/app.js -o ./public/js/bundle.js -v -d",
     "deploy:heroku": "git push heroku master",
 
-    "lint": "clear && jshint *.js **/*.js",
+    "lint": "clear && jshint .",
     "test": "npm run lint && mocha test -u bdd -R spec",
     "build": "npm run test && npm run build:clean && npm run build:less && npm run build:bundle",
     "start": "npm run build && node server.js",
