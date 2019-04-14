@@ -5,6 +5,7 @@ const mongoose = require('mongoose');
 const Dataset = require('../models/dataset');
 const Datapoint = require('../models/datapoint');
 const _ = require('lodash');
+const moment = require('moment');
 
 const set_controller = require('../controllers/datasetController');
 
@@ -14,49 +15,71 @@ var state = {
     nav: [{
             title: 'Datasets',
             icon: 'fa-list',
-            href: '/'
+            path: '/'
         },
         {
             title: 'New Dataset',
-            icon: 'fa-plus',
-            href: '/set/create'
+            icon: 'fa-plus-square',
+            path: '/set/new',
+            noscroll: true
         },
         {
             title: 'Multi-View',
             icon: 'fa-chart-pie',
-            href: '/multi'
+            path: '/multi',
+            noscroll: true
         }
-    ]
+    ],
+    dynamic: [{
+        regex: /^\/set\/.+/, //match /set/STUFF
+        title: 'Dataset Detail',
+        icon: '',
+        noscroll: true
+    }]
 };
 
 // prep state
 router.use(function (req, res, next) {
     console.log('initialization: ' + req.path);
 
-    // reset active states
-    state.nav.forEach(element => {
-        element.active = undefined;
-    });
-    // mark current page as active
-    let activenav = _.find(state.nav, {
-        href: req.path
-    });
-    if (activenav)
-        activenav.active = true;
-
-    // add nav, site title to locals
+    // configure template locals
     res.locals.siteTitle = state.siteTitle;
     res.locals.nav = state.nav;
+    res.locals.req = {
+        path: req.path
+    };
+
+    // grab current page from nav
+    let active = _.find(state.nav, {
+        path: req.path
+    });
+
+    // add info about current page
+    if (active) {
+        res.locals.active = active;
+        setPageTitle(res, active.title);
+    } else {
+        // try dyanmic pages
+        state.dynamic.forEach((v, k, col) => {
+            if (v.regex && v.regex.test(req.path)) {
+                // match!
+                console.log('matched a dynamic page');
+                res.locals.active = v;
+                if (v.title)
+                    setPageTitle(res, v.title);
+            }
+        });
+    }
     console.log('locals:');
     console.log(res.locals);
 
-    // console.log(req.baseUrl);
-    // console.log(req.originalUrl);
+    // pass some node module utility stuff along too!
+    res.locals.moment = moment;
 
     next();
 });
 
-// charts overview page
+// list all datasets
 router.get('/', function (req, res, next) {
     Dataset.find()
         .sort({
@@ -65,48 +88,26 @@ router.get('/', function (req, res, next) {
         .exec(function (err, datasets) {
             //to do: do something useful with error
             if (err)
-                res.send(err);
+                return next(err);
 
             res.locals.datasets = datasets;
-
-            res.render('index', state);
+            res.render('datasets');
         });
 });
 
-router.get('/set/create', set_controller.create_get);
-router.post('/set/create', set_controller.create_post);
-router.get('/set/:id/delete', set_controller.delete_get);
-router.post('/set/:id/delete', set_controller.delete_post);
-router.get('/set/:id/update', set_controller.update_get);
-router.post('/set/:id/update', set_controller.update_post);
-router.get('/set/:id', set_controller.detail);
-router.get('/sets', set_controller.list);
 
-// multi view
-router.get('/multi', function (req, res, next) {
-    Dataset.find()
-        .sort({
-            name: 'asc'
-        })
-        .exec(function (err, datasets) {
-            //to do: do something useful with error
-            if (err)
-                res.send(err);
-
-            res.locals.datasets = datasets;
-
-            res.render('multi', state);
-        });
+// new dataset
+router.get('/set/new', function (req, res, next) {
+    res.render('set_form');
 });
 
-// chart detail
-router.get('/chart/:id', function (req, res, next) {
+// view dataset
+router.get('/set/:id', function (req, res, next) {
 
     // grab the dataset from the db
     Dataset.findById(req.params.id, function (err, dataset) {
-        // TO DO: handle error
         if (err)
-            res.send(err);
+            return next(err);
 
         // populate chart's datapoints
         Datapoint.find({
@@ -117,18 +118,87 @@ router.get('/chart/:id', function (req, res, next) {
             })
             .exec(function (err, datapoints) {
                 if (err)
-                    res.send(err);
+                    return next(err);
+
+                // setPageTitle(res, dataset.name);
 
                 var result = dataset.toObject();
                 result.data = datapoints;
-
-                state.dataset = result;
-
-                res.render('chart', state);
+                res.locals.dataset = result;
+                res.render('dataset');
             });
     });
 });
 
-// create new data point
+// new data point on a dataset
+router.get('/set/:id/new', function (req, res, next) {
+    console.log('new data point form');
+
+    // grab the dataset from the db
+    Dataset.findById(req.params.id, function (err, dataset) {
+        if (err)
+            return next(err);
+
+        if(!dataset) {
+            console.log('no dataset found');
+
+            // dataset not found
+            return next('Dataset not found');
+        }
+
+        var result = dataset.toObject();
+        res.locals.dataset = result;
+
+        var active = {
+            title: dataset.name + ': add entry',
+            noscroll: true
+        };
+        res.locals.active = active;
+        setPageTitle(res, active.title);
+
+        // today's date
+        res.locals.defaults = {
+            x: moment().format('YYYY-MM-DD')
+        };
+
+        res.render('point_form');
+    });
+});
+
+// view multiple datasets on the same chart
+router.get('/multi', function (req, res, next) {
+    Dataset.find()
+        .sort({
+            name: 'asc'
+        })
+        .exec(function (err, datasets) {
+            //to do: do something useful with error
+            if (err)
+                return next(error);
+
+            res.locals.datasets = datasets;
+            res.render('multi');
+        });
+});
+
+// helper functions
+
+/**
+ * add page title to res.locals
+ * @param {*} res 
+ * @param {*} title 
+ */
+function setPageTitle(res, title) {
+    res.locals.pageTitle = title;
+    res.locals.siteTitle = state.siteTitle + ' - ' + title;
+}
+
+// router.post('/set/create', set_controller.create_post);
+// router.get('/set/:id/delete', set_controller.delete_get);
+// router.post('/set/:id/delete', set_controller.delete_post);
+// router.get('/set/:id/update', set_controller.update_get);
+// router.post('/set/:id/update', set_controller.update_post);
+// router.get('/set/:id', set_controller.detail);
+// router.get('/sets', set_controller.list);
 
 module.exports = router;

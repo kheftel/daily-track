@@ -12,27 +12,37 @@ html(lang='en')
         link(rel="stylesheet" href="/css/toast.css")
 
         title= siteTitle
+
     body
         #page-container.d-flex.flex-column
-            nav#topnav.navbar.navbar-expand-md.navbar-dark.bg-primary.shadow-down
+            nav#topnav.navbar.navbar-expand-md.navbar-dark.bg-primary.shadow-b
                 button#sidebarCollapse.btn.btn-info.btn-shadow(type="button")
                     i.fas.fa-align-left
                 a.navbar-brand.mx-auto.text-shadow(href="/") DailyTrack
             #content-container.d-flex.flex-expand.w-100.align-items-stretch
-                nav#sidebar.nav.flex-column.transition-animate.shadow-right.bg-secondary
+                //- nav#sidebar.nav.flex-column.transition-animate.shadow-right.bg-secondary
+                //-     block sidebar
+                //-         each item in nav
+                //-             a(class="nav-link text-shadow" + (item.active ? ' active' : ''), href=item.href)
+                //-                 span(class="fas fa-fw mr-1 " + item.icon)
+                //-                 =item.title
+
+                nav#sidebar.navbar.navbar-light.flex-column.align-items-stretch.bg-gray-800.py-2.transition-animate.shadow-b
                     block sidebar
-                        each item in nav
-                            a(class="nav-link text-shadow" + (item.active ? ' active' : ''), href=item.href)
-                                span(class="fas fa-fw mr-1 " + item.icon)
-                                =item.title
-                            //- if item.active
-                            //- else
-                            //-     a.nav-link.text-shadow(href=item.href)
-                            //-         span(class="fas fa-fw mr-1 " + item.icon)
-                            //-         =item.title
+                        ul.navbar-nav
+                            li
+                                h4.px-2.text-shadow Navigation
+                            each item in nav
+                                li(class="nav-item" + (item.path == req.path ? ' active' : ''))
+                                    a.nav-link.p-2.text-shadow.transition-animate(href=item.path)
+                                        span(class="fas fa-fw mr-1 " + item.icon)
+                                        =item.title
                 #content.w-100.py-2.transition-animate.d-flex.align-items-stretch
                     #sidebar-shade.d-md-none.modal-backdrop.fade
-                    block content
+                    div(class="container-fluid" + ((active && active.noscroll) ? " d-flex flex-column" : ''))
+                        if pageTitle
+                            h3.text-shadow= pageTitle
+                        block content
 
         script(src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous")
         script(src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous")

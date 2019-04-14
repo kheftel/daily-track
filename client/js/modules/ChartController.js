@@ -20,7 +20,7 @@ ChartController = function (container) {
     this._container.appendChild(this._footer);
 
     this._btnLeft = document.createElement('button');
-    this._btnLeft.classList.add('btn', 'btn-primary');
+    this._btnLeft.classList.add('btn', 'btn-primary', 'btn-shadow');
     this._btnLeft.innerHTML = '<span class="fas fa-angle-double-left"></i>'; //'&lt;&lt;';
     this._btnLeft.addEventListener('click', () => {
         this.panLeft();
@@ -28,7 +28,7 @@ ChartController = function (container) {
     this._footer.appendChild(this._btnLeft);
 
     this._btnRight = document.createElement('button');
-    this._btnRight.classList.add('btn', 'btn-primary');
+    this._btnRight.classList.add('btn', 'btn-primary', 'btn-shadow');
     this._btnRight.innerHTML = '<span class="fas fa-angle-double-right"></i>'; //'&gt;&gt;';
     this._btnRight.addEventListener('click', () => {
         this.panRight();
@@ -36,7 +36,7 @@ ChartController = function (container) {
     this._footer.appendChild(this._btnRight);
 
     this._btnZoomOut = document.createElement('button');
-    this._btnZoomOut.classList.add('btn', 'btn-primary');
+    this._btnZoomOut.classList.add('btn', 'btn-primary', 'btn-shadow');
     this._btnZoomOut.innerHTML = '<span class="fas fa-search-minus"></i>'; //'-';
     this._btnZoomOut.addEventListener('click', () => {
         this.zoomOut();
@@ -44,7 +44,7 @@ ChartController = function (container) {
     this._footer.appendChild(this._btnZoomOut);
 
     this._btnZoomIn = document.createElement('button');
-    this._btnZoomIn.classList.add('btn', 'btn-primary');
+    this._btnZoomIn.classList.add('btn', 'btn-primary', 'btn-shadow');
     this._btnZoomIn.innerHTML = '<span class="fas fa-search-plus"></i>'; //'+';
     this._btnZoomIn.addEventListener('click', () => {
         this.zoomIn();
@@ -56,8 +56,7 @@ ChartController = function (container) {
         'bar': '<span class="fas fa-chart-bar"></i>'
     };
     this._btnType = document.createElement('button');
-    this._btnType.classList.add('btn', 'btn-primary');
-    this._btnType.classList.add('d-none');
+    this._btnType.classList.add('btn', 'btn-primary', 'd-none', 'btn-shadow');
     this._btnType.innerHTML = '<span class="fas fa-chart-line"></i>';
     this._btnType.addEventListener('click', () => {
         if(this.datasets.length == 1) {
@@ -73,12 +72,10 @@ ChartController = function (container) {
     });
     this._footer.appendChild(this._btnType);
 
-    // this._btnAdd = document.createElement('button');
-    // this._btnAdd.classList.add('btn', 'btn-primary');
-    // this._btnAdd.innerHTML = '<span class="fas fa-pencil-alt"></i>';
-    // this._btnAdd.addEventListener('click', function () {
-    // });
-    // this._footer.appendChild(this._btnAdd);
+    this._btnAdd = document.createElement('a');
+    this._btnAdd.classList.add('btn', 'btn-primary', 'd-none', 'btn-shadow');
+    this._btnAdd.innerHTML = '<span class="fas fa-plus-square"></i>';
+    this._footer.appendChild(this._btnAdd);
 
     this._chart = new Chart(this._canvas, this._config);
     this._datasetIds = [];
@@ -172,9 +169,11 @@ p.addDatasetFromModel = function (dataset, complete) {
     // disable chart type toggle btn if multiple sets
     if(this.datasets.length > 1) {
         $(this._btnType).addClass('d-none');
+        $(this._btnAdd).addClass('d-none');
     }
     else {
         $(this._btnType).removeClass('d-none').html(this._toggleHTML[dataset.type]);
+        $(this._btnAdd).removeClass('d-none').attr('href', '/set/' + dataset._id + '/new');
     }
 
     // update chart
@@ -202,10 +201,11 @@ var chartColors = {
 
 p.colorSchemes = {
     vividRainbow: ['#00AAEE', '#A6D608', '#FFE302', '#FF5F00', '#F70D1A', '#9F00FF'],
+    darkly:  ["#3498DB", "#00bc8c", "#ffef00", "#F39C12", "#fd7e14", "#E74C3C", "#e83e8c", "#6f42c1", "#6610f2", "#375a7f"],
     chartjs: [chartColors.red, chartColors.orange, chartColors.yellow, chartColors.green, chartColors.blue, chartColors.purple, chartColors.grey]
 };
 
-p.defaultColorScheme = 'vividRainbow';
+p.defaultColorScheme = 'darkly';
 
 Object.defineProperty(p, 'schemeNames', {
     get() {

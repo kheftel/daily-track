@@ -1,36 +1,29 @@
 extends layout
 
 block content
-    .container-fluid
-        h4 #{title}
-
-        form#set-form(method='POST' action='/api/sets' novalidate)
-            div#name-group.form-group
-                label(for='name') Name:
-                input#name.form-control(type='text', placeholder='Meditation, sleep, mood, etc' name='name' value=(undefined===dataset ? '' : dataset.name) required)
-                #name-invalid.invalid-feedback
-                #name-valid.valid-feedback
-            div#yAxisLabel-group.form-group
-                label(for='yAxisLabel') Unit:
-                input#yAxisLabel.form-control(type='text', placeholder='Minutes, hours, pounds, etc' name='yAxisLabel' value=(undefined===dataset ? '' : dataset.yAxisLabel) required)
-                #yAxisLabel-invalid.invalid-feedback
-                #yAxisLabel-valid.valid-feedback
-            div#chartType-group.form-group
-                label(for='chartType') Chart Type:
-                select#chartType.form-control(name='chartType' value=(undefined===dataset ? '' : dataset.chartType) required)
-                    option
-                        | line
-                    option
-                        | bar
-                #chartType-invalid.invalid-feedback
-                #chartType-valid.valid-feedback
-            button#save.btn.btn-success(type='submit')
-                | Save
-                span.d-none.spinner-border.spinner-border-sm.ml-1(role="status" aria-hidden="true")
-        if errors 
-            ul
-                for error in errors
-                    li!= error.msg
+    form#set-form(method='POST' action='/api/sets' novalidate)
+        div#name-group.form-group
+            label(for='name') Name:
+            input#name.form-control(type='text', placeholder='Meditation, sleep, mood, etc' name='name' value=(undefined===dataset ? '' : dataset.name) required)
+            #name-invalid.invalid-feedback
+            #name-valid.valid-feedback
+        div#yAxisLabel-group.form-group
+            label(for='yAxisLabel') Unit:
+            input#yAxisLabel.form-control(type='text', placeholder='Minutes, hours, pounds, etc' name='yAxisLabel' value=(undefined===dataset ? '' : dataset.yAxisLabel) required)
+            #yAxisLabel-invalid.invalid-feedback
+            #yAxisLabel-valid.valid-feedback
+        div#chartType-group.form-group
+            label(for='chartType') Chart Type:
+            select#chartType.form-control(name='chartType' value=(undefined===dataset ? '' : dataset.chartType) required)
+                option
+                    | line
+                option
+                    | bar
+            #chartType-invalid.invalid-feedback
+            #chartType-valid.valid-feedback
+        button#save.btn.btn-success(type='submit')
+            | Save
+            span.d-none.spinner-border.spinner-border-sm.ml-1(role="status" aria-hidden="true")
 block pagescript
     script.
 

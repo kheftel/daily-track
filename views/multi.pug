@@ -1,19 +1,12 @@
 extends layout
 
 block content
-    .container-fluid.d-flex.flex-column
-        .row
-            .col
-                h4 Multi-View
-        .row.flex-expand
-            .col
-                - var ids = [];
-                each set, i in datasets
-                    - ids.push(set._id)
-                - console.log('hi');
-                - console.log(ids);
-
-                div(class="chartcontainer" id="multi" data-ids=JSON.stringify(ids))
+    .row.flex-expand
+        .col
+            - var ids = [];
+            each set, i in datasets
+                - ids.push(set._id)
+            div(class="chartcontainer" id="multi" data-ids=JSON.stringify(ids))
 
 block pagescript
     script.

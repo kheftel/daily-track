@@ -1,9 +1,48 @@
 // VARIABLES /////////////////////
 @sidebar-width: 200px;
-@transition-duration: .2s;
+@transition-duration: 0.2s;
 
 @footer-height: 60px;
 @ios-bar-height: 60px;
+
+@shadow-color: rgba(0, 0, 0, 0.5);
+@shadow-length: 0.25rem;
+@shadow-blur: 0.5rem;
+@text-shadow-length: 2px;
+@text-shadow-blur: 2px;
+
+// DARKLY VARIABLES
+@white: #fff;
+@gray-100: #f8f9fa;
+@gray-200: #ebebeb;
+@gray-300: #dee2e6;
+@gray-400: #ced4da;
+@gray-500: #adb5bd;
+@gray-600: #999;
+@gray-700: #444;
+@gray-800: #303030;
+@gray-900: #222;
+@black: #000;
+
+@blue: #375a7f;
+@indigo: #6610f2;
+@purple: #6f42c1;
+@pink: #e83e8c;
+@red: #E74C3C;
+@orange: #fd7e14;
+@yellow: #F39C12;
+@green: #00bc8c;
+@teal: #20c997;
+@cyan: #3498DB;
+
+@primary: @blue;
+@secondary: @gray-700;
+@success: @green;
+@info: @cyan;
+@warning: @yellow;
+@danger: @red;
+@light: @gray-800;
+@dark: @gray-500;
 
 // RULES /////////////////
 
@@ -72,7 +111,6 @@ html {
 #sidebar {
     min-width: @sidebar-width;
     max-width: @sidebar-width;
-    background: #282828;
     // transition: all 0.3s;
 }
 
@@ -85,18 +123,123 @@ html {
     height: @footer-height;
 }
 
-.controlbar button {
+.controlbar .btn {
     margin: 0 .25rem;
 }
 
 // UTILITY CLASSES
-// effects
+// darkly bg gray levels and colorsZ
+.bg-white {
+    background-color: @white;
+}
+
+.bg-gray-100 {
+    background-color: @gray-100 ;
+}
+
+.bg-gray-200 {
+    background-color: @gray-200;
+}
+
+.bg-gray-300 {
+    background-color: @gray-300;
+}
+
+.bg-gray-400 {
+    background-color: @gray-400;
+}
+
+.bg-gray-500 {
+    background-color: @gray-500;
+}
+
+.bg-gray-600 {
+    background-color: @gray-600;
+}
+
+.bg-gray-700 {
+    background-color: @gray-700;
+}
+
+.bg-gray-800 {
+    background-color: @gray-800;
+}
+
+.bg-gray-900 {
+    background-color: @gray-900;
+}
+
+.bg-black {
+    background-color: @black;
+}
+
+.blue {
+    background-color: @blue;
+}
+
+.indigo {
+    background-color: @indigo;
+}
+
+.purple {
+    background-color: @purple;
+}
+
+.pink {
+    background-color: @pink;
+}
+
+.red {
+    background-color: @red;
+}
+
+.orange {
+    background-color: @orange;
+}
+
+.yellow {
+    background-color: @yellow;
+}
+
+.green {
+    background-color: @green;
+}
+
+.teal {
+    background-color: @teal;
+}
+
+.cyan {
+    background-color: @cyan;
+}
+
+.bg-level-0 {
+    background-color: #1B1B1B;
+}
+
+.bg-level-1 {
+    background-color: #222;
+}
+
+.bg-level-2 {
+    background-color: #282828;
+}
+
+.bg-level-3 {
+    background-color: #333;
+}
+
+.bg-level-4 {
+    background-color: #383838;
+}
+
+// fx
 .fx-blur {
     filter: blur(8px);
     -webkit-filter: blur(8px);
 }
 
-// flex classes
+// flex
 .flex-1,
 .flex-expand {
     -webkit-box-flex: 1;
@@ -104,32 +247,68 @@ html {
     flex: 1 1 0%;
 }
 
+// animated transitions
 .transition-animate {
     -webkit-transition: all @transition-duration;
     -o-transition: all @transition-duration;
     transition: all @transition-duration;
 }
 
+// shadows
 .text-shadow {
-    text-shadow: 2px 2px 2px rgba(0, 0, 0, .5);
+    text-shadow: @text-shadow-length @text-shadow-length @text-shadow-blur @shadow-color;
 }
 
 .btn-shadow {
-    -webkit-box-shadow: 2px 2px 2px rgba(0, 0, 0, .5);
-    box-shadow: 2px 2px 2px rgba(0, 0, 0, .5);
+    -webkit-box-shadow: @text-shadow-length @text-shadow-length @text-shadow-blur @shadow-color;
+    box-shadow: @text-shadow-length @text-shadow-length @text-shadow-blur @shadow-color;
 }
 
-.shadow-down {
-    -webkit-box-shadow: 0rem 0.25rem 0.5rem rgba(0, 0, 0, .5) !important;
-    box-shadow: 0rem 0.25rem 0.5rem rgba(0, 0, 0, .5) !important;
+.shadow-b {
+    -webkit-box-shadow: 0 @shadow-length @shadow-blur @shadow-color  !important;
+    box-shadow: 0 @shadow-length @shadow-blur @shadow-color  !important;
 }
 
-.shadow-right {
-    -webkit-box-shadow: 0.25rem 0rem 0.5rem rgba(0, 0, 0, .5) !important;
-    box-shadow: 0.25rem 0rem 0.5rem rgba(0, 0, 0, .5) !important;
+.shadow-r {
+    -webkit-box-shadow: @shadow-length 0 @shadow-blur @shadow-color  !important;
+    box-shadow: @shadow-length 0 @shadow-blur @shadow-color  !important;
+}
+
+.shadow-br,
+.shadow-rb {
+    -webkit-box-shadow: @shadow-length @shadow-length @shadow-blur @shadow-color  !important;
+    box-shadow: @shadow-length @shadow-length @shadow-blur @shadow-color  !important;
+}
+
+// rounded
+.rounded-1 {
+    border-radius: 0.25rem !important;
+}
+
+.rounded-2 {
+    border-radius: 0.5rem !important;
 }
 
 // END UTILITY CLASSES
+
+// bootstrap overrides
+// sidebar link hover
+.navbar-light .navbar-nav .nav-link:hover {
+    color: #fff;
+    background-color: #375a7f;
+}
+
+.navbar-light .navbar-nav .show>.nav-link,
+.navbar-light .navbar-nav .active>.nav-link,
+.navbar-light .navbar-nav .nav-link.show,
+.navbar-light .navbar-nav .nav-link.active {
+    color: #fff;
+    background-color: #3498DB;
+}
+
+.navbar-light .navbar-nav .active>.nav-link:hover {
+    background-color: #3498DB;
+}
 
 // media queries
 @media (max-width: 767px) {

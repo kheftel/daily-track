@@ -7,6 +7,7 @@ const express = require('express'),
 
 const {
     body,
+    check,
     validationResult
 } = require('express-validator/check');
 const {
@@ -26,7 +27,7 @@ apiRouter.use(bodyParser.json());
 
 // test route to make sure everything is working (accessed at GET http://localhost:8080/api)
 apiRouter.get('/', function (req, res) {
-    res.json({
+    return res.json({
         message: 'hooray! welcome to our api!'
     });
 });
@@ -38,16 +39,10 @@ apiRouter.route('/sets')
     // POST = create a dataset
     .post([
         // validate / sanitize name
-        body('name', 'Name is required.').isLength({
-            min: 1
-        }).trim(),
-        sanitizeBody('name').escape(),
+        body('name', 'Name is required.').not().isEmpty().trim().escape(),
 
         // validate / sanitize unit
-        body('yAxisLabel', 'Unit is required.').isLength({
-            min: 1
-        }).trim(),
-        sanitizeBody('yAxisLabel').escape(),
+        body('yAxisLabel', 'Unit is required.').not().isEmpty().trim().escape(),
 
         // sanitize chartType
         sanitizeBody('chartType').escape(),
@@ -81,10 +76,11 @@ apiRouter.route('/sets')
             // save the dataset and check for errors
             dataset.save(function (err) {
                 if (err)
-                    res.send(err);
+                    return res.send(err);
+
                 data.success = true;
-                data.message = 'Dataset created!';
-                res.json(data);
+                data.message = 'Dataset ' + dataset.name + ' created!';
+                return res.json(data);
             });
         }
     ])
@@ -97,9 +93,9 @@ apiRouter.route('/sets')
             })
             .exec(function (err, datasets) {
                 if (err)
-                    res.send(err);
+                    return res.send(err);
 
-                res.json(datasets);
+                return res.json(datasets);
             });
     });
 
@@ -112,11 +108,11 @@ apiRouter.route('/sets/:id')
         // grab the dataset from the db
         Dataset.findById(req.params.id, function (err, dataset) {
             if (err)
-                res.send(err);
-            
+                return res.send(err);
+
             // bad id? no dataset found?
-            if(!dataset) {
-                res.json({
+            if (!dataset) {
+                return res.json({
                     success: false,
                     message: "no dataset found for id " + req.params.id
                 });
@@ -131,12 +127,12 @@ apiRouter.route('/sets/:id')
                 })
                 .exec(function (err, datapoints) {
                     if (err)
-                        res.send(err);
+                        return res.send(err);
 
                     var result = dataset.toObject();
                     result.data = datapoints;
 
-                    res.json(result);
+                    return res.json(result);
                 });
         });
     })
@@ -148,7 +144,7 @@ apiRouter.route('/sets/:id')
         Dataset.findById(req.params.id, function (err, dataset) {
 
             if (err)
-                res.send(err);
+                return res.send(err);
 
             // update the dataset's info
             ['name', 'chartType', 'xAxisLabel', 'yAxisLabel', 'precision'].forEach(function (element) {
@@ -159,9 +155,9 @@ apiRouter.route('/sets/:id')
             // save the dataset
             dataset.save(function (err) {
                 if (err)
-                    res.send(err);
+                    return res.send(err);
 
-                res.json({
+                return res.json({
                     message: 'Dataset updated!'
                 });
             });
@@ -189,54 +185,77 @@ apiRouter.route('/sets/:id')
 apiRouter.route('/sets/:id/data')
 
     // POST = create a datapoint
-    .post(function (req, res) {
 
-        Dataset.findById(req.params.id, function (err, dataset) {
-            if (err)
-                res.send(err);
-
+    //TO DO: validation like creating a datapoint
+    .post([
+        // validate date
+        body('x')
+        .custom((value, {
+            req,
+            location,
+            path
+        }) => {
             // date should be submitted as a UTC string in YYYY-MM-DD format
-            // enforce date only by truncating time portion
-            var truncatedDateString = moment(new Date(req.body.x).toISOString()).utc().format('YYYY-MM-DD');
+            // enforce date only by truncating time portion, if any
+            var result;
+            try {
+                result = moment(new Date(value).toISOString()).utc().format('YYYY-MM-DD');
+            } catch (e) {
+                console.log(e);
+                throw new Error('Invalid date format (should be YYYY-MM-DD)');
+            }
+            console.log('date after validation: ' + result);
+            req.body.x = result;
 
-            // enforce one data point per date
-            Datapoint.find({
-                    'dataset': req.params.id
+            // now see if there's already a datapoint for this date
+            return Datapoint.findOne({
+                    dataset: req.params.id,
+                    x: value
                 })
-                .exec(function (err, points) {
-                    if (err)
-                        res.send(err);
-
-                    var m = moment.utc(truncatedDateString);
-                    for (var i = 0; i < points.length; i++) {
-                        console.log('comp: ' + truncatedDateString + ' and ' + moment.utc(points[i].x).format('YYYY-MM-DD'));
-                        if (m.isSame(points[i].x, 'day')) {
-                            console.log('match');
-                            res.json({
-                                message: 'Error, only one data point per date!'
-                            });
-                            return;
-                        }
+                .exec()
+                .then(datapoint => {
+                    if (datapoint) {
+                        var errstring = 'Datapoint already exists for date ' + value;
+                        return Promise.reject(errstring);
                     }
-
-                    var datapoint = new Datapoint();
-                    datapoint.dataset = dataset._id;
-                    datapoint.x = truncatedDateString;
-                    // enforce integer y values
-                    datapoint.y = Math.round(req.body.y);
-
-                    // save the datapoint and check for errors
-                    datapoint.save(function (err) {
-                        if (err)
-                            res.send(err);
-
-                        res.json({
-                            message: 'Datapoint created!'
-                        });
-                    });
                 });
-        });
-    })
+        }),
+        // validate / sanitize value
+        body('y', 'Value should be a number, yo.').isNumeric().toInt(),
+        // Process request after validation and sanitization.
+        (req, res, next) => {
+
+            // grab the validation errors, if any
+            const errors = validationResult(req);
+            var data = {};
+
+            if (!errors.isEmpty()) {
+                console.log('validation errors:');
+                var arr = errors.array();
+                console.log(arr);
+
+                data.success = false;
+                data.errors = arr;
+
+                return res.json(data);
+            }
+
+            // // Create datapoint with validated / sanitized data
+            var datapoint = new Datapoint();
+            datapoint.x = req.body.x;
+            datapoint.y = req.body.y;
+            datapoint.dataset = req.params.id;
+
+            // save the dataset and check for errors
+            datapoint.save(function (err) {
+                if (err)
+                    return res.send(err);
+                data.success = true;
+                data.message = 'Datapoint created for date ' + req.body.x;
+                return res.json(data);
+            });
+        }
+    ])
 
     // GET = get all the datapoints for this set (obsolete)
     .get(function (req, res) {
@@ -248,8 +267,8 @@ apiRouter.route('/sets/:id/data')
             })
             .exec(function (err, datapoints) {
                 if (err)
-                    res.send(err);
-                res.json(datapoints);
+                    return res.send(err);
+                return res.json(datapoints);
             });
     });
 
@@ -268,8 +287,8 @@ apiRouter.route('/sets/:id/range/:start/:end')
             })
             .exec(function (err, datapoints) {
                 if (err)
-                    res.send(err);
-                res.json(datapoints);
+                    return res.send(err);
+                return res.json(datapoints);
             });
     });
 
@@ -282,9 +301,9 @@ apiRouter.route('/points/:id')
         // grab the dataset from the db
         Datapoint.findById(req.params.id, function (err, datapoint) {
             if (err)
-                res.send(err);
+                return res.send(err);
 
-            res.json(datapoint);
+            return res.json(datapoint);
         });
     })
 
@@ -292,7 +311,7 @@ apiRouter.route('/points/:id')
     .put(function (req, res) {
         Datapoint.findById(req.params.id, function (err, datapoint) {
             if (err)
-                res.send(err);
+                return res.send(err);
 
             // update the datapoint's info - for now, only y supported
             // TO DO: update datapoint's x value, but test for dups
@@ -304,9 +323,9 @@ apiRouter.route('/points/:id')
             // save the datapoint
             datapoint.save(function (err) {
                 if (err)
-                    res.send(err);
+                    return res.send(err);
 
-                res.json({
+                return res.json({
                     message: 'Datapoint updated!'
                 });
             });

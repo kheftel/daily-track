@@ -1,6 +1,12 @@
 extends layout
 
 block content
-  h1= message
-  h2= error.status
-  pre #{error.stack}
+    .row.flex-expand
+        .col.h-100
+            .card.border-light.h-100.shadow-rb
+                .card-header
+                    .card-title.m-0.d-flex.content-justify-between
+                        h4.text-shadow= message
+                .card-body(style="position: relative;")
+                    h5= error.status
+                    pre.chartcontainer #{error.stack}
