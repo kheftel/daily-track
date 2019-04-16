@@ -163,22 +163,20 @@ apiRouter.route('/sets/:id')
             });
 
         });
-    }); //,
+    })
 
-// DELETE = delete the dataset
-// TO DO: what to do about the points?
-// .delete(function (req, res) {
-//     Dataset.remove({
-//         _id: req.params.id
-//     }, function (err, dataset) {
-//         if (err)
-//             res.send(err);
+    // DELETE = delete the dataset
+    // TO DO: what to do about the points?
+    .delete(function (req, res) {
+        Dataset.findByIdAndDelete(req.params.id, function (err, dataset) {
+            if (err)
+                res.send(err);
 
-//         res.json({
-//             message: 'Successfully deleted'
-//         });
-//     });
-// });
+            res.json({
+                message: 'Successfully deleted ' + (dataset ? dataset.name : '')
+            });
+        });
+    });
 
 // on routes that end in /sets/:id/data
 // ----------------------------------------------------

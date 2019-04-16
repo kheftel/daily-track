@@ -6,12 +6,12 @@ block content
             - var ids = [];
             each set, i in datasets
                 - ids.push(set._id)
-            div(class="chartcontainer" id="multi" data-ids=JSON.stringify(ids))
+            div(class="chartholder" id="multi" data-ids=JSON.stringify(ids) data-setname='Multi')
 
 block pagescript
     script.
 
-        var ids = JSON.parse($('.chartcontainer')[0].dataset.ids);
+        var ids = JSON.parse($('.chartholder')[0].dataset.ids);
         console.log(ids);
 
         // controller for chart

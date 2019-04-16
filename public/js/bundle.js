@@ -1,6 +1,12 @@
 (function(){function r(e,n,t){function o(i,f){if(!n[i]){if(!e[i]){var c="function"==typeof require&&require;if(!f&&c)return c(i,!0);if(u)return u(i,!0);var a=new Error("Cannot find module '"+i+"'");throw a.code="MODULE_NOT_FOUND",a}var p=n[i]={exports:{}};e[i][0].call(p.exports,function(r){var n=e[i][1][r];return o(n||r)},p,p.exports,r,e,n,t)}return n[i].exports}for(var u="function"==typeof require&&require,i=0;i<t.length;i++)o(t[i]);return o}return r})()({1:[function(require,module,exports){
 var ChartController = require('./js/ChartController');
-require('./js/toast.js');
+// require('./js/lib/jquery-3.2.1.min.js');
+// require('./js/lib/popper.min.js');
+// require('./js/lib/bootstrap.min.js');
+// require('./js/lib/bootstrap-confirmation.min.js');
+// require('./js/lib/moment.min.js');
+// require('./js/lib/Chart.min.js');
+require('./js/lib/toast.js');
 
 window.helpers = window.helpers || {};
 
@@ -68,68 +74,74 @@ $(document).ready(function () {
 //         controller.showAll();
 //     });
 // });
-},{"./js/ChartController":2,"./js/toast.js":3}],2:[function(require,module,exports){
+},{"./js/ChartController":2,"./js/lib/toast.js":3}],2:[function(require,module,exports){
 ChartController = function (container) {
-    // copy config
-    this._config = JSON.parse(JSON.stringify(p.defaultConfig));
-
+    // parent container can be id or html elem
     if (typeof container == 'string')
         container = document.getElementById(container);
 
-    this._chartContainer = document.createElement('div');
-    this._chartContainer.style.height = 'calc(100% - 48px)';
-    this._chartContainer.style.width = "100%";
-    this._chartContainer.style.position = 'relative';
-    container.appendChild(this._chartContainer);
-    this._container = container;
+    if (!container)
+        throw new Error('chart: container not found');
 
-    this._canvas = document.createElement('canvas');
-    this._chartContainer.appendChild(this._canvas);
+    this._parentContainer = container;
+    var parentData = container.dataset;
 
-    this._footer = document.createElement('div');
-    this._footer.classList.add('controlbar', 'd-flex', 'justify-content-center', 'align-items-center', 'py-2');
-    this._container.appendChild(this._footer);
+    // create html
+    // .card.border-light.shadow-rb(style="height: " + style.chartRowHeight)
+    //     .card-header.p-2
+    //         .card-title.m-0.d-flex.content-justify-between
+    //             h4.m-0.text-shadow
+    //                 a.align-middle(href="/set/" + set._id)= set.name
+    //             button.ml-auto.btn.btn-primary.btn-shadow
+    //                 span.fas.fa-edit
+    //     .card-body(style="position: relative;")
+    //         .chartcontainer(id="set-" + i + "-" + set._id data-setid=set._id)
+    this._main = elem(
+        'div',
+        this._parentContainer,
+        ['card', 'border-light', 'shadow-rb'],
+        'height: 400px; opacity: 0; transition: opacity 0.5s;'  
+    );
+    this._cardHeader = elem('div', this._main, ['card-header', 'd-flex', 'align-items-center', 'p-2']);
+    this._detailLink = elem('a', this._cardHeader, ['align-middle', 'm-0', 'h5'], null, parentData.setname);
+    this._detailLink.href = '/set/' + parentData.setid;
+    this._editButton = iconButton(['ml-auto', 'btn', 'btn-primary', 'btn-shadow'], this._cardHeader, 'fa-edit');
+    this._deleteButton = iconButton(['btn', 'btn-primary', 'btn-shadow', 'd-none'], this._cardHeader, 'fa-trash-alt');
 
-    this._btnLeft = document.createElement('button');
-    this._btnLeft.classList.add('btn', 'btn-primary', 'btn-shadow');
-    this._btnLeft.innerHTML = '<span class="fas fa-angle-double-left"></i>'; //'&lt;&lt;';
-    this._btnLeft.addEventListener('click', () => {
+    this._cardBody = elem('div', this._main, 'card-body', 'position: relative;');
+    this._chartContainer = elem('div', this._cardBody, 'chartcontainer');
+
+    // holds the canvas for the chart
+    this._canvasholder = elem(
+        'div',
+        this._chartContainer,
+        null,
+        'height: calc(100% - 48px); width: 100%; width: relative;'
+    );
+
+    // canvas the chart is rendered on
+    this._canvas = elem('canvas', this._canvasholder);
+
+    // footer with buttons to manipulate chart
+    this._footer = elem('div', this._chartContainer, ['controlbar', 'd-flex', 'justify-content-center', 'align-items-center', 'py-2']);
+
+    this._btnLeft = iconButton(['btn', 'btn-primary', 'btn-shadow'], this._footer, 'fa-angle-double-left', () => {
         this.panLeft();
     });
-    this._footer.appendChild(this._btnLeft);
-
-    this._btnRight = document.createElement('button');
-    this._btnRight.classList.add('btn', 'btn-primary', 'btn-shadow');
-    this._btnRight.innerHTML = '<span class="fas fa-angle-double-right"></i>'; //'&gt;&gt;';
-    this._btnRight.addEventListener('click', () => {
+    this._btnRight = iconButton(['btn', 'btn-primary', 'btn-shadow'], this._footer, 'fa-angle-double-right', () => {
         this.panRight();
     });
-    this._footer.appendChild(this._btnRight);
-
-    this._btnZoomOut = document.createElement('button');
-    this._btnZoomOut.classList.add('btn', 'btn-primary', 'btn-shadow');
-    this._btnZoomOut.innerHTML = '<span class="fas fa-search-minus"></i>'; //'-';
-    this._btnZoomOut.addEventListener('click', () => {
+    this._btnZoomOut = iconButton(['btn', 'btn-primary', 'btn-shadow'], this._footer, 'fa-search-minus', () => {
         this.zoomOut();
     });
-    this._footer.appendChild(this._btnZoomOut);
-
-    this._btnZoomIn = document.createElement('button');
-    this._btnZoomIn.classList.add('btn', 'btn-primary', 'btn-shadow');
-    this._btnZoomIn.innerHTML = '<span class="fas fa-search-plus"></i>'; //'+';
-    this._btnZoomIn.addEventListener('click', () => {
+    this._btnZoomIn = iconButton(['btn', 'btn-primary', 'btn-shadow'], this._footer, 'fa-search-plus', () => {
         this.zoomIn();
     });
-    this._footer.appendChild(this._btnZoomIn);
-
     this._toggleHTML = {
         'line': '<span class="fas fa-chart-line"></i>',
         'bar': '<span class="fas fa-chart-bar"></i>'
     };
-    this._btnType = document.createElement('button');
-    this._btnType.classList.add('btn', 'btn-primary', 'd-none', 'btn-shadow');
-    this._btnType.innerHTML = '<span class="fas fa-chart-line"></i>';
-    this._btnType.addEventListener('click', () => {
+    this._btnType = iconButton(['btn', 'btn-primary', 'btn-shadow', 'd-none'], this._footer, 'fa-chart-line', () => {
         if (this.datasets.length == 1) {
             var set = this.datasets[0];
             if (set.type == 'line')
@@ -141,13 +153,11 @@ ChartController = function (container) {
             this.updateChart();
         }
     });
-    this._footer.appendChild(this._btnType);
 
-    this._btnAdd = document.createElement('a');
-    this._btnAdd.classList.add('btn', 'btn-primary', 'd-none', 'btn-shadow');
-    this._btnAdd.innerHTML = '<span class="fas fa-plus-square"></i>';
-    this._footer.appendChild(this._btnAdd);
+    this._btnAdd = iconLinkButton(['btn', 'btn-primary', 'btn-shadow', 'd-none'], this._footer, 'fa-plus-square');
 
+    // create chart
+    this._config = JSON.parse(JSON.stringify(p.defaultConfig));
     this._chart = new Chart(this._canvas, this._config);
     this._datasetIds = [];
     this._right = moment.utc();
@@ -156,7 +166,67 @@ ChartController = function (container) {
     this._colorScheme = this.defaultColorScheme;
 
     this.setZoomLevel(this.defaultZoomLevel, false);
+
 };
+
+// convenience
+function elem(type, parent, classList, style, innerHTML) {
+    var result = document.createElement(type);
+    if (classList) {
+        result.classList.add.apply(result.classList, Array.isArray(classList) ? classList : [classList]);
+    }
+    if (style) {
+        result.style = style;
+    }
+    if (innerHTML) {
+        result.innerHTML = innerHTML;
+    }
+    if (parent) {
+        parent.appendChild(result);
+    }
+    return result;
+}
+
+function iconButton(classList, parent, icon, click, style) {
+    var result = elem('button', parent, classList, style, `<span class="fas ${icon}"></i>`);
+    if (click)
+        $(result).click(click);
+    return result;
+}
+
+function iconLinkButton(classList, parent, icon, href, style) {
+    var result = elem('a', parent, classList, style, `<span class="fas ${icon}"></i>`);
+    if (href)
+        result.href = href;
+    return result;
+}
+
+function showmodal(message) {
+    var modal = elem('div', body, ['modal', 'fade']);
+
+    modal.innerHTML =
+        `<div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="exampleModalLabel">Modal title</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            ${message}
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">No</button>
+            <button type="button" class="btn btn-primary">Yes</button>
+          </div>
+        </div>
+      </div>
+    </div>`;
+
+    $(modal).show();
+}
 
 var p = ChartController.prototype;
 
@@ -234,17 +304,66 @@ p.addDatasetFromModel = function (dataset, complete) {
     this.datasets.push(dataset);
     this._datasetIds.push(dataset._id);
 
-    // disable chart type toggle btn if multiple sets
+    // disable some buttons if in multi-mode
     if (this.datasets.length > 1) {
         $(this._btnType).addClass('d-none');
         $(this._btnAdd).addClass('d-none');
+        $(this._deleteButton).addClass('d-none');
     } else {
         $(this._btnType).removeClass('d-none').html(this._toggleHTML[dataset.type]);
         $(this._btnAdd).removeClass('d-none').attr('href', '/set/' + dataset._id + '/new');
+        $(this._deleteButton).removeClass('d-none').confirmation({
+            rootSelector: this._deleteButton,
+            popout: true,
+            container: 'body',
+            title: 'Are you sure you want to delete ' + dataset.name + ' AND all of its data?'
+        }).on('click', () => {
+            if (this.datasets.length != 1) throw new Error('cannot delete if empty or in multi-mode');
+
+            // TO DO: what to do with the dataset's points?
+
+            // delete set from database
+            $.ajax({
+                url: '/api/sets/' + dataset._id,
+                method: 'DELETE',
+                success: (response) => {
+                    console.log(response);
+
+                    $(this._main)
+                        .removeClass('anim-disappear')
+                        .addClass('anim-disappear')
+                        .on('animationend webkitanimationEnd', (e) => {
+                            // destroy chart and html
+                            this._chart.destroy();
+                            this._chart = null;
+                            this._main.remove();
+
+                            $.toast({
+                                title: 'Success!',
+                                content: response.message,
+                                type: 'success',
+                                delay: 5000
+                            });
+                        });
+                },
+                error: (err) => {
+                    console.log(err);
+                    
+                    $.toast({
+                        title: 'Error!',
+                        content: err.message,
+                        type: 'error',
+                        delay: 5000
+                    });
+        }
+            });
+        });
     }
 
     // update chart
     this.updateChart();
+
+    this._main.style.opacity = 1;
 
     if (complete) complete();
 };
@@ -675,10 +794,10 @@ Chart.scaleService.updateScaleDefaults('time', {
     ticks: {
         fontColor: 'white',
         callback: function (value, index, values) {
-            console.log('x-time-tick:');
-            console.log(value);
-            console.log(index);
-            console.log(values);
+            // console.log('x-time-tick:');
+            // console.log(value);
+            // console.log(index);
+            // console.log(values);
             return value;
         },
         maxRotation: 0

@@ -1,5 +1,11 @@
 var ChartController = require('./js/ChartController');
-require('./js/toast.js');
+// require('./js/lib/jquery-3.2.1.min.js');
+// require('./js/lib/popper.min.js');
+// require('./js/lib/bootstrap.min.js');
+// require('./js/lib/bootstrap-confirmation.min.js');
+// require('./js/lib/moment.min.js');
+// require('./js/lib/Chart.min.js');
+require('./js/lib/toast.js');
 
 window.helpers = window.helpers || {};
 

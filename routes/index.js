@@ -40,7 +40,7 @@ var state = {
         notitle: true
     }],
     style: {
-        chartRowHeight: '260px'
+        chartRowHeight: '320px'
     }
 };
 

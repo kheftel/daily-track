@@ -4,15 +4,17 @@ block content
     each set, i in datasets
         .row.mb-2
             .col
-                .card.border-light.shadow-rb
-                    .card-header.p-2
-                        .card-title.m-0.d-flex.content-justify-between
-                            h4.m-0.text-shadow
-                                a.align-middle(href="/set/" + set._id)= set.name
-                            button.ml-auto.btn.btn-primary.btn-shadow
-                                span.fas.fa-edit
-                    .card-body(style='position: relative; height: ' + style.chartRowHeight + ';')
-                        .chartcontainer(style="height: " + style.chartRowHeight id="set-" + i + "-" + set._id data-setid=set._id)
+                .chartholder(data-setid=set._id data-setname=set.name)
+                
+                //- .card.border-light.shadow-rb(style="height: " + style.chartRowHeight)
+                //-     .card-header.p-2
+                //-         .card-title.m-0.d-flex.content-justify-between
+                //-             h4.m-0.text-shadow
+                //-                 a.align-middle(href="/set/" + set._id)= set.name
+                //-             button.ml-auto.btn.btn-primary.btn-shadow
+                //-                 span.fas.fa-edit
+                //-     .card-body(style="position: relative;")
+                //-         .chartcontainer(id="set-" + i + "-" + set._id data-setid=set._id)
 
 //- .card.border-light
 //-     .card-header hi there
@@ -36,8 +38,9 @@ block content
 block pagescript
     script.
 
-        $(".chartcontainer").each(function(i, container) {
+        $(".chartholder").each(function(i, container) {
             var setid = container.dataset.setid;
+            console.log(setid);
             var controller = new ChartController(container);
             controller.colorOffset = i;
             controller.addDataset(setid);
