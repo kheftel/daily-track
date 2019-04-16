@@ -1,3 +1,8 @@
+/**
+ * Wraps a chart.js chart and provides an interface to it
+ * 
+ * @param  {} container the html element where we put our markup
+ */
 ChartController = function (container) {
     // parent container can be id or html elem
     if (typeof container == 'string')
@@ -23,7 +28,7 @@ ChartController = function (container) {
         'div',
         this._parentContainer,
         ['card', 'border-light', 'shadow-rb'],
-        'height: 400px; opacity: 0; transition: opacity 0.5s;'  
+        'height: 400px; opacity: 0; transition: opacity 0.5s;'
     );
     this._cardHeader = elem('div', this._main, ['card-header', 'd-flex', 'align-items-center', 'p-2']);
     this._detailLink = elem('a', this._cardHeader, ['align-middle', 'm-0', 'h5'], null, parentData.setname);
@@ -83,7 +88,7 @@ ChartController = function (container) {
     this._config = JSON.parse(JSON.stringify(p.defaultConfig));
     this._chart = new Chart(this._canvas, this._config);
     this._datasetIds = [];
-    this._right = moment.utc();
+    this._focus = moment.utc().startOf('day');
 
     this._colorOffset = 0;
     this._colorScheme = this.defaultColorScheme;
@@ -91,8 +96,19 @@ ChartController = function (container) {
     this.setZoomLevel(this.defaultZoomLevel, false);
 
 };
+var p = ChartController.prototype;
 
-// convenience
+// convenience functions ////////////////////////
+
+/**
+ * create an html element
+ * 
+ * @param  {} type required, which element to create
+ * @param  {} parent optional, where to attach in DOM
+ * @param  {} classList optional, array of classes to add (or one single class as a string)
+ * @param  {} style optional, inline css to add
+ * @param  {} innerHTML optional, innerHTML to add
+ */
 function elem(type, parent, classList, style, innerHTML) {
     var result = document.createElement(type);
     if (classList) {
@@ -109,7 +125,15 @@ function elem(type, parent, classList, style, innerHTML) {
     }
     return result;
 }
-
+/**
+ * create a button with an icon
+ * 
+ * @param  {} classList
+ * @param  {} parent
+ * @param  {} icon
+ * @param  {} click
+ * @param  {} style
+ */
 function iconButton(classList, parent, icon, click, style) {
     var result = elem('button', parent, classList, style, `<span class="fas ${icon}"></i>`);
     if (click)
@@ -117,6 +141,14 @@ function iconButton(classList, parent, icon, click, style) {
     return result;
 }
 
+/**
+ * create a link that looks like a button
+ * @param {*} classList 
+ * @param {*} parent 
+ * @param {*} icon 
+ * @param {*} href 
+ * @param {*} style 
+ */
 function iconLinkButton(classList, parent, icon, href, style) {
     var result = elem('a', parent, classList, style, `<span class="fas ${icon}"></i>`);
     if (href)
@@ -124,36 +156,39 @@ function iconLinkButton(classList, parent, icon, href, style) {
     return result;
 }
 
-function showmodal(message) {
-    var modal = elem('div', body, ['modal', 'fade']);
+// function showmodal(message) {
+//     var modal = elem('div', body, ['modal', 'fade']);
 
-    modal.innerHTML =
-        `<div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-      <div class="modal-dialog" role="document">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title" id="exampleModalLabel">Modal title</h5>
-            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-              <span aria-hidden="true">&times;</span>
-            </button>
-          </div>
-          <div class="modal-body">
-            ${message}
-          </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-dismiss="modal">No</button>
-            <button type="button" class="btn btn-primary">Yes</button>
-          </div>
-        </div>
-      </div>
-    </div>`;
+//     modal.innerHTML =
+//         `<div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+//       <div class="modal-dialog" role="document">
+//         <div class="modal-content">
+//           <div class="modal-header">
+//             <h5 class="modal-title" id="exampleModalLabel">Modal title</h5>
+//             <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+//               <span aria-hidden="true">&times;</span>
+//             </button>
+//           </div>
+//           <div class="modal-body">
+//             ${message}
+//           </div>
+//           <div class="modal-footer">
+//             <button type="button" class="btn btn-secondary" data-dismiss="modal">No</button>
+//             <button type="button" class="btn btn-primary">Yes</button>
+//           </div>
+//         </div>
+//       </div>
+//     </div>`;
 
-    $(modal).show();
-}
+//     $(modal).show();
+// }
 
-var p = ChartController.prototype;
-
-// DATA, LOADING /////////
+/**
+ * add a dataset to the chart, it will populate itself via AJAX
+ * 
+ * @param  {} id
+ * @param  {} complete
+ */
 p.addDataset = function (id, complete) {
     $.ajax({
         url: '/api/sets/' + id,
@@ -169,6 +204,11 @@ p.addDataset = function (id, complete) {
     });
 };
 
+/**
+ * add several datsets at once
+ * 
+ * @param  {} ids array of dataset ids
+ */
 p.addDatasetsFromIds = function (ids) {
     var which = 0;
     var datasets = [];
@@ -207,7 +247,12 @@ p.addDatasetsFromIds = function (ids) {
 
     next();
 };
-
+/**
+ * add a dataset from the complete data
+ * 
+ * @param  {} dataset
+ * @param  {} complete
+ */
 p.addDatasetFromModel = function (dataset, complete) {
     // translate for chart dataset object
     dataset.type = dataset.chartType;
@@ -271,14 +316,14 @@ p.addDatasetFromModel = function (dataset, complete) {
                 },
                 error: (err) => {
                     console.log(err);
-                    
+
                     $.toast({
                         title: 'Error!',
                         content: err.message,
                         type: 'error',
                         delay: 5000
                     });
-        }
+                }
             });
         });
     }
@@ -291,6 +336,9 @@ p.addDatasetFromModel = function (dataset, complete) {
     if (complete) complete();
 };
 
+/**
+ *  datasets (readonly) 
+ **/
 Object.defineProperty(p, 'datasets', {
     get() {
         return this._chart.data.datasets;
@@ -316,12 +364,14 @@ p.colorSchemes = {
 
 p.defaultColorScheme = 'darkly';
 
+/** color scheme names (readonly) */
 Object.defineProperty(p, 'schemeNames', {
     get() {
         return Object.keys(p.colorSchemes);
     }
 });
 
+/** color scheme */
 Object.defineProperty(p, 'colorScheme', {
     get() {
         return this._colorScheme;
@@ -337,6 +387,9 @@ Object.defineProperty(p, 'colorScheme', {
     }
 });
 
+/**
+ * apply color scheme to chart options
+ */
 p.refreshColorsFromScheme = function () {
     for (var i = 0; i < this.datasets.length; i++) {
         var set = this.datasets[i];
@@ -346,6 +399,7 @@ p.refreshColorsFromScheme = function () {
     }
 };
 
+/** colorOffset within the color scheme */
 Object.defineProperty(p, 'colorOffset', {
     get() {
         return this._colorOffset;
@@ -357,7 +411,11 @@ Object.defineProperty(p, 'colorOffset', {
         this.updateChart();
     }
 });
-
+/**
+ * grab a color from the colorscheme
+ * 
+ * @param  {} i=0
+ */
 p.getColor = function (i = 0) {
     var scheme = this.colorSchemes[this._colorScheme];
     return scheme[(i + this._colorOffset) % scheme.length];
@@ -461,9 +519,11 @@ p.timeScales = [{
         zoom: {
             'weeks': 1
         },
-        half: {
-            'days': 3
-        },
+        half: [{
+            'hours': 3 * 24
+        }, {
+            'hours': 3 * 24 + 12
+        }],
         pan: {
             'days': 1
         },
@@ -473,16 +533,16 @@ p.timeScales = [{
 
 p.dateFormat = 'MM/DD/YYYY';
 
-p.defaultZoomLevel = 3;
+p.defaultZoomLevel = 6;
 
-/** xAxis */
+/** xAxis config object from chart (readonly) */
 Object.defineProperty(p, 'xAxis', {
     get() {
         return this._chart.options.scales.xAxes[0];
     }
 });
 
-/** xAxisLabel */
+/** xAxisLabel from chart */
 Object.defineProperty(p, 'xAxisLabel', {
     get() {
         return this.xAxis.scaleLabel.labelString;
@@ -493,14 +553,14 @@ Object.defineProperty(p, 'xAxisLabel', {
     }
 });
 
-/** yAxis */
+/** yAxis config object from chart (readonly) */
 Object.defineProperty(p, 'yAxis', {
     get() {
         return this._chart.options.scales.yAxes[0];
     }
 });
 
-/** yAxisLabel */
+/** yAxisLabel from chart */
 Object.defineProperty(p, 'yAxisLabel', {
     get() {
         return this.yAxis.scaleLabel.labelString;
@@ -510,7 +570,12 @@ Object.defineProperty(p, 'yAxisLabel', {
         this.updateChart();
     }
 });
-
+/**
+ * set zoom level of chart
+ * 
+ * @param  {} val zoom level
+ * @param  {} update=true whether to update chart
+ */
 p.setZoomLevel = function (val, update = true) {
     val = Math.max(0, Math.min(val, this.timeScales.length - 1));
     this._zoomLevel = val;
@@ -520,43 +585,75 @@ p.setZoomLevel = function (val, update = true) {
         this.updateChart();
 };
 
+/**
+ * current zoom level
+ */
 p.getZoomLevel = function () {
     return this._zoomLevel;
 };
 
+/**
+ * zoom in one level
+ * 
+ * @param  {} update=true
+ */
 p.zoomIn = function (update = true) {
     this.setZoomLevel(this._zoomLevel + 1, update);
 };
-
+/**
+ * zoom out one level
+ * 
+ * @param  {} update=true
+ */
 p.zoomOut = function (update = true) {
     this.setZoomLevel(this._zoomLevel - 1, update);
 };
 
-/** timeScale */
+/** 
+ * current timeScale object for this zoom level (readonly) 
+ */
 Object.defineProperty(p, 'timeScale', {
     get() {
         return this.timeScales[this._zoomLevel];
     }
 });
 
-p.getRightEdge = function () {
-    return this._right;
+/**
+ * where the chart is centered, formatted string
+ */
+p.getFocus = function () {
+    return this._focus.format('YYYY-MM-DD');
 };
 
+/**
+ * pan to the right one unit based on timescale
+ * 
+ * @param  {} update=true
+ */
 p.panRight = function (update = true) {
-    // this._right.add(this.pans[this._zoomLevel]);
-    this._right.add(this.timeScale.pan);
+    // this._focus.add(this.pans[this._zoomLevel]);
+    this._focus.add(this.timeScale.pan);
     if (update)
         this.updateChart();
 };
 
+/**
+ * pan to the left one unit based on timescale
+ * 
+ * @param  {} update=true
+ */
 p.panLeft = function (update = true) {
-    // this._right.subtract(this.pans[this._zoomLevel]);
-    this._right.subtract(this.timeScale.pan);
+    // this._focus.subtract(this.pans[this._zoomLevel]);
+    this._focus.subtract(this.timeScale.pan);
     if (update)
         this.updateChart();
 };
 
+/**
+ * show alllllll the data for this set
+ * 
+ * @param  {} update=true
+ */
 p.showAll = function (update = true) {
     var data = this._chart.data.datasets[0].data;
     var first = data[0].x;
@@ -567,13 +664,17 @@ p.showAll = function (update = true) {
         this._chart.update();
 };
 
+/**
+ * returns a convenience string for labeling
+ */
 p.getRangeString = function () {
-    var leftString = moment.utc(this._right).subtract(this.timeScale.half).format(this.dateFormat);
-    var rightString = moment.utc(this._right).add(this.timeScale.half).format(this.dateFormat);
+    // TO DO: don't repeat unnecessary information, like moodtrack
+    var leftString = moment.utc(this._focus).subtract(Array.isArray(this.timeScale.half) ? this.timeScale.half[0] : this.timeScale.half).format(this.dateFormat);
+    var rightString = moment.utc(this._focus).add(Array.isArray(this.timeScale.half) ? this.timeScale.half[1] : this.timeScale.half).format(this.dateFormat);
 
-    // var rightString = this._right.format(this.dateFormat);
-    // var leftString = moment.utc(this._right).subtract(this.timeScale.zoom).format(this.dateFormat);
-    return leftString + ' - ' + rightString + ' - (' + this.timeScale.label + ')';
+    // var rightString = this._focus.format(this.dateFormat);
+    // var leftString = moment.utc(this._focus).subtract(this.timeScale.zoom).format(this.dateFormat);
+    return leftString + ' - ' + rightString;
     // return [leftString, rightString, this.timeScale.label];
 };
 
@@ -587,22 +688,34 @@ p.getRangeString = function () {
 //     return halfWidth;
 // }
 
+
+/**
+ * update the chart
+ * 
+ * @param  {} t optional, passed to chart.update
+ */
 p.updateChart = function (t) {
     // set viewport on chart
     if (!this._chart) return;
 
-    this.xAxis.time.min = moment.utc(this._right).subtract(this.timeScale.half).format();
-    this.xAxis.time.max = moment.utc(this._right).add(this.timeScale.half).format();
-    this.xAxis.time.unit = this.timeScale.unit;
+    if (this._zoomLevel == 6) {
+        this.xAxis.time.unit = 'day';
+        this.xAxis.time.min = moment.utc(this._focus).subtract(this.timeScale.half[0]).format();
+        this.xAxis.time.max = moment.utc(this._focus).add(this.timeScale.half[1]).format();
+    } else {
+        this.xAxis.time.unit = this.timeScale.unit;
+        this.xAxis.time.min = moment.utc(this._focus).subtract(Array.isArray(this.timeScale.half) ? this.timeScale.half[0] : this.timeScale.half).format('YYYY-MM-DD');
+        this.xAxis.time.max = moment.utc(this._focus).add(Array.isArray(this.timeScale.half) ? this.timeScale.half[1] : this.timeScale.half).format('YYYY-MM-DD');
+    }
 
-    // console.log(this.xAxis.time.min);
-    // console.log(this.xAxis.time.max);
+    console.log(this.xAxis.time.min);
+    console.log(this.xAxis.time.max);
 
     //console.log(this._chart.options.scales.xAxes[0].time.min + ', ' + this._chart.options.scales.xAxes[0].time.max)
     //console.log(this.zooms[this._zoomLevel]);
 
-    //this._chart.scales['x-axis-0'].options.time.max = this._right.format();
-    //this._chart.scales['x-axis-0'].options.time.min = this._right.subtract(this.zooms[this._zoomLevel]).format();
+    //this._chart.scales['x-axis-0'].options.time.max = this._focus.format();
+    //this._chart.scales['x-axis-0'].options.time.min = this._focus.subtract(this.zooms[this._zoomLevel]).format();
     //xAxis.time.max = max.format();
     //xAxis.time.min = viewport.getRightEdge().subtract(viewport.getZoomParams()).format();
     //config.options.scales.xAxes[0] = xAxis;  
