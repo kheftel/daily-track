@@ -98,6 +98,12 @@ router.get('/', function (req, res, next) {
                 return next(err);
 
             res.locals.datasets = datasets;
+
+            // today's date
+            res.locals.defaults = {
+                x: moment().format('YYYY-MM-DD')
+            };
+
             res.render('datasets');
         });
 });

@@ -80,6 +80,7 @@ $(document).ready(function () {
  * 
  * @param  {} container the html element where we put our markup
  */
+var numControllers = 0;
 ChartController = function (container) {
     // parent container can be id or html elem
     if (typeof container == 'string')
@@ -90,6 +91,8 @@ ChartController = function (container) {
 
     this._parentContainer = container;
     var parentData = container.dataset;
+
+    this._focus = moment.utc().startOf('day');
 
     // create html
     // .card.border-light.shadow-rb(style="height: " + style.chartRowHeight)
@@ -112,6 +115,28 @@ ChartController = function (container) {
     this._detailLink.href = '/set/' + parentData.setid;
     this._editButton = iconButton(['ml-auto', 'btn', 'btn-primary', 'btn-shadow'], this._cardHeader, 'fa-edit');
     this._deleteButton = iconButton(['btn', 'btn-primary', 'btn-shadow', 'd-none'], this._cardHeader, 'fa-trash-alt');
+    this._toggleHTML = {
+        'line': '<span class="fas fa-chart-line"></i>',
+        'bar': '<span class="fas fa-chart-bar"></i>'
+    };
+    this._btnType = iconButton(['btn', 'btn-primary', 'btn-shadow', 'd-none'], this._cardHeader, 'fa-chart-line', () => {
+        if (this.datasets.length == 1) {
+            var set = this.datasets[0];
+            if (set.type == 'line')
+                set.type = 'bar';
+            else
+                set.type = 'line';
+            this._btnType.innerHTML = this._toggleHTML[set.type];
+
+            this.updateChart();
+        }
+    });
+    this._btnZoomOut = iconButton(['btn', 'btn-primary', 'btn-shadow'], this._cardHeader, 'fa-search-minus', () => {
+        this.zoomOut();
+    });
+    this._btnZoomIn = iconButton(['btn', 'btn-primary', 'btn-shadow'], this._cardHeader, 'fa-search-plus', () => {
+        this.zoomIn();
+    });
 
     this._cardBody = elem('div', this._main, 'card-body', 'position: relative;');
     this._chartContainer = elem('div', this._cardBody, 'chartcontainer');
@@ -133,40 +158,43 @@ ChartController = function (container) {
     this._btnLeft = iconButton(['btn', 'btn-primary', 'btn-shadow'], this._footer, 'fa-angle-double-left', () => {
         this.panLeft();
     });
+
+    numControllers++;
+    var ddId = 'focuspicker' + numControllers;
+
+//<input type="text" class="form-control datetimepicker-input" id="datetimepicker5" data-toggle="datetimepicker" data-target="#datetimepicker5"/>
+
+    this._dateDisplay = elem('input', this._footer, ['form-control', 'datetimepicker-input'], 'width: 150px;');
+    this._dateDisplay.id = ddId;
+    $(this._dateDisplay)
+    .attr('data-toggle', 'datetimepicker')
+    .attr('data-target', '#' + ddId)
+    .datetimepicker({
+        format: 'L'
+    });
+    $(this._dateDisplay).datetimepicker('date', this._focus);
+    //this._dateDisplay.value = this._focus.format();
+    $(this._dateDisplay).on('change.datetimepicker', (e) => {
+        //console.log(e.date);
+        console.log('date picker changed');
+        console.log(e.date.format('YYYY-MM-DD'));
+        
+        this._focus = moment.utc($(this._dateDisplay).datetimepicker('date'));
+        //moment.utc(e.date);//moment(e.date.format('YYYY-MM-DD'));
+        console.log('focus: ' + this._focus.format('YYYY-MM-DD'));
+        this.updateChart();
+    });
+
     this._btnRight = iconButton(['btn', 'btn-primary', 'btn-shadow'], this._footer, 'fa-angle-double-right', () => {
         this.panRight();
     });
-    this._btnZoomOut = iconButton(['btn', 'btn-primary', 'btn-shadow'], this._footer, 'fa-search-minus', () => {
-        this.zoomOut();
-    });
-    this._btnZoomIn = iconButton(['btn', 'btn-primary', 'btn-shadow'], this._footer, 'fa-search-plus', () => {
-        this.zoomIn();
-    });
-    this._toggleHTML = {
-        'line': '<span class="fas fa-chart-line"></i>',
-        'bar': '<span class="fas fa-chart-bar"></i>'
-    };
-    this._btnType = iconButton(['btn', 'btn-primary', 'btn-shadow', 'd-none'], this._footer, 'fa-chart-line', () => {
-        if (this.datasets.length == 1) {
-            var set = this.datasets[0];
-            if (set.type == 'line')
-                set.type = 'bar';
-            else
-                set.type = 'line';
-            this._btnType.innerHTML = this._toggleHTML[set.type];
-
-            this.updateChart();
-        }
-    });
-
     this._btnAdd = iconLinkButton(['btn', 'btn-primary', 'btn-shadow', 'd-none'], this._footer, 'fa-plus-square');
 
     // create chart
     this._config = JSON.parse(JSON.stringify(p.defaultConfig));
     this._chart = new Chart(this._canvas, this._config);
     this._datasetIds = [];
-    this._focus = moment.utc().startOf('day');
-
+    
     this._colorOffset = 0;
     this._colorScheme = this.defaultColorScheme;
 
@@ -775,6 +803,7 @@ p.updateChart = function (t) {
     // set viewport on chart
     if (!this._chart) return;
 
+    console.log('update: ' + this._focus.format('YYYY-MM-DD'));
     if (this._zoomLevel == 6) {
         this.xAxis.time.unit = 'day';
         this.xAxis.time.min = moment.utc(this._focus).subtract(this.timeScale.half[0]).format();
@@ -785,8 +814,8 @@ p.updateChart = function (t) {
         this.xAxis.time.max = moment.utc(this._focus).add(Array.isArray(this.timeScale.half) ? this.timeScale.half[1] : this.timeScale.half).format('YYYY-MM-DD');
     }
 
-    console.log(this.xAxis.time.min);
-    console.log(this.xAxis.time.max);
+    //console.log(this.xAxis.time.min);
+    //console.log(this.xAxis.time.max);
 
     //console.log(this._chart.options.scales.xAxes[0].time.min + ', ' + this._chart.options.scales.xAxes[0].time.max)
     //console.log(this.zooms[this._zoomLevel]);
@@ -798,6 +827,8 @@ p.updateChart = function (t) {
     //config.options.scales.xAxes[0] = xAxis;  
 
     this._chart.options.title.text = this.getRangeString();
+
+    $(this._dateDisplay).datetimepicker('date', this._focus);
 
     this._chart.update(t);
 
