@@ -38,7 +38,7 @@ html {
 #sidebar.active {
   margin-left: -200px;
 }
-.controlbar {
+.controlbar .buttonrow {
   height: 48px;
 }
 .controlbar .btn,

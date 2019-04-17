@@ -146,57 +146,61 @@ ChartController = function (container) {
         'div',
         this._chartContainer,
         null,
-        'height: calc(100% - 48px); width: 100%; width: relative;'
+        'height: calc(100% - 96px); width: 100%; width: relative;'
     );
 
     // canvas the chart is rendered on
     this._canvas = elem('canvas', this._canvasholder);
 
     // footer with buttons to manipulate chart
-    this._footer = elem('div', this._chartContainer, ['controlbar', 'd-flex', 'justify-content-center', 'align-items-center', 'py-2']);
+    this._footer = elem('div', this._chartContainer, ['controlbar']);
 
-    this._btnLeft = iconButton(['btn', 'btn-primary', 'btn-shadow'], this._footer, 'fa-angle-double-left', () => {
+    this._row1 = elem('div', this._footer, ['buttonrow', 'd-flex', 'justify-content-center', 'align-items-center', 'py-2']);
+    this._row2 = elem('div', this._footer, ['buttonrow', 'd-flex', 'justify-content-center', 'align-items-center', 'py-2']);
+
+    this._btnLeft = iconButton(['btn', 'btn-primary', 'btn-shadow'], this._row1, 'fa-angle-double-left', () => {
         this.panLeft();
     });
 
     numControllers++;
     var ddId = 'focuspicker' + numControllers;
 
-//<input type="text" class="form-control datetimepicker-input" id="datetimepicker5" data-toggle="datetimepicker" data-target="#datetimepicker5"/>
+    //<input type="text" class="form-control datetimepicker-input" id="datetimepicker5" data-toggle="datetimepicker" data-target="#datetimepicker5"/>
 
-    this._dateDisplay = elem('input', this._footer, ['form-control', 'datetimepicker-input'], 'width: 150px;');
+    // create datepicker component
+    this._dateDisplay = elem('input', this._row1, ['form-control', 'datetimepicker-input'], 'max-width: 8rem;');
     this._dateDisplay.id = ddId;
     $(this._dateDisplay)
-    .attr('data-toggle', 'datetimepicker')
-    .attr('data-target', '#' + ddId)
-    .datetimepicker({
-        format: 'L'
-    });
+        .attr('data-toggle', 'datetimepicker')
+        .attr('data-target', '#' + ddId)
+        .datetimepicker({
+            format: 'L'
+        });
+    // set date picker value
     $(this._dateDisplay).datetimepicker('date', this._focus);
-    //this._dateDisplay.value = this._focus.format();
+    // adjust chart when date picker changes
     $(this._dateDisplay).on('change.datetimepicker', (e) => {
-        //console.log(e.date);
-        console.log('date picker changed');
-        console.log(e.date.format('YYYY-MM-DD'));
-        
-        this._focus = moment.utc($(this._dateDisplay).datetimepicker('date'));
-        //moment.utc(e.date);//moment(e.date.format('YYYY-MM-DD'));
-        console.log('focus: ' + this._focus.format('YYYY-MM-DD'));
+        var newFocus = moment(e.date).utc().startOf('day');
+        console.log('date picker changed: ' + newFocus.format());
+        this._focus = newFocus;
         this.updateChart();
     });
 
-    this._btnRight = iconButton(['btn', 'btn-primary', 'btn-shadow'], this._footer, 'fa-angle-double-right', () => {
+    this._btnRight = iconButton(['btn', 'btn-primary', 'btn-shadow'], this._row1, 'fa-angle-double-right', () => {
         this.panRight();
     });
-    this._btnAdd = iconLinkButton(['btn', 'btn-primary', 'btn-shadow', 'd-none'], this._footer, 'fa-plus-square');
+    // this._btnAdd = iconLinkButton(['btn', 'btn-primary', 'btn-shadow', 'd-none'], this._row2, 'fa-plus-square');
+    this._currentValue = elem('input', this._row2, ['form-control'], 'max-width: 8rem;');
+    this._saveCurrentValue = elem('button', this._row2, ['btn', 'btn-success'], null, 'Save');
+    this._saveCurrentSpinner = elem('span', this._saveCurrentValue, ['d-none', 'spinner-border', 'spinner-border-sm', 'ml-1']);
+
+    this._colorOffset = 0;
+    this._colorScheme = this.defaultColorScheme;
 
     // create chart
     this._config = JSON.parse(JSON.stringify(p.defaultConfig));
     this._chart = new Chart(this._canvas, this._config);
     this._datasetIds = [];
-    
-    this._colorOffset = 0;
-    this._colorScheme = this.defaultColorScheme;
 
     this.setZoomLevel(this.defaultZoomLevel, false);
 
@@ -380,11 +384,13 @@ p.addDatasetFromModel = function (dataset, complete) {
     // disable some buttons if in multi-mode
     if (this.datasets.length > 1) {
         $(this._btnType).addClass('d-none');
-        $(this._btnAdd).addClass('d-none');
+        //$(this._btnAdd).addClass('d-none');
+        $(this._row2).removeClass('d-flex').addClass('d-none');
         $(this._deleteButton).addClass('d-none');
     } else {
         $(this._btnType).removeClass('d-none').html(this._toggleHTML[dataset.type]);
-        $(this._btnAdd).removeClass('d-none').attr('href', '/set/' + dataset._id + '/new');
+        // $(this._btnAdd).removeClass('d-none').attr('href', '/set/' + dataset._id + '/new');
+        $(this._row2).addClass('d-flex').removeClass('d-none');
         $(this._deleteButton).removeClass('d-none').confirmation({
             rootSelector: this._deleteButton,
             popout: true,
@@ -433,6 +439,12 @@ p.addDatasetFromModel = function (dataset, complete) {
         });
     }
 
+    console.log('dataset added:');
+    console.log(dataset);
+
+    console.log('scaleservice time defaults:');
+    console.log(Chart.scaleService.defaults.time);
+
     // update chart
     this.updateChart();
 
@@ -476,7 +488,7 @@ Object.defineProperty(p, 'schemeNames', {
     }
 });
 
-/** color scheme */
+/** get/set color scheme. does NOT update chart, you must do that manually */
 Object.defineProperty(p, 'colorScheme', {
     get() {
         return this._colorScheme;
@@ -488,12 +500,11 @@ Object.defineProperty(p, 'colorScheme', {
         this._colorScheme = value;
         this._colorOffset = 0;
         this.refreshColorsFromScheme();
-        this.updateChart();
     }
 });
 
 /**
- * apply color scheme to chart options
+ * apply color scheme to chart options.
  */
 p.refreshColorsFromScheme = function () {
     for (var i = 0; i < this.datasets.length; i++) {
@@ -504,7 +515,7 @@ p.refreshColorsFromScheme = function () {
     }
 };
 
-/** colorOffset within the color scheme */
+/** get/set colorOffset within the color scheme. does NOT update chart, you must do that manually */
 Object.defineProperty(p, 'colorOffset', {
     get() {
         return this._colorOffset;
@@ -513,7 +524,6 @@ Object.defineProperty(p, 'colorOffset', {
         this._colorOffset = i;
 
         this.refreshColorsFromScheme();
-        this.updateChart();
     }
 });
 /**
@@ -647,14 +657,13 @@ Object.defineProperty(p, 'xAxis', {
     }
 });
 
-/** xAxisLabel from chart */
+/** xAxisLabel from chart. does NOT update chart, you must do that manually */
 Object.defineProperty(p, 'xAxisLabel', {
     get() {
         return this.xAxis.scaleLabel.labelString;
     },
     set(val) {
         this.xAxis.scaleLabel.labelString = val;
-        this.updateChart();
     }
 });
 
@@ -665,14 +674,13 @@ Object.defineProperty(p, 'yAxis', {
     }
 });
 
-/** yAxisLabel from chart */
+/** yAxisLabel from chart. does NOT update chart, you must do that manually */
 Object.defineProperty(p, 'yAxisLabel', {
     get() {
         return this.yAxis.scaleLabel.labelString;
     },
     set(val) {
         this.yAxis.scaleLabel.labelString = val;
-        this.updateChart();
     }
 });
 /**
@@ -803,7 +811,7 @@ p.updateChart = function (t) {
     // set viewport on chart
     if (!this._chart) return;
 
-    console.log('update: ' + this._focus.format('YYYY-MM-DD'));
+    console.log('updateChart, focusing on: ' + this._focus.format());
     if (this._zoomLevel == 6) {
         this.xAxis.time.unit = 'day';
         this.xAxis.time.min = moment.utc(this._focus).subtract(this.timeScale.half[0]).format();
@@ -814,8 +822,7 @@ p.updateChart = function (t) {
         this.xAxis.time.max = moment.utc(this._focus).add(Array.isArray(this.timeScale.half) ? this.timeScale.half[1] : this.timeScale.half).format('YYYY-MM-DD');
     }
 
-    //console.log(this.xAxis.time.min);
-    //console.log(this.xAxis.time.max);
+    console.log('chart min/max: ' + this.xAxis.time.min + ' - ' + this.xAxis.time.max);
 
     //console.log(this._chart.options.scales.xAxes[0].time.min + ', ' + this._chart.options.scales.xAxes[0].time.max)
     //console.log(this.zooms[this._zoomLevel]);
@@ -826,16 +833,37 @@ p.updateChart = function (t) {
     //xAxis.time.min = viewport.getRightEdge().subtract(viewport.getZoomParams()).format();
     //config.options.scales.xAxes[0] = xAxis;  
 
+    // update chart legend
     this._chart.options.title.text = this.getRangeString();
 
+    // set datepicker date to focus
     $(this._dateDisplay).datetimepicker('date', this._focus);
 
+    this._currentValue.value = this.getDatasetValue(this._focus.format('YYYY-MM-DD'));
+
+    // update chart
     this._chart.update(t);
 
-    //console.log(this.getRangeString());
+    console.log('chart updated, x axis options:');
+    console.log(this.xAxis);
 };
 
 // UTILITY FUNCTIONS
+/**
+ * get dataset value at date x
+ * 
+ * @param  {} x date in 'YYYY-MM-DD' format
+ */
+p.getDatasetValue = function(x) {
+    var data = this.datasets[0].data;
+    for(var i = 0; i < data.length; i++) {
+        if(data[i].x == x) {
+            return data[i].y;
+        }
+    }
+    return "0";
+};
+
 p.normalizeDates = function (data) {
     for (var i = 0; i < data.length; i++) {
         var datum = data[i];
@@ -847,20 +875,20 @@ p.normalizeDates = function (data) {
 // INTERNALS
 p.defaultXAxis = {
     type: 'time',
-    time: {
-        unit: 'day',
-        tooltipFormat: 'MM/DD/YYYY'
-    },
-    distribution: 'linear',
-    display: true,
-    scaleLabel: {
-        display: false,
-        labelString: 'no data'
-    },
-    ticks: {
-        autoSkip: true,
-        source: 'auto'
-    }
+    // time: {
+    //     unit: 'day',
+    //     tooltipFormat: 'MM/DD/YYYY'
+    // },
+    // distribution: 'linear',
+    // display: true,
+    // scaleLabel: {
+    //     display: false,
+    //     labelString: 'no data'
+    // },
+    // ticks: {
+    //     autoSkip: true,
+    //     source: 'auto'
+    // }
 };
 
 p.defaultYAxis = {
@@ -934,36 +962,36 @@ Chart.scaleService.updateScaleDefaults('linear', {
     },
 });
 
-Chart.scaleService.updateScaleDefaults('time', {
-    ticks: {
-        fontColor: 'white',
-        callback: function (value, index, values) {
-            // console.log('x-time-tick:');
-            // console.log(value);
-            // console.log(index);
-            // console.log(values);
-            return value;
-        },
-        maxRotation: 0
-    },
+ Chart.scaleService.updateScaleDefaults('time', {
+    /*time: {
+        unit: 'day'
+    },*/
     gridLines: {
         color: 'rgba(255, 255, 255, 0.2)'
-    },
-    scaleLabel: {
-        display: true,
-        fontColor: 'white',
-        labelString: 'no data'
-    },
+    }
+//     ticks: {
+//         autoSkip: false,
+//         fontColor: 'white',
+//         maxRotation: 0
+//     },
+//     gridLines: {
+//         color: 'rgba(255, 255, 255, 0.2)'
+//     },
+//     scaleLabel: {
+//         display: true,
+//         fontColor: 'white',
+//         labelString: 'no data'
+//     },
 });
 
-Chart.scaleService.updateScaleDefaults('radial', {
-    angleLines: {
-        color: 'white' // lines radiating from the center
-    },
-    pointLabels: {
-        fontColor: 'white' // labels around the edge like 'Running'
-    }
-});
+// Chart.scaleService.updateScaleDefaults('radial', {
+//     angleLines: {
+//         color: 'white' // lines radiating from the center
+//     },
+//     pointLabels: {
+//         fontColor: 'white' // labels around the edge like 'Running'
+//     }
+// });
 
 module.exports = ChartController;
 },{}],3:[function(require,module,exports){
