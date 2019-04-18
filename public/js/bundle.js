@@ -155,8 +155,8 @@ ChartController = function (container) {
     // footer with buttons to manipulate chart
     this._footer = elem('div', this._chartContainer, ['controlbar']);
 
-    this._row1 = elem('div', this._footer, ['buttonrow', 'd-flex', 'justify-content-center', 'align-items-center', 'py-2']);
-    this._row2 = elem('div', this._footer, ['buttonrow', 'd-flex', 'justify-content-center', 'align-items-center', 'py-2']);
+    this._row1 = elem('div', this._footer, ['buttonrow', 'd-flex', 'justify-content-center', 'align-items-center', 'py-2', 'bg-gray-700'], 'max-width: 300px; margin: 0 auto; border-radius: 1rem; border: 1px solid rgba(255, 255, 255, 0.2);');
+    this._row2 = elem('div', this._footer, ['buttonrow', 'd-flex', 'form-inline', 'justify-content-center', 'align-items-center', 'py-2']);
 
     this._btnLeft = iconButton([], this._row1, 'fa-angle-double-left', () => {
         this.panLeft();
@@ -188,23 +188,24 @@ ChartController = function (container) {
     this._btnRight = iconButton([], this._row1, 'fa-angle-double-right', () => {
         this.panRight();
     });
+    this._formgroupValue = elem('div', this._row2, ['input-group']);
     // this._btnAdd = iconLinkButton([, 'd-none'], this._row2, 'fa-plus-square');
     var inputId = 'focusinputvalue' + _numControllers;
-    this._inputValueLabel = elem('label', this._row2, [], 'margin:0; padding: 0.25rem;');
-    $(this._inputValueLabel).attr('id', inputId);
-    this._inputValue = elem('input', this._row2, ['form-control'], 'max-width: 8rem;');
+    // this._inputValueLabel = elem('label', this._row2, [], 'margin:0; padding: 0.25rem;');
+    // $(this._inputValueLabel).attr('id', inputId);
+    this._inputValue = elem('input', this._formgroupValue, ['form-control'], 'max-width: 8rem;');
     this._inputValue.id = inputId;
     this._inputValue.type = 'number';
-    // Execute a function when the user releases a key on the keyboard
+    // save when user presses enter
     $(this._inputValue).on("keyup", (event) => {
-        // Number 13 is the "Enter" key on the keyboard
         if (event.keyCode === 13) {
-            // Cancel the default action, if needed
             event.preventDefault();
-            // Trigger the button element with a click
             this._btnSaveValue.click();
         }
     });
+    // input addon
+    this._addonValue = elem('div', this._formgroupValue, ['input-group-append']);
+    this._addonValueLabel = elem('span', this._addonValue, ['input-group-text'], null);
 
     this._btnSaveValue = iconButton([], this._row2, 'fa-save'); // elem('button', this._row2, [], null, 'Save');
     var btnSaveValueSpinner = elem('span', this._btnSaveValue, ['spinner-border', 'spinner-border-sm', 'ml-1']);
@@ -422,7 +423,8 @@ p.addDatasetFromModel = function (dataset, complete) {
         $(this._row2).addClass('d-flex').removeClass('d-none');
 
         // activate save button
-        $(this._inputValueLabel).html(dataset.yAxisLabel + ':');
+        // $(this._inputValueLabel).html(dataset.yAxisLabel + ':');
+        $(this._addonValueLabel).html(dataset.yAxisLabel);
         $(this._btnSaveValue).on('click', () => {
 
             // disable btn

@@ -172,13 +172,14 @@ html {
   font-size: 1rem;
   color: #fff;
   background-color: #222;
-  border: 1px solid #999;
-  border-radius: 0.25rem;
 }
-.form-control:focus,
-.form-control:hover {
-  color: #fff;
-  background-color: #222;
+.input-group {
+  border-radius: 0.25rem;
+  border: 1px solid #999;
+}
+.input-group:hover,
+.input-group:focus,
+.input-group:focus-within {
   border-color: #fff;
 }
 .inconspicuous {
