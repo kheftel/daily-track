@@ -582,8 +582,8 @@ p.addDatasetFromModel = function (dataset, complete) {
 
             });
 
-        // show and activate delete button
-        $(this._deleteButton).removeClass('d-none').confirmation({
+        // show and activate delete button - disabled for now
+        $(this._deleteButton).addClass('d-none').confirmation({
             rootSelector: this._deleteButton,
             popout: true,
             container: 'body',
