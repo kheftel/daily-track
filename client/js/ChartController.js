@@ -113,9 +113,11 @@ ChartController = function (container) {
         this.panRight();
     });
     // this._btnAdd = iconLinkButton(['btn', 'btn-primary', 'btn-shadow', 'd-none'], this._row2, 'fa-plus-square');
-    this._currentValue = elem('input', this._row2, ['form-control'], 'max-width: 8rem;');
-    this._saveCurrentValue = elem('button', this._row2, ['btn', 'btn-success'], null, 'Save');
-    this._saveCurrentSpinner = elem('span', this._saveCurrentValue, ['d-none', 'spinner-border', 'spinner-border-sm', 'ml-1']);
+    this._valueInput = elem('input', this._row2, ['form-control'], 'max-width: 4rem;');
+    this._valueInput.type = 'number';
+    this._btnSaveValue = elem('button', this._row2, ['btn', 'btn-success'], null, 'Save');
+    this._btnSaveSpinner = elem('span', this._btnSaveValue, ['d-none', 'spinner-border', 'spinner-border-sm', 'ml-1']);
+    this._btnDeleteValue = iconButton(['btn', 'btn-primary', 'btn-shadow'], this._row2, 'fa-trash-alt');
 
     this._colorOffset = 0;
     this._colorScheme = this.defaultColorScheme;
@@ -311,9 +313,170 @@ p.addDatasetFromModel = function (dataset, complete) {
         $(this._row2).removeClass('d-flex').addClass('d-none');
         $(this._deleteButton).addClass('d-none');
     } else {
+        // show type toggle btn
         $(this._btnType).removeClass('d-none').html(this._toggleHTML[dataset.type]);
         // $(this._btnAdd).removeClass('d-none').attr('href', '/set/' + dataset._id + '/new');
+
+        // show row 2
         $(this._row2).addClass('d-flex').removeClass('d-none');
+
+        // activate save button
+        $(this._btnSaveValue).on('click', () => {
+
+            // disable btn, show the spinner
+            $(this._btnSaveValue).addClass('disabled');
+            $(this._btnSaveSpinner).removeClass('d-none');
+
+            // get the form data
+            var formData = {
+                'x': this._focus.format('YYYY-MM-DD'),
+                'y': $(this._valueInput).val()
+            };
+
+            // send data to server
+            var pointExists = this.getDatasetValueExists(formData.x);
+            $.ajax({
+                    type: 'POST',
+                    url: '/api/sets/' + dataset._id + '/data',
+                    data: formData,
+                    dataType: 'json',
+                    encode: true
+                })
+                .done((data) => {
+                    console.log('ajax resopnse:');
+                    console.log(data);
+
+                    // hide the spinner
+                    $(this._btnSaveValue).removeClass('disabled');
+                    $(this._btnSaveSpinner).addClass('d-none');
+
+                    if (!data.success) {
+                        // validation error
+                        if (data.errors) {
+                            data.errors.forEach((error) => {
+                                // add the error message
+
+                                $.toast({
+                                    title: 'Error',
+                                    content: error.msg,
+                                    type: 'error',
+                                    delay: 5000
+                                });
+                            });
+                        }
+                    } else {
+                        // success
+
+                        // add data point to dataset
+                        this.setDatasetValue(formData.x, formData.y);
+                        this.updateChart();
+
+                        $.toast({
+                            title: 'Success!',
+                            content: data.message,
+                            type: 'success',
+                            delay: 5000
+                        });
+
+                        //- $('form').append('<div class="alert alert-success">' + data.message + '</div>');
+
+                        // usually after form submission, you'll want to redirect
+                        // window.location = '/thank-you'; // redirect a user to another page
+                    }
+                })
+                .fail((data) => {
+                    // hide the spinner
+                    $(this._btnSaveValue).removeClass('disabled');
+                    $(this._btnSaveSpinner).addClass('d-none');
+
+                    $.toast({
+                        title: 'Error!',
+                        content: 'Unable to save, please try again later',
+                        type: 'error',
+                        delay: 5000
+                    });
+
+                    console.log('ajax error:');
+                    console.log(data);
+                });
+
+        });
+
+        // activate delete value button
+        $(this._btnDeleteValue).on('click', () => {
+
+            // disable btn
+            $(this._btnDeleteValue).addClass('disabled');
+
+            // get the form data
+            // TO DO: y should be not required if delete is passed
+            var formData = {
+                'x': this._focus.format('YYYY-MM-DD'),
+                'y': $(this._valueInput).val(),
+                'delete': '1'
+            };
+
+            // send data to server
+            var pointExists = this.getDatasetValueExists(formData.x);
+            $.ajax({
+                    type: 'POST',
+                    url: '/api/sets/' + dataset._id + '/data',
+                    data: formData,
+                    dataType: 'json',
+                    encode: true
+                })
+                .done((data) => {
+                    console.log('ajax resopnse:');
+                    console.log(data);
+
+                    // hide the spinner
+                    $(this._btnDeleteValue).removeClass('disabled');
+
+                    if (!data.success) {
+                        // error in deletion
+                        if (data.errors) {
+                            data.errors.forEach((error) => {
+                                // add the error message
+
+                                $.toast({
+                                    title: 'Error',
+                                    content: error.msg,
+                                    type: 'error',
+                                    delay: 5000
+                                });
+                            });
+                        }
+                    } else {
+                        // success, datapoint deleted
+                        this.deleteDatasetValue(formData.x);
+                        this.updateChart();
+
+                        $.toast({
+                            title: 'Success!',
+                            content: data.message,
+                            type: 'success',
+                            delay: 5000
+                        });
+                    }
+                })
+                .fail((data) => {
+                    // hide the spinner
+                    $(this._btnDeleteValue).removeClass('disabled');
+
+                    $.toast({
+                        title: 'Error!',
+                        content: 'Unable to delete, please try again later',
+                        type: 'error',
+                        delay: 5000
+                    });
+
+                    console.log('ajax error:');
+                    console.log(data);
+                });
+
+        });
+
+        // show and activate delete button
         $(this._deleteButton).removeClass('d-none').confirmation({
             rootSelector: this._deleteButton,
             popout: true,
@@ -762,7 +925,7 @@ p.updateChart = function (t) {
     // set datepicker date to focus
     $(this._dateDisplay).datetimepicker('date', this._focus);
 
-    this._currentValue.value = this.getDatasetValue(this._focus.format('YYYY-MM-DD'));
+    this._valueInput.value = this.getDatasetValue(this._focus.format('YYYY-MM-DD'));
 
     // update chart
     this._chart.update(t);
@@ -777,14 +940,83 @@ p.updateChart = function (t) {
  * 
  * @param  {} x date in 'YYYY-MM-DD' format
  */
-p.getDatasetValue = function(x) {
+p.getDatasetValue = function (x) {
     var data = this.datasets[0].data;
-    for(var i = 0; i < data.length; i++) {
-        if(data[i].x == x) {
+    for (var i = 0; i < data.length; i++) {
+        if (data[i].x == x) {
             return data[i].y;
         }
     }
     return "0";
+};
+
+/**
+ * get whether dataset value at date x exists
+ * 
+ * @param  {} x date in 'YYYY-MM-DD' format
+ */
+p.getDatasetValueExists = function (x) {
+    var data = this.datasets[0].data;
+    for (var i = 0; i < data.length; i++) {
+        if (data[i].x == x) {
+            return true;
+        }
+    }
+    return false;
+};
+
+/**
+ * set dataset value at date x. does NOT update chart
+ * 
+ * @param  {} x date in 'YYYY-MM-DD' format
+ * @param  {} y value
+ */
+p.setDatasetValue = function (x, y) {
+    var data = this.datasets[0].data;
+
+    var newPoint = {
+        x: x,
+        y: y
+    };
+
+    for (var i = 0; i < data.length; i++) {
+        // is it equal to this date?
+        if (data[i].x == x) {
+            // update existing value
+            data[i].y = y;
+            return;
+        }
+
+        // is it before this one?
+        if(moment(x).isBefore(moment(data[i].x))) {
+            if(i == 0)
+                data.unshift(newPoint);
+            else
+                data.splice(i, 0, newPoint);
+            return;
+        }
+    }
+
+    // is data off the end? add at end
+    data.push(newPoint);
+};
+
+/**
+ * delete dataset value at date x. does NOT update chart
+ * 
+ * @param  {} x date in 'YYYY-MM-DD' format
+ */
+p.deleteDatasetValue = function (x) {
+    var data = this.datasets[0].data;
+
+    for (var i = 0; i < data.length; i++) {
+        // is it equal to this date?
+        if (data[i].x == x) {
+            // delete existing value
+            data.splice(i, 1);
+            return;
+        }
+    }
 };
 
 p.normalizeDates = function (data) {
@@ -885,26 +1117,27 @@ Chart.scaleService.updateScaleDefaults('linear', {
     },
 });
 
- Chart.scaleService.updateScaleDefaults('time', {
-    /*time: {
-        unit: 'day'
-    },*/
+Chart.scaleService.updateScaleDefaults('time', {
+    minUnit: 'day',
     gridLines: {
         color: 'rgba(255, 255, 255, 0.2)'
+    },
+    ticks: {
+        maxRotation: 0
     }
-//     ticks: {
-//         autoSkip: false,
-//         fontColor: 'white',
-//         maxRotation: 0
-//     },
-//     gridLines: {
-//         color: 'rgba(255, 255, 255, 0.2)'
-//     },
-//     scaleLabel: {
-//         display: true,
-//         fontColor: 'white',
-//         labelString: 'no data'
-//     },
+    //     ticks: {
+    //         autoSkip: false,
+    //         fontColor: 'white',
+    //         maxRotation: 0
+    //     },
+    //     gridLines: {
+    //         color: 'rgba(255, 255, 255, 0.2)'
+    //     },
+    //     scaleLabel: {
+    //         display: true,
+    //         fontColor: 'white',
+    //         labelString: 'no data'
+    //     },
 });
 
 // Chart.scaleService.updateScaleDefaults('radial', {

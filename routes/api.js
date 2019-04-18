@@ -182,7 +182,7 @@ apiRouter.route('/sets/:id')
 // ----------------------------------------------------
 apiRouter.route('/sets/:id/data')
 
-    // POST = create a datapoint
+    // POST = create OR UPDATE a datapoint
 
     //TO DO: validation like creating a datapoint
     .post([
@@ -204,26 +204,14 @@ apiRouter.route('/sets/:id/data')
             }
             console.log('date after validation: ' + result);
             req.body.x = result;
-
-            // now see if there's already a datapoint for this date
-            return Datapoint.findOne({
-                    dataset: req.params.id,
-                    x: value
-                })
-                .exec()
-                .then(datapoint => {
-                    if (datapoint) {
-                        var errstring = 'Datapoint already exists for date ' + value;
-                        return Promise.reject(errstring);
-                    }
-                });
+            return true;
         }),
         // validate / sanitize value
         body('y', 'Value should be a number, yo.').isNumeric().toInt(),
         // Process request after validation and sanitization.
         (req, res, next) => {
 
-            // grab the validation errors, if any
+            // send the validation errors, if any
             const errors = validationResult(req);
             var data = {};
 
@@ -238,20 +226,64 @@ apiRouter.route('/sets/:id/data')
                 return res.json(data);
             }
 
-            // // Create datapoint with validated / sanitized data
-            var datapoint = new Datapoint();
-            datapoint.x = req.body.x;
-            datapoint.y = req.body.y;
-            datapoint.dataset = req.params.id;
+            // Create/update datapoint with validated / sanitized data
+            Datapoint.findOne({
+                    dataset: req.params.id,
+                    x: req.body.x
+                })
+                .exec((err, datapoint) => {
+                    if (err)
+                        return res.send(err);
 
-            // save the dataset and check for errors
-            datapoint.save(function (err) {
-                if (err)
-                    return res.send(err);
-                data.success = true;
-                data.message = 'Datapoint created for date ' + req.body.x;
-                return res.json(data);
-            });
+                    if (datapoint) {
+                        // update or delete?
+                        if (req.body.delete == "1") {
+                            datapoint.delete((err) => {
+                                if (err)
+                                    return res.send(err);
+
+                                return res.json({
+                                    success: 'true',
+                                    message: 'Datapoint deleted'
+                                });
+                            });
+                        } else {
+                            datapoint.y = req.body.y;
+                            datapoint.save((err) => {
+                                if (err)
+                                    return res.send(err);
+
+                                return res.json({
+                                    success: 'true',
+                                    message: 'Datapoint updated'
+                                });
+                            });
+                        }
+                    } else {
+                        if (req.body.delete == "1") {
+                            return res.json({
+                                success: false,
+                                errors: [{
+                                    msg: "No datapoint to delete"
+                                }]
+                            });
+                        }
+
+                        var newpoint = new Datapoint();
+                        newpoint.x = req.body.x;
+                        newpoint.y = req.body.y;
+                        newpoint.dataset = req.params.id;
+
+                        // save the datapoint and check for errors
+                        newpoint.save(function (err) {
+                            if (err)
+                                return res.send(err);
+                            data.success = true;
+                            data.message = 'Datapoint created for date ' + req.body.x;
+                            return res.json(data);
+                        });
+                    }
+                });
         }
     ])
 
