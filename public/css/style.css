@@ -180,6 +180,16 @@ html {
   background-color: #222;
   border-color: #fff;
 }
+button:not(:disabled) > .spinner-border,
+button:not(:disabled) > .spinner-grow {
+  display: none;
+}
+button:disabled > .spinner-border,
+button[disabled] > .spinner-border,
+button:disabled > .spinner-grow,
+button[disabled] > .spinner-grow {
+  display: inline-block;
+}
 @media (max-width: 767px) {
   #sidebar {
     margin-left: -200px;

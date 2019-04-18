@@ -314,6 +314,19 @@ html {
     border-color: @white;
 }
 
+// show/hide spinners in disabled/enabled buttons
+button:not(:disabled) > .spinner-border, 
+button:not(:disabled) > .spinner-grow {
+    display: none;
+}
+
+button:disabled > .spinner-border ,
+button[disabled] > .spinner-border,
+button:disabled > .spinner-grow ,
+button[disabled] > .spinner-grow {
+    display: inline-block;
+}
+
 // media queries
 @media (max-width: 767px) {
 

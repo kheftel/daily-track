@@ -116,9 +116,9 @@ ChartController = function (container) {
     this._inputValue = elem('input', this._row2, ['form-control'], 'max-width: 4rem;');
     this._inputValue.type = 'number';
     this._btnSaveValue = elem('button', this._row2, ['btn', 'btn-success'], null, 'Save');
-    this._btnSaveValueSpinner = elem('span', this._btnSaveValue, ['d-none', 'spinner-border', 'spinner-border-sm', 'ml-1']);
+    var btnSaveValueSpinner = elem('span', this._btnSaveValue, ['spinner-border', 'spinner-border-sm', 'ml-1']);
     this._btnDeleteValue = iconButton(['btn', 'btn-primary', 'btn-shadow'], this._row2, 'fa-trash-alt');
-    this._btnDeleteValueSpinner = elem('span', this._btnDeleteValue, ['d-none', 'spinner-border', 'spinner-border-sm', 'ml-1']);
+    var btnDeleteValueSpinner = elem('span', this._btnDeleteValue, ['spinner-border', 'spinner-border-sm', 'ml-1']);
 
     this._colorOffset = 0;
     this._colorScheme = this.defaultColorScheme;
@@ -324,9 +324,8 @@ p.addDatasetFromModel = function (dataset, complete) {
         // activate save button
         $(this._btnSaveValue).on('click', () => {
 
-            // disable btn, show the spinner
-            $(this._btnSaveValue).addClass('disabled');
-            $(this._btnSaveValueSpinner).removeClass('d-none');
+            // disable btn
+            $(this._btnSaveValue).prop('disabled', true);
 
             // get the form data
             var formData = {
@@ -335,7 +334,6 @@ p.addDatasetFromModel = function (dataset, complete) {
             };
 
             // send data to server
-            var pointExists = this.getDatasetValueExists(formData.x);
             $.ajax({
                     type: 'POST',
                     url: '/api/sets/' + dataset._id + '/data',
@@ -347,9 +345,8 @@ p.addDatasetFromModel = function (dataset, complete) {
                     console.log('ajax resopnse:');
                     console.log(data);
 
-                    // hide the spinner
-                    $(this._btnSaveValue).removeClass('disabled');
-                    $(this._btnSaveValueSpinner).addClass('d-none');
+                    // enable btn
+                    $(this._btnSaveValue).prop('disabled', false);
 
                     if (!data.success) {
                         // validation error
@@ -386,9 +383,8 @@ p.addDatasetFromModel = function (dataset, complete) {
                     }
                 })
                 .fail((data) => {
-                    // hide the spinner
-                    $(this._btnSaveValue).removeClass('disabled');
-                    $(this._btnSaveValueSpinner).addClass('d-none');
+                    // enable btn
+                    $(this._btnSaveValue).prop('disabled', false);
 
                     $.toast({
                         title: 'Error!',
@@ -413,8 +409,7 @@ p.addDatasetFromModel = function (dataset, complete) {
             }).on('click', () => {
 
                 // disable btn
-                $(this._btnDeleteValue).addClass('disabled');
-                $(this._btnDeleteValueSpinner).removeClass('d-none');
+                $(this._btnDeleteValue).prop('disabled', true);
 
                 // get the form data
                 // TO DO: y should be not required if delete is passed
@@ -424,8 +419,10 @@ p.addDatasetFromModel = function (dataset, complete) {
                     'delete': '1'
                 };
 
+                // TO DO: update disabled value as you scroll the chart
+                //var pointExists = this.getDatasetValueExists(formData.x);
+
                 // send data to server
-                var pointExists = this.getDatasetValueExists(formData.x);
                 $.ajax({
                         type: 'POST',
                         url: '/api/sets/' + dataset._id + '/data',
@@ -437,9 +434,8 @@ p.addDatasetFromModel = function (dataset, complete) {
                         console.log('ajax resopnse:');
                         console.log(data);
 
-                        // hide the spinner
-                        $(this._btnDeleteValue).removeClass('disabled');
-                        $(this._btnDeleteValueSpinner).addClass('d-none');
+                        // enable btn
+                        $(this._btnDeleteValue).prop('disabled', false);
 
                         if (!data.success) {
                             // error in deletion
@@ -469,9 +465,8 @@ p.addDatasetFromModel = function (dataset, complete) {
                         }
                     })
                     .fail((data) => {
-                        // hide the spinner
-                        $(this._btnDeleteValue).removeClass('disabled');
-                        $(this._btnDeleteValueSpinner).addClass('d-none');
+                        // enable btn
+                        $(this._btnDeleteValue).prop('disabled', false);
 
                         $.toast({
                             title: 'Error!',
