@@ -308,22 +308,34 @@ html {
     border-radius: 0.25rem;
 }
 
-.form-control:focus {
+.form-control:focus,
+.form-control:hover {
     color: @white;
     background-color: @gray-900;
     border-color: @white;
 }
 
+.inconspicuous {
+    border-color: transparent;
+    background-color: transparent;
+}
+
+.inconspicuous:focus,
+.inconspicuous:hover {
+    color: @white;
+    background-color: @gray-900;
+}
+
 // show/hide spinners in disabled/enabled buttons
-button:not(:disabled) > .spinner-border, 
-button:not(:disabled) > .spinner-grow {
+button:not(:disabled)>.spinner-border,
+button:not(:disabled)>.spinner-grow {
     display: none;
 }
 
-button:disabled > .spinner-border ,
-button[disabled] > .spinner-border,
-button:disabled > .spinner-grow ,
-button[disabled] > .spinner-grow {
+button:disabled>.spinner-border,
+button[disabled]>.spinner-border,
+button:disabled>.spinner-grow,
+button[disabled]>.spinner-grow {
     display: inline-block;
 }
 

@@ -175,10 +175,20 @@ html {
   border: 1px solid #999;
   border-radius: 0.25rem;
 }
-.form-control:focus {
+.form-control:focus,
+.form-control:hover {
   color: #fff;
   background-color: #222;
   border-color: #fff;
+}
+.inconspicuous {
+  border-color: transparent;
+  background-color: transparent;
+}
+.inconspicuous:focus,
+.inconspicuous:hover {
+  color: #fff;
+  background-color: #222;
 }
 button:not(:disabled) > .spinner-border,
 button:not(:disabled) > .spinner-grow {

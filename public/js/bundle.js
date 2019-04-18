@@ -80,7 +80,7 @@ $(document).ready(function () {
  * 
  * @param  {} container the html element where we put our markup
  */
-var numControllers = 0;
+var _numControllers = 0;
 ChartController = function (container) {
     // parent container can be id or html elem
     if (typeof container == 'string')
@@ -113,13 +113,13 @@ ChartController = function (container) {
     this._cardHeader = elem('div', this._main, ['card-header', 'd-flex', 'align-items-center', 'p-2']);
     this._detailLink = elem('a', this._cardHeader, ['align-middle', 'm-0', 'h5'], null, parentData.setname);
     this._detailLink.href = '/set/' + parentData.setid;
-    this._editButton = iconButton(['ml-auto', 'btn', 'btn-primary', 'btn-shadow'], this._cardHeader, 'fa-edit');
-    this._deleteButton = iconButton(['btn', 'btn-primary', 'btn-shadow', 'd-none'], this._cardHeader, 'fa-trash-alt');
+    this._editButton = iconButton(['ml-auto'], this._cardHeader, 'fa-edit');
+    this._deleteButton = iconButton(['d-none'], this._cardHeader, 'fa-trash-alt');
     this._toggleHTML = {
         'line': '<span class="fas fa-chart-line"></i>',
         'bar': '<span class="fas fa-chart-bar"></i>'
     };
-    this._btnType = iconButton(['btn', 'btn-primary', 'btn-shadow', 'd-none'], this._cardHeader, 'fa-chart-line', () => {
+    this._btnType = iconButton(['d-none'], this._cardHeader, 'fa-chart-line', () => {
         if (this.datasets.length == 1) {
             var set = this.datasets[0];
             if (set.type == 'line')
@@ -131,10 +131,10 @@ ChartController = function (container) {
             this.updateChart();
         }
     });
-    this._btnZoomOut = iconButton(['btn', 'btn-primary', 'btn-shadow'], this._cardHeader, 'fa-search-minus', () => {
+    this._btnZoomOut = iconButton([], this._cardHeader, 'fa-search-minus', () => {
         this.zoomOut();
     });
-    this._btnZoomIn = iconButton(['btn', 'btn-primary', 'btn-shadow'], this._cardHeader, 'fa-search-plus', () => {
+    this._btnZoomIn = iconButton([], this._cardHeader, 'fa-search-plus', () => {
         this.zoomIn();
     });
 
@@ -158,21 +158,20 @@ ChartController = function (container) {
     this._row1 = elem('div', this._footer, ['buttonrow', 'd-flex', 'justify-content-center', 'align-items-center', 'py-2']);
     this._row2 = elem('div', this._footer, ['buttonrow', 'd-flex', 'justify-content-center', 'align-items-center', 'py-2']);
 
-    this._btnLeft = iconButton(['btn', 'btn-primary', 'btn-shadow'], this._row1, 'fa-angle-double-left', () => {
+    this._btnLeft = iconButton([], this._row1, 'fa-angle-double-left', () => {
         this.panLeft();
     });
 
-    numControllers++;
-    var ddId = 'focuspicker' + numControllers;
+    var datefocusid = 'focusdatepicker' + _numControllers;
 
     //<input type="text" class="form-control datetimepicker-input" id="datetimepicker5" data-toggle="datetimepicker" data-target="#datetimepicker5"/>
 
     // create datepicker component
     this._dateDisplay = elem('input', this._row1, ['form-control', 'datetimepicker-input'], 'max-width: 8rem;');
-    this._dateDisplay.id = ddId;
+    this._dateDisplay.id = datefocusid;
     $(this._dateDisplay)
         .attr('data-toggle', 'datetimepicker')
-        .attr('data-target', '#' + ddId)
+        .attr('data-target', '#' + datefocusid)
         .datetimepicker({
             format: 'L'
         });
@@ -186,15 +185,30 @@ ChartController = function (container) {
         this.updateChart();
     });
 
-    this._btnRight = iconButton(['btn', 'btn-primary', 'btn-shadow'], this._row1, 'fa-angle-double-right', () => {
+    this._btnRight = iconButton([], this._row1, 'fa-angle-double-right', () => {
         this.panRight();
     });
-    // this._btnAdd = iconLinkButton(['btn', 'btn-primary', 'btn-shadow', 'd-none'], this._row2, 'fa-plus-square');
-    this._inputValue = elem('input', this._row2, ['form-control'], 'max-width: 4rem;');
+    // this._btnAdd = iconLinkButton([, 'd-none'], this._row2, 'fa-plus-square');
+    var inputId = 'focusinputvalue' + _numControllers;
+    this._inputValueLabel = elem('label', this._row2, [], 'margin:0; padding: 0.25rem;');
+    $(this._inputValueLabel).attr('id', inputId);
+    this._inputValue = elem('input', this._row2, ['form-control'], 'max-width: 8rem;');
+    this._inputValue.id = inputId;
     this._inputValue.type = 'number';
-    this._btnSaveValue = elem('button', this._row2, ['btn', 'btn-success'], null, 'Save');
+    // Execute a function when the user releases a key on the keyboard
+    $(this._inputValue).on("keyup", (event) => {
+        // Number 13 is the "Enter" key on the keyboard
+        if (event.keyCode === 13) {
+            // Cancel the default action, if needed
+            event.preventDefault();
+            // Trigger the button element with a click
+            this._btnSaveValue.click();
+        }
+    });
+
+    this._btnSaveValue = iconButton([], this._row2, 'fa-save'); // elem('button', this._row2, [], null, 'Save');
     var btnSaveValueSpinner = elem('span', this._btnSaveValue, ['spinner-border', 'spinner-border-sm', 'ml-1']);
-    this._btnDeleteValue = iconButton(['btn', 'btn-primary', 'btn-shadow'], this._row2, 'fa-trash-alt');
+    this._btnDeleteValue = iconButton([], this._row2, 'fa-trash-alt');
     var btnDeleteValueSpinner = elem('span', this._btnDeleteValue, ['spinner-border', 'spinner-border-sm', 'ml-1']);
 
     this._colorOffset = 0;
@@ -207,8 +221,17 @@ ChartController = function (container) {
 
     this.setZoomLevel(this.defaultZoomLevel, false);
 
+    this._id = _numControllers;
+    _numControllers++;
 };
 var p = ChartController.prototype;
+
+// some defaults
+p.dateFormat = 'MM/DD/YYYY';
+
+p.defaultZoomLevel = 6;
+
+p.defaultButtonClasses = ['btn', 'btn-outline-success'];
 
 // convenience functions ////////////////////////
 
@@ -240,14 +263,14 @@ function elem(type, parent, classList, style, innerHTML) {
 /**
  * create a button with an icon
  * 
- * @param  {} classList
+ * @param  {Array} classList
  * @param  {} parent
  * @param  {} icon
  * @param  {} click
  * @param  {} style
  */
 function iconButton(classList, parent, icon, click, style) {
-    var result = elem('button', parent, classList, style, `<span class="fas ${icon}"></i>`);
+    var result = elem('button', parent, p.defaultButtonClasses.concat(classList), style, `<span class="fas ${icon}"></i>`);
     if (click)
         $(result).click(click);
     return result;
@@ -399,6 +422,7 @@ p.addDatasetFromModel = function (dataset, complete) {
         $(this._row2).addClass('d-flex').removeClass('d-none');
 
         // activate save button
+        $(this._inputValueLabel).html(dataset.yAxisLabel + ':');
         $(this._btnSaveValue).on('click', () => {
 
             // disable btn
@@ -813,10 +837,6 @@ p.timeScales = [{
         unit: 'day'
     }
 ];
-
-p.dateFormat = 'MM/DD/YYYY';
-
-p.defaultZoomLevel = 6;
 
 /** xAxis config object from chart (readonly) */
 Object.defineProperty(p, 'xAxis', {
