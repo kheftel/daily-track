@@ -113,30 +113,48 @@ ChartController = function (container) {
     this._cardHeader = elem('div', this._main, ['card-header', 'd-flex', 'align-items-center', 'p-2']);
     this._detailLink = elem('a', this._cardHeader, ['align-middle', 'm-0', 'h5'], null, parentData.setname);
     this._detailLink.href = '/set/' + parentData.setid;
-    this._editButton = iconButton(['ml-auto'], this._cardHeader, 'fa-edit');
-    this._deleteButton = iconButton(['d-none'], this._cardHeader, 'fa-trash-alt');
+
+    this._drpHeader = elem('div', this._cardHeader, ['dropdown', 'ml-auto']);
+    this._drpHeaderBtn = elem('button', this._drpHeader, ['btn', 'btn-outline-success', 'dropdown-toggle']);
+    $(this._drpHeaderBtn)
+        .attr('type', 'button')
+        .attr('id', 'dropdown' + _numControllers)
+        .attr('data-toggle', 'dropdown');
+    this._drpHeaderBody = elem('div', this._drpHeader, ['dropdown-menu', 'dropdown-menu-right']);
+    /* <div class="dropdown">
+      <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+        Dropdown button
+      </button>
+      <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+        <a class="dropdown-item" href="#">Action</a>
+        <a class="dropdown-item" href="#">Another action</a>
+        <a class="dropdown-item" href="#">Something else here</a>
+      </div>
+    </div> */
+
+    this._editButton = iconLink(['dropdown-item'], this._drpHeaderBody, 'fa-edit', 'Edit');
+    //iconButton(['ml-auto', 'dropdown-item'], this._drpHeaderBody, 'fa-edit');
     this._toggleHTML = {
-        'line': '<span class="fas fa-chart-line"></i>',
-        'bar': '<span class="fas fa-chart-bar"></i>'
+        'bar': '<span class="fas fa-chart-line"></span>Show as line Chart',
+        'line': '<span class="fas fa-chart-bar"></span>Show as bar Chart'
     };
-    this._btnType = iconButton(['d-none'], this._cardHeader, 'fa-chart-line', () => {
+    this._btnType = iconLink(['d-none', 'dropdown-item'], this._drpHeaderBody, 'fa-chart-line', 'Line Chart', '#', (e) => {
+        e.preventDefault();
         if (this.datasets.length == 1) {
             var set = this.datasets[0];
-            if (set.type == 'line')
+            if (set.type == 'line') {
                 set.type = 'bar';
-            else
+                this._btnType.innerHTML = this._toggleHTML.bar;
+            }
+            else {
                 set.type = 'line';
-            this._btnType.innerHTML = this._toggleHTML[set.type];
+                this._btnType.innerHTML = this._toggleHTML.line;
+            }
 
             this.updateChart();
         }
     });
-    this._btnZoomOut = iconButton([], this._cardHeader, 'fa-search-minus', () => {
-        this.zoomOut();
-    });
-    this._btnZoomIn = iconButton([], this._cardHeader, 'fa-search-plus', () => {
-        this.zoomIn();
-    });
+    this._deleteButton = iconLink(['d-none', 'dropdown-item'], this._drpHeaderBody, 'fa-trash-alt', 'Delete', '#');
 
     this._cardBody = elem('div', this._main, 'card-body', 'position: relative;');
     this._chartContainer = elem('div', this._cardBody, 'chartcontainer');
@@ -155,8 +173,13 @@ ChartController = function (container) {
     // footer with buttons to manipulate chart
     this._footer = elem('div', this._chartContainer, ['controlbar']);
 
-    this._row1 = elem('div', this._footer, ['buttonrow', 'd-flex', 'justify-content-center', 'align-items-center', 'py-2', 'bg-gray-700'], 'max-width: 300px; margin: 0 auto; border-radius: 1rem; border: 1px solid rgba(255, 255, 255, 0.2);');
-    this._row2 = elem('div', this._footer, ['buttonrow', 'd-flex', 'form-inline', 'justify-content-center', 'align-items-center', 'py-2']);
+    this._row1 = elem('div', this._footer, ['buttonrow', 'd-flex', 'justify-content-center', 'align-items-center', 'p-1', 'bg-gray-700'], 'max-width: 300px; margin: 0 auto; border-radius: 1rem; border: 1px solid rgba(255, 255, 255, 0.2);');
+    this._row2 = elem('div', this._footer, ['buttonrow', 'd-flex', 'form-inline', 'justify-content-center', 'align-items-center', 'p-1']);
+
+    this._btnZoomOut = iconButton([], this._row1, 'fa-search-minus', (e) => {
+        e.preventDefault();
+        this.zoomOut();
+    });
 
     this._btnLeft = iconButton([], this._row1, 'fa-angle-double-left', () => {
         this.panLeft();
@@ -188,6 +211,12 @@ ChartController = function (container) {
     this._btnRight = iconButton([], this._row1, 'fa-angle-double-right', () => {
         this.panRight();
     });
+    this._btnZoomIn = iconButton([], this._row1, 'fa-search-plus', (e) => {
+        e.preventDefault();
+        this.zoomIn();
+    });
+
+
     this._formgroupValue = elem('div', this._row2, ['input-group']);
     // this._btnAdd = iconLinkButton([, 'd-none'], this._row2, 'fa-plus-square');
     var inputId = 'focusinputvalue' + _numControllers;
@@ -217,6 +246,18 @@ ChartController = function (container) {
 
     // create chart
     this._config = JSON.parse(JSON.stringify(p.defaultConfig));
+    this._config.options.onClick = (e, arr) => {
+        console.log(arr);
+        if(!Array.isArray(arr) || arr.length == 0) return;
+        var p = arr[0];
+        if(p == null || p._datasetIndex == null || p._index == null) return;
+        var datapoint = this.datasets[p._datasetIndex].data[p._index];
+        var newFocus = moment(datapoint.x).utc().startOf('day');
+        console.log('clicked datapoint, focusing on: ' + newFocus.format());
+        this._focus = newFocus;
+        this.updateChart();
+    };
+    
     this._chart = new Chart(this._canvas, this._config);
     this._datasetIds = [];
 
@@ -278,17 +319,21 @@ function iconButton(classList, parent, icon, click, style) {
 }
 
 /**
- * create a link that looks like a button
+ * create a link with an icon and text
  * @param {*} classList 
  * @param {*} parent 
  * @param {*} icon 
+ * @param {*} text 
  * @param {*} href 
+ * @param {*} click 
  * @param {*} style 
  */
-function iconLinkButton(classList, parent, icon, href, style) {
-    var result = elem('a', parent, classList, style, `<span class="fas ${icon}"></i>`);
+function iconLink(classList, parent, icon, text, href, click, style) {
+    var result = elem('a', parent, classList, style, `<span class="fas ${icon}"></span>${text}`);
     if (href)
         result.href = href;
+    if (click)
+        $(result).click(click);
     return result;
 }
 
@@ -585,18 +630,27 @@ p.addDatasetFromModel = function (dataset, complete) {
             });
 
         // show and activate delete button - disabled for now
-        $(this._deleteButton).addClass('d-none').confirmation({
+        $(this._deleteButton).removeClass('d-none').confirmation({
             rootSelector: this._deleteButton,
             popout: true,
             container: 'body',
             title: 'Are you sure you want to delete ' + dataset.name + ' AND all of its data?'
-        }).on('click', () => {
+        }).on('click', (e) => {
+            e.preventDefault();
+
+            $.toast({
+                title: 'Info',
+                content: 'Delete currently disabled',
+                type: 'info',
+                delay: 5000
+            });
+
             if (this.datasets.length != 1) throw new Error('cannot delete if empty or in multi-mode');
 
             // TO DO: what to do with the dataset's points?
 
             // delete set from database
-            $.ajax({
+            /*$.ajax({
                 url: '/api/sets/' + dataset._id,
                 method: 'DELETE',
                 success: (response) => {
@@ -629,7 +683,7 @@ p.addDatasetFromModel = function (dataset, complete) {
                         delay: 5000
                     });
                 }
-            });
+            });*/
         });
     }
 
@@ -880,6 +934,15 @@ Object.defineProperty(p, 'yAxisLabel', {
  * @param  {} update=true whether to update chart
  */
 p.setZoomLevel = function (val, update = true) {
+    if(val < 0 || val >= this.timeScales.length) {
+        $.toast({
+            title: 'Info',
+            content: 'Min/max zoom level reached',
+            type: 'info',
+            delay: 5000
+        });
+    }
+
     val = Math.max(0, Math.min(val, this.timeScales.length - 1));
     this._zoomLevel = val;
     // console.log('zoom level: ' + this._zoomLevel);
@@ -1184,7 +1247,6 @@ Chart.defaults.global.maintainAspectRatio = false;
 Chart.defaults.global.responsive = true;
 Chart.defaults.global.defaultFontFamily = '"Lato", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol"';
 Chart.defaults.global.layout.padding = 0;
-
 Chart.defaults.global.legend.position = 'top';
 Chart.defaults.global.legend.labels.padding = 8;
 Chart.defaults.global.legend.labels.usePointStyle = true;
