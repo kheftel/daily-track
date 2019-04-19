@@ -43,7 +43,7 @@ html {
 }
 .controlbar .btn,
 .card-header .btn {
-  margin: 0 0.25rem;
+  margin: 0 0.125rem;
 }
 .bg-white {
   background-color: #fff;
@@ -109,8 +109,8 @@ html {
   background-color: #3498DB;
 }
 .fx-blur {
-  filter: blur(8px);
-  -webkit-filter: blur(8px);
+  filter: blur(0.5rem);
+  -webkit-filter: blur(0.5rem);
 }
 .flex-1,
 .flex-expand {
@@ -165,7 +165,7 @@ html {
 }
 .btn,
 .input-group-text {
-  padding: 0.25rem 0.75rem !important;
+  padding: 0.25rem 0.5rem !important;
 }
 .btn-outline-success:hover {
   -webkit-box-shadow: 0 0 0 0.2rem rgba(0, 188, 140, 0.5);
@@ -228,11 +228,21 @@ button:not(:disabled) > .spinner-border,
 button:not(:disabled) > .spinner-grow {
   display: none;
 }
+button:not(:disabled) > span.fas,
+button:not(:disabled) > span.fas {
+  display: inline-block;
+}
 button:disabled > .spinner-border,
 button[disabled] > .spinner-border,
 button:disabled > .spinner-grow,
 button[disabled] > .spinner-grow {
   display: inline-block;
+}
+button:disabled > span.fas,
+button[disabled] > span.fas,
+button:disabled > span.fas,
+button[disabled] > span.fas {
+  display: none;
 }
 @media (max-width: 767px) {
   #sidebar {
@@ -248,8 +258,8 @@ button[disabled] > .spinner-grow {
     display: none;
   }
   .fx-blur-when-small {
-    filter: blur(8px);
-    -webkit-filter: blur(8px);
+    filter: blur(0.5rem);
+    -webkit-filter: blur(0.5rem);
   }
 }
 #topnav {
@@ -271,7 +281,7 @@ button[disabled] > .spinner-grow {
     transform: scale(0, 0);
   }
   100% {
-    height: 0px;
+    height: 0;
     transform: scale(0, 0);
   }
 }

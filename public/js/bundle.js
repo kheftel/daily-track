@@ -193,7 +193,7 @@ ChartController = function (container) {
     var inputId = 'focusinputvalue' + _numControllers;
     // this._inputValueLabel = elem('label', this._row2, [], 'margin:0; padding: 0.25rem;');
     // $(this._inputValueLabel).attr('id', inputId);
-    this._inputValue = elem('input', this._formgroupValue, ['form-control'], 'max-width: 8rem;');
+    this._inputValue = elem('input', this._formgroupValue, ['form-control'], 'max-width: 6rem;');
     this._inputValue.id = inputId;
     this._inputValue.type = 'number';
     // save when user presses enter
