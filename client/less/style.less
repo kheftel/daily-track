@@ -278,6 +278,7 @@ html {
     background-color: #375a7f;
 }
 
+// active links
 .navbar-light .navbar-nav .show>.nav-link,
 .navbar-light .navbar-nav .active>.nav-link,
 .navbar-light .navbar-nav .nav-link.show,
@@ -290,38 +291,73 @@ html {
     background-color: #3498DB;
 }
 
-// btn padding
-.btn {
+// btn / input group text padding
+.btn,
+.input-group-text {
     padding: 0.25rem 0.75rem !important;
 }
 
 // form controls
+
+// button rollovers
+.btn-outline-success:hover {
+    -webkit-box-shadow: 0 0 0 0.2rem rgba(0, 188, 140, 0.5);
+    box-shadow: 0 0 0 0.2rem rgba(0, 188, 140, 0.5);
+}
+
+// don't break small screen layout
+.form-inline .input-group,
+.form-inline .custom-select {
+    width: auto;
+}
+
+// form element basic styling
 .form-control {
     height: initial;
     padding: 0.25rem 0.75rem;
-    font-size: 1rem;
     color: @white;
     background-color: @gray-900;
-    // border: 1px solid @gray-600;
-    // border-radius: 0.25rem;
+    border-color: #666;
 }
 
-.form-control:focus,
-.form-control:hover {
-    // color: @white;
-    // background-color: @gray-900;
-    // border-color: @white;
-}
-
+// input groups get same transitions as buttons
 .input-group {
+    border: 1px solid #666;
     border-radius: 0.25rem;
-    border: 1px solid @gray-600;
+    -webkit-transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out, border-color 0.15s ease-in-out, -webkit-box-shadow 0.15s ease-in-out;
+    transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out, border-color 0.15s ease-in-out, -webkit-box-shadow 0.15s ease-in-out;
+    transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out, border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+    transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out, border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out, -webkit-box-shadow 0.15s ease-in-out;
 }
 
+.input-group-text {
+    color: @white;
+}
+
+.input-group>.form-control,
+.input-group>.form-control:hover,
+.input-group>.form-control:focus {
+    border-color: transparent;
+    box-shadow: none;
+    -webkit-box-shadow: none;
+}
+
+.input-group>.form-control:hover,
+.input-group>.form-control:focus {
+    background-color: @black;
+}
+
+// rollovers
+.form-control:focus,
+.form-control:hover,
 .input-group:hover,
 .input-group:focus,
 .input-group:focus-within {
     border-color: @white;
+    background-color: @black;
+    color: @white;
+    -webkit-box-shadow: 0 0 0 0.2rem rgba(255, 255, 255, 0.5);
+    box-shadow: 0 0 0 0.2rem rgba(255, 255, 255, 0.5);
 }
 
 .inconspicuous {
@@ -390,7 +426,6 @@ button[disabled]>.spinner-grow {
 }
 
 // animations!
-
 @keyframes disappear {
     0% {
         transform: scale(100%, 100%);

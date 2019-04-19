@@ -4,6 +4,7 @@
  * @version 0.6.0
  **/
 #toast-container {
+    position: -webkit-sticky;
     position: sticky;
     z-index: 1055;
     top: 0

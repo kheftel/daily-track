@@ -163,24 +163,57 @@ html {
 .navbar-light .navbar-nav .active > .nav-link:hover {
   background-color: #3498DB;
 }
-.btn {
+.btn,
+.input-group-text {
   padding: 0.25rem 0.75rem !important;
+}
+.btn-outline-success:hover {
+  -webkit-box-shadow: 0 0 0 0.2rem rgba(0, 188, 140, 0.5);
+  box-shadow: 0 0 0 0.2rem rgba(0, 188, 140, 0.5);
+}
+.form-inline .input-group,
+.form-inline .custom-select {
+  width: auto;
 }
 .form-control {
   height: initial;
   padding: 0.25rem 0.75rem;
-  font-size: 1rem;
   color: #fff;
   background-color: #222;
+  border-color: #666;
 }
 .input-group {
+  border: 1px solid #666;
   border-radius: 0.25rem;
-  border: 1px solid #999;
+  -webkit-transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out, border-color 0.15s ease-in-out, -webkit-box-shadow 0.15s ease-in-out;
+  transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out, border-color 0.15s ease-in-out, -webkit-box-shadow 0.15s ease-in-out;
+  transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out, border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+  transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out, border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out, -webkit-box-shadow 0.15s ease-in-out;
 }
+.input-group-text {
+  color: #fff;
+}
+.input-group > .form-control,
+.input-group > .form-control:hover,
+.input-group > .form-control:focus {
+  border-color: transparent;
+  box-shadow: none;
+  -webkit-box-shadow: none;
+}
+.input-group > .form-control:hover,
+.input-group > .form-control:focus {
+  background-color: #000;
+}
+.form-control:focus,
+.form-control:hover,
 .input-group:hover,
 .input-group:focus,
 .input-group:focus-within {
   border-color: #fff;
+  background-color: #000;
+  color: #fff;
+  -webkit-box-shadow: 0 0 0 0.2rem rgba(255, 255, 255, 0.5);
+  box-shadow: 0 0 0 0.2rem rgba(255, 255, 255, 0.5);
 }
 .inconspicuous {
   border-color: transparent;
