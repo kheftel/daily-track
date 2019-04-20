@@ -1,12 +1,13 @@
 var ChartController = require('./js/ChartController');
-// require('./js/lib/jquery-3.2.1.min.js');
-// require('./js/lib/popper.min.js');
-// require('./js/lib/bootstrap.min.js');
-// require('./js/lib/bootstrap-confirmation.min.js');
-// require('./js/lib/moment.min.js');
-// require('./js/lib/Chart.min.js');
-require('./js/toast.js');
-require('./js/chartjs-plugin-vh-line.js');
+require('jquery');
+require('popper.js');
+require('bootstrap');
+require('moment');
+require('chart.js');
+require('./js/lib/bootstrap-confirmation.min.js');
+require('./js/lib/tempusdominus-bootstrap-4.min.js');
+require('./js/lib/toast.js');
+require('./js/lib/chartjs-plugin-vh-line.js');
 
 window.helpers = window.helpers || {};
 

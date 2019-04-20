@@ -6,7 +6,8 @@
   "scripts": {
     "start:dev": "nodemon server.js",
     "build:less": "lessc ./client/less/style.less ./public/css/style.css && copyfiles --flat ./client/css/*.css ./public/css",
-    "build:bundle": "browserify ./client/app.js -o ./public/js/bundle.js && copyfiles --flat ./client/js/*.js ./public/js",
+    "build:bundleold": "browserify ./client/app.js -o ./public/js/bundle.js && copyfiles --flat ./client/js/*.js ./public/js",
+    "build:bundle": "webpack",
     "build:clean": "rimraf ./public/css/* ./public/js/*",
     "watch:bundle": "watchify ./client/app.js -o ./public/js/bundle.js -v -d",
     "deploy:heroku": "git push heroku master",
@@ -21,28 +22,34 @@
   "license": "ISC",
   "dependencies": {
     "body-parser": "^1.18.3",
-    "chartjs-plugin-zoom": "^0.7.0",
+    "bootstrap": "^4.3.1",
+    "chart.js": "^2.8.0",
     "express": "^4.16.4",
     "express-validator": "^5.3.1",
     "http-errors": "^1.7.2",
+    "jquery": "^3.4.0",
     "lodash": "^4.17.11",
     "moment": "^2.24.0",
     "moment-round": "^1.0.1",
     "mongoose": "^5.5.1",
     "morgan": "^1.9.1",
+    "popper.js": "^1.15.0",
     "pug": "^2.0.3"
   },
   "devDependencies": {
     "browserify": "^16.2.3",
     "copyfiles": "^2.1.0",
+    "expose-loader": "^0.7.5",
     "jshint": "^2.10.2",
     "less": "^3.9.0",
-    "mocha": "^6.1.3",
+    "mocha": "^6.1.4",
     "nodemon": "^1.18.11",
     "rimraf": "^2.6.3",
     "should": "^13.2.3",
     "uglify-js": "^3.5.4",
-    "watchify": "^3.11.1"
+    "watchify": "^3.11.1",
+    "webpack": "^4.30.0",
+    "webpack-cli": "^3.3.0"
   },
   "engines": {
     "node": "8.11.1"
