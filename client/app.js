@@ -9,6 +9,13 @@ require('./js/lib/tempusdominus-bootstrap-4.min.js');
 require('./js/lib/toast.js');
 require('./js/lib/chartjs-plugin-vh-line.js');
 
+import './css/bootstrap-darkly.css';
+import './less/style.less';
+import './css/toast.css';
+import './css/tempusdominus-bootstrap-4.min.css';
+// import './css/fontawesome-v5.8.1-solid.css';
+// import './css/fontawesome-v5.8.1-fontawesome.css';
+
 window.helpers = window.helpers || {};
 
 window.helpers.createChartControllerFromModel = function(container, dataset) {
