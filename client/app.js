@@ -5,7 +5,8 @@ var ChartController = require('./js/ChartController');
 // require('./js/lib/bootstrap-confirmation.min.js');
 // require('./js/lib/moment.min.js');
 // require('./js/lib/Chart.min.js');
-require('./js/lib/toast.js');
+require('./js/toast.js');
+require('./js/chartjs-plugin-vh-line.js');
 
 window.helpers = window.helpers || {};
 

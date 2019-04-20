@@ -6,7 +6,8 @@ var ChartController = require('./js/ChartController');
 // require('./js/lib/bootstrap-confirmation.min.js');
 // require('./js/lib/moment.min.js');
 // require('./js/lib/Chart.min.js');
-require('./js/lib/toast.js');
+require('./js/toast.js');
+require('./js/chartjs-plugin-vh-line.js');
 
 window.helpers = window.helpers || {};
 
@@ -74,7 +75,7 @@ $(document).ready(function () {
 //         controller.showAll();
 //     });
 // });
-},{"./js/ChartController":2,"./js/lib/toast.js":3}],2:[function(require,module,exports){
+},{"./js/ChartController":2,"./js/chartjs-plugin-vh-line.js":3,"./js/toast.js":4}],2:[function(require,module,exports){
 /**
  * Wraps a chart.js chart and provides an interface to it
  * 
@@ -135,18 +136,17 @@ ChartController = function (container) {
     this._editButton = iconLink(['dropdown-item'], this._drpHeaderBody, 'fa-edit', 'Edit');
     //iconButton(['ml-auto', 'dropdown-item'], this._drpHeaderBody, 'fa-edit');
     this._toggleHTML = {
-        'bar': '<span class="fas fa-chart-line"></span>Show as line Chart',
-        'line': '<span class="fas fa-chart-bar"></span>Show as bar Chart'
+        'bar': '<span class="fas fa-chart-line"></span><span class="ml-2">Switch to line Chart</span>',
+        'line': '<span class="fas fa-chart-bar"></span><span class="ml-2">Switch to bar Chart</span>'
     };
-    this._btnType = iconLink(['d-none', 'dropdown-item'], this._drpHeaderBody, 'fa-chart-line', 'Line Chart', '#', (e) => {
+    this._btnType = iconLink(['d-none', 'dropdown-item'], this._drpHeaderBody, '', '', '#', (e) => {
         e.preventDefault();
         if (this.datasets.length == 1) {
             var set = this.datasets[0];
             if (set.type == 'line') {
                 set.type = 'bar';
                 this._btnType.innerHTML = this._toggleHTML.bar;
-            }
-            else {
+            } else {
                 set.type = 'line';
                 this._btnType.innerHTML = this._toggleHTML.line;
             }
@@ -171,10 +171,9 @@ ChartController = function (container) {
     this._canvas = elem('canvas', this._canvasholder);
 
     // footer with buttons to manipulate chart
-    this._footer = elem('div', this._chartContainer, ['controlbar']);
-
-    this._row1 = elem('div', this._footer, ['buttonrow', 'd-flex', 'justify-content-center', 'align-items-center', 'p-1', 'bg-gray-700'], 'max-width: 300px; margin: 0 auto; border-radius: 1rem; border: 1px solid rgba(255, 255, 255, 0.2);');
-    this._row2 = elem('div', this._footer, ['buttonrow', 'd-flex', 'form-inline', 'justify-content-center', 'align-items-center', 'p-1']);
+    this._footer = elem('div', this._chartContainer, ['controlbar', 'shadow-rb'], `max-width: 300px; margin: 0 auto; border-radius: 1rem; border: ${this.defaultFocusStyle.borderWidth}px solid ${this.defaultFocusStyle.borderColor}; height: 84px; background: #383838;`);
+    this._row1 = elem('div', this._footer, ['d-flex', 'justify-content-center', 'align-items-center', 'pt-1']);
+    this._row2 = elem('div', this._footer, ['d-flex', 'form-inline', 'justify-content-center', 'align-items-center', 'pt-1']);
 
     this._btnZoomOut = iconButton([], this._row1, 'fa-search-minus', (e) => {
         e.preventDefault();
@@ -203,6 +202,10 @@ ChartController = function (container) {
     // adjust chart when date picker changes
     $(this._dateDisplay).on('change.datetimepicker', (e) => {
         var newFocus = moment(e.date).utc().startOf('day');
+        if(this._focus.format('YYYY-MM-DD') == newFocus.format('YYYY-MM-DD')) {
+            return;
+        }
+
         console.log('date picker changed: ' + newFocus.format());
         this._focus = newFocus;
         this.updateChart();
@@ -247,17 +250,22 @@ ChartController = function (container) {
     // create chart
     this._config = JSON.parse(JSON.stringify(p.defaultConfig));
     this._config.options.onClick = (e, arr) => {
-        console.log(arr);
-        if(!Array.isArray(arr) || arr.length == 0) return;
+        if (!Array.isArray(arr) || arr.length == 0) return;
         var p = arr[0];
-        if(p == null || p._datasetIndex == null || p._index == null) return;
+        if (p == null || p._datasetIndex == null || p._index == null) return;
         var datapoint = this.datasets[p._datasetIndex].data[p._index];
         var newFocus = moment(datapoint.x).utc().startOf('day');
         console.log('clicked datapoint, focusing on: ' + newFocus.format());
         this._focus = newFocus;
         this.updateChart();
     };
-    
+
+    this._config.options.verticalLine = [{
+        x: this._focus.format('YYYY-MM-DD'),
+        borderColor: this.defaultFocusStyle.borderColor,
+        borderWidth: this.defaultFocusStyle.borderWidth
+    }];
+
     this._chart = new Chart(this._canvas, this._config);
     this._datasetIds = [];
 
@@ -274,6 +282,11 @@ p.dateFormat = 'MM/DD/YYYY';
 p.defaultZoomLevel = 6;
 
 p.defaultButtonClasses = ['btn', 'btn-outline-success'];
+
+p.defaultFocusStyle = {
+    borderColor: '#00bc8c', //'#375a7f',
+    borderWidth: 3
+};
 
 // convenience functions ////////////////////////
 
@@ -329,7 +342,7 @@ function iconButton(classList, parent, icon, click, style) {
  * @param {*} style 
  */
 function iconLink(classList, parent, icon, text, href, click, style) {
-    var result = elem('a', parent, classList, style, `<span class="fas ${icon}"></span>${text}`);
+    var result = elem('a', parent, classList, style, `<span class="fas ${icon}"></span><span class="ml-2">${text}</span>`);
     if (href)
         result.href = href;
     if (click)
@@ -934,7 +947,7 @@ Object.defineProperty(p, 'yAxisLabel', {
  * @param  {} update=true whether to update chart
  */
 p.setZoomLevel = function (val, update = true) {
-    if(val < 0 || val >= this.timeScales.length) {
+    if (val < 0 || val >= this.timeScales.length) {
         $.toast({
             title: 'Info',
             content: 'Min/max zoom level reached',
@@ -1092,7 +1105,12 @@ p.updateChart = function (t) {
     // set datepicker date to focus
     $(this._dateDisplay).datetimepicker('date', this._focus);
 
+    // set input value to focus
     this._inputValue.value = this.getDatasetValue(this._focus.format('YYYY-MM-DD'));
+
+    // add focus line
+    this._chart.options.verticalLine[0].x = this._focus.format('YYYY-MM-DD');
+    console.log('focus line set to ' + this._chart.options.verticalLine[0].x);
 
     // update chart
     this._chart.update(t);
@@ -1246,6 +1264,8 @@ p.defaultConfig = {
 Chart.defaults.global.maintainAspectRatio = false;
 Chart.defaults.global.responsive = true;
 Chart.defaults.global.defaultFontFamily = '"Lato", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol"';
+Chart.defaults.global.animation.duration = 500;
+Chart.defaults.global.animation.easing = "easeInOutCubic";
 Chart.defaults.global.layout.padding = 0;
 Chart.defaults.global.legend.position = 'top';
 Chart.defaults.global.legend.labels.padding = 8;
@@ -1259,6 +1279,7 @@ Chart.defaults.global.title.padding = 4;
 
 Chart.defaults.global.elements.point.radius = 5;
 Chart.defaults.global.elements.point.hoverRadius = 10;
+Chart.defaults.global.elements.point.hitRadius = 20;
 Chart.defaults.global.elements.line.tension = 0;
 Chart.defaults.global.elements.rectangle.borderWidth = 2;
 
@@ -1269,12 +1290,14 @@ Chart.scaleService.updateScaleDefaults('linear', {
         //     console.log('x-linear-tick: ' + value + ', ' + index + ', ' + values);
         //     return value;
         // },
-        maxRotation: 0
+        maxRotation: 0,
+        min: 0
 
         //showLabelBackdrop: false // hide square behind text
     },
     gridLines: {
-        color: 'rgba(255, 255, 255, 0.2)'
+        color: 'rgba(255, 255, 255, 0.2)',
+        zeroLineColor: 'rgba(255, 255, 255, 0.2)'
     },
     scaleLabel: {
         display: true,
@@ -1283,13 +1306,18 @@ Chart.scaleService.updateScaleDefaults('linear', {
     },
 });
 
+// axes can be customized including ticks here: https://www.chartjs.org/docs/latest/axes/#callbacks
+// chart plugin info: https://www.chartjs.org/docs/latest/developers/plugins.html
 Chart.scaleService.updateScaleDefaults('time', {
     minUnit: 'day',
     gridLines: {
         color: 'rgba(255, 255, 255, 0.2)'
     },
     ticks: {
-        maxRotation: 0
+        fontColor: 'white',
+        source: 'auto', //default 'auto'
+        maxRotation: 0,
+        autoSkip: false
     }
     //     ticks: {
     //         autoSkip: false,
@@ -1317,6 +1345,81 @@ Chart.scaleService.updateScaleDefaults('time', {
 
 module.exports = ChartController;
 },{}],3:[function(require,module,exports){
+(function (Chart) {
+    var VHLinePlugin = {
+        beforeDraw: function (chart) {
+            var ctx = chart.chart.ctx;
+            var axis, line, borderWidth, borderColor, fontColor, fontFamily, fontSize, value, i;
+
+            var hLines = chart.options.horizontalLine;
+            if (hLines) {
+                axis = chart.scales["y-axis-0"];
+                for (i = 0; i < hLines.length; i++) {
+                    line = hLines[i];
+
+                    borderWidth = line.borderWidth || VHLinePlugin.defaults.borderWidth;
+                    borderColor = line.borderColor || VHLinePlugin.defaults.borderColor;
+                    value = line.y ? axis.getPixelForValue(line.y) : 0;
+                    fontColor = line.fontColor || Chart.defaults.global.defaultFontColor;
+                    fontFamily = line.fontFamily || Chart.defaults.global.defaultFontFamily;
+                    fontSize = line.fontSize || Chart.defaults.global.defaultFontSize;
+
+                    if (value) {
+                        VHLinePlugin.drawLine(ctx, borderWidth, borderColor, chart.chartArea.left, value, chart.chartArea.right, value);
+                    }
+
+                    if (line.text) {
+                        ctx.fillStyle = fontColor;
+                        ctx.font = fontSize + 'px ' + fontFamily;
+                        ctx.fillText(line.text, chart.chartArea.left, value - fontSize / 2);
+                    }
+                }
+            }
+            vLines = chart.options.verticalLine;
+            if (vLines) {
+                axis = chart.scales["x-axis-0"];
+                for (i = 0; i < vLines.length; i++) {
+                    line = vLines[i];
+
+                    borderWidth = line.borderWidth || VHLinePlugin.defaults.borderWidth;
+                    borderColor = line.borderColor || VHLinePlugin.defaults.borderColor;
+                    value = line.x ? axis.getPixelForValue(line.x) : 0;
+                    fontColor = line.fontColor || Chart.defaults.global.defaultFontColor;
+                    fontFamily = line.fontFamily || Chart.defaults.global.defaultFontFamily;
+                    fontSize = line.fontSize || Chart.defaults.global.defaultFontSize;
+
+                    if (value) {
+                        var bottom = Chart.defaults.scale.gridLines.drawTicks ? 
+                            chart.chartArea.bottom + Chart.defaults.scale.gridLines.tickMarkLength :
+                            chart.chartArea.bottom;
+                        bottom = chart.chart.height;
+                        VHLinePlugin.drawLine(ctx, borderWidth, borderColor, value, chart.chartArea.top, value, bottom);
+                    }
+
+                    if (line.text) {
+                        ctx.fillStyle = fontColor;
+                        ctx.font = fontSize + 'px ' + fontFamily;
+                        ctx.fillText(line.text, value + borderWidth, chart.chartArea.top + fontSize / 2);
+                    }
+                }
+            }
+        },
+        drawLine: function (ctx, borderWidth, borderColor, x1, y1, x2, y2) {
+            ctx.lineWidth = borderWidth;
+            ctx.beginPath();
+            ctx.moveTo(x1, y1);
+            ctx.lineTo(x2, y2);
+            ctx.strokeStyle = borderColor;
+            ctx.stroke();
+        },
+        defaults: {
+            borderColor: 'rgba(169,169,169, .6)',
+            borderWidth: 3
+        }
+    };
+    Chart.pluginService.register(VHLinePlugin);
+}(Chart));
+},{}],4:[function(require,module,exports){
 /**
  * @author Script47 (https://github.com/Script47/Toast)
  * @description Toast - A Bootstrap 4.2+ jQuery plugin for the toast component

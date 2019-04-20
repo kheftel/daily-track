@@ -2,9 +2,9 @@ extends layout
 
 block content
     each set, i in datasets
-        .row.mb-2
-            .col
-                .chartholder(data-setid=set._id data-setname=set.name)
+        .chartholder.mb-2(data-setid=set._id data-setname=set.name)
+        //- .row.mb-2
+        //-     .col
                 
                 //- .card.border-light.shadow-rb(style="height: " + style.chartRowHeight)
                 //-     .card-header.p-2

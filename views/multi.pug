@@ -1,12 +1,12 @@
 extends layout
 
 block content
-    .row.flex-expand
+    - var ids = [];
+    each set, i in datasets
+        - ids.push(set._id)
+    div(class="chartholder" id="multi" data-ids=JSON.stringify(ids) data-setname='Multi')
+    //- .row.flex-expand
         .col
-            - var ids = [];
-            each set, i in datasets
-                - ids.push(set._id)
-            div(class="chartholder" id="multi" data-ids=JSON.stringify(ids) data-setname='Multi')
 
 block pagescript
     script.

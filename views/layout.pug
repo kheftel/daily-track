@@ -39,21 +39,29 @@ html(lang='en')
                                         =item.title
                 #content.w-100.py-2.transition-animate.d-flex.align-items-stretch
                     #sidebar-shade.d-md-none.modal-backdrop.fade
-                    div(class="container-fluid" + ((active && active.noscroll) ? " d-flex flex-column" : ''))
+                    div(class="w-100 px-2" + ((active && active.noscroll) ? " d-flex flex-column" : ''))
                         if pageTitle && !(active && active.notitle)
                             h4.text-shadow= pageTitle
                         block content
 
+        //- jquery
         script(src="https://code.jquery.com/jquery-3.2.1.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous")
+        //- popper
         script(src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous")
+        //- bootstrap
         script(src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous")
+        //- bootstrap-confirmation
         script(src="/js/bootstrap-confirmation.min.js")
-
+        //- moment
         script(src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.24.0/moment.min.js" integrity="sha256-4iQZ6BVL4qNKlQ27TExEhBN1HFPvAvAMbFavKKosSWQ=" crossorigin="anonymous")
+        //- chart.js
         script(src="https://cdn.jsdelivr.net/npm/chart.js@2.8.0/dist/Chart.min.js" integrity="sha256-Uv9BNBucvCPipKQ2NS9wYpJmi8DTOEfTA/nH2aoJALw=" crossorigin="anonymous")
-        script(type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/tempusdominus-bootstrap-4/5.0.0-alpha14/js/tempusdominus-bootstrap-4.min.js")
-        
+        //- chart annotations
+        script(src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-annotation/0.5.7/chartjs-plugin-annotation.js")
+        //- datepicker
+        script(type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/tempusdominus-bootstrap-4/5.0.0-alpha14/js/tempusdominus-bootstrap-4.min.js")       
         //- script(src="https://cdn.jsdelivr.net/npm/hammerjs@2.0.8")
+        //- app bundled script
         script(src="/js/bundle.js")
 
         block pagescript
