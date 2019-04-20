@@ -64,7 +64,7 @@ html {
 
 // header
 .navbar-brand {
-    background-image: url(/img/dailytracklogo.png);
+    background-image: url("/img/dailytracklogo.png");
     background-repeat: no-repeat;
     background-position: left center;
     padding: 0.25rem 0 0.25rem 3rem;
@@ -317,7 +317,7 @@ html {
     height: initial;
     padding: 0.25rem 0.75rem;
     color: @white;
-    background-color: @gray-900;
+    background-color: @gray-900 !important;
     border-color: #666;
 }
 
@@ -353,12 +353,13 @@ html {
 .form-control:hover,
 .input-group:hover,
 .input-group:focus,
-.input-group:focus-within {
-    border-color: @white;
-    background-color: @black;
-    color: @white;
-    -webkit-box-shadow: 0 0 0 0.2rem rgba(255, 255, 255, 0.5);
-    box-shadow: 0 0 0 0.2rem rgba(255, 255, 255, 0.5);
+.input-group:focus-within,
+.picker__input.picker__input--active {
+    border-color: @white !important;
+    background-color: @black !important;
+    color: @white !important;
+    -webkit-box-shadow: 0 0 0 0.2rem rgba(255, 255, 255, 0.5) !important;
+    box-shadow: 0 0 0 0.2rem rgba(255, 255, 255, 0.5) !important;
 }
 
 .inconspicuous {

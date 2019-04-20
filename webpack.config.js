@@ -1,5 +1,6 @@
 const path = require('path');
 const webpack = require('webpack');
+const CleanWebpackPlugin = require('clean-webpack-plugin');
 
 module.exports = {
     mode: 'development',
@@ -21,19 +22,29 @@ module.exports = {
             },
             {
                 test: /\.css$/,
-                use: [
-                    'style-loader',
-                    'css-loader'
-                ]
+                use: [{
+                    loader: 'style-loader'
+                }, {
+                    loader: 'css-loader',
+                    options: {
+                        sourceMap: true
+                    }
+                }]
             },
             {
                 test: /\.less$/,
-                use: [{
-                    loader: 'style-loader' // creates style nodes from JS strings
-                }, {
-                    loader: 'css-loader' // translates CSS into CommonJS
-                }, {
-                    loader: 'less-loader' // compiles Less to CSS
+                use: [{ // creates style nodes from JS strings
+                    loader: 'style-loader'
+                }, { // translates CSS into CommonJS
+                    loader: 'css-loader',
+                    options: {
+                        sourceMap: true
+                    }
+                }, { // compiles Less to CSS
+                    loader: 'less-loader',
+                    options: {
+                        sourceMap: true
+                    }
                 }]
             }, {
                 test: /\.(woff|woff2|eot|ttf|otf|svg)$/,
@@ -46,7 +57,9 @@ module.exports = {
             }
         ]
     },
+    devtool: 'inline-source-map',
     plugins: [
+        new CleanWebpackPlugin(),
         new webpack.ProvidePlugin({
             Chart: 'chart.js'
         }),

@@ -6,15 +6,16 @@
   "scripts": {
     "start:dev": "nodemon server.js",
     "build:lessold": "lessc ./client/less/style.less ./public/css/style.css && copyfiles --flat ./client/css/*.css ./public/css",
+    "build:img":"copyfiles --flat ./client/img/* ./public/img",
     "build:bundleold": "browserify ./client/app.js -o ./public/js/bundle.js && copyfiles --flat ./client/js/*.js ./public/js",
     "build:bundle": "webpack",
-    "build:clean": "rimraf ./public/css/* ./public/js/*",
+    "build:clean": "rimraf ./public/css/* ./public/js/* ./public/img/*",
     "watch:bundle": "watchify ./client/app.js -o ./public/js/bundle.js -v -d",
     "deploy:heroku": "git push heroku master",
     "server": "npm run test && npm run start",
     "lint": "clear && jshint .",
     "test": "npm run lint && mocha test -u bdd -R spec",
-    "build": "npm run build:clean && npm run build:bundle",
+    "build": "npm run build:clean && npm run build:bundle && npm run build:img",
     "start": "npm run build && node server.js",
     "deploy": "npm run test && npm run build && npm run deploy:heroku"
   },
@@ -38,6 +39,7 @@
   },
   "devDependencies": {
     "browserify": "^16.2.3",
+    "clean-webpack-plugin": "^2.0.1",
     "copyfiles": "^2.1.0",
     "css-loader": "^2.1.1",
     "expose-loader": "^0.7.5",

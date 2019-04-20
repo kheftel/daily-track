@@ -111,27 +111,51 @@ ChartController = function (container) {
     //<input type="text" class="form-control datetimepicker-input" id="datetimepicker5" data-toggle="datetimepicker" data-target="#datetimepicker5"/>
 
     // create datepicker component
-    this._dateDisplay = elem('input', this._row1, ['form-control', 'datetimepicker-input'], 'max-width: 8rem;');
+    this._dateDisplay = elem('input', this._row1, ['form-control'], 'max-width: 8rem;');
+    $(this._dateDisplay).attr('data-value', this._focus.format('YYYY-MM-DD'));
+    $(this._dateDisplay).attr('value', this._focus.format('YYYY-MM-DD'));
     this._dateDisplay.id = datefocusid;
-    $(this._dateDisplay)
-        .attr('data-toggle', 'datetimepicker')
-        .attr('data-target', '#' + datefocusid)
-        .datetimepicker({
-            format: 'L'
-        });
-    // set date picker value
-    $(this._dateDisplay).datetimepicker('date', this._focus);
-    // adjust chart when date picker changes
-    $(this._dateDisplay).on('change.datetimepicker', (e) => {
-        var newFocus = moment(e.date).utc().startOf('day');
-        if(this._focus.format('YYYY-MM-DD') == newFocus.format('YYYY-MM-DD')) {
-            return;
+
+    this._pickadate = $(this._dateDisplay).pickadate({
+        formatSubmit: 'YYYY-MM-DD',
+        format: 'yyyy-mm-dd'
+    }).pickadate('picker');
+    this._pickadate.on({
+        set: (value) => {
+            var newFocus = moment(value.select);
+            if (this._focus.format('YYYY-MM-DD') == newFocus.format('YYYY-MM-DD')) {
+                return;
+            }
+            console.log('pickadate set value: ', newFocus.format());
+            this._focus = newFocus;
+            this.updateChart();
         }
 
-        console.log('date picker changed: ' + newFocus.format());
-        this._focus = newFocus;
-        this.updateChart();
     });
+
+
+
+    // this._dateDisplay = elem('input', this._row1, ['form-control', 'datetimepicker-input'], 'max-width: 8rem;');
+    // this._dateDisplay.id = datefocusid;
+    // $(this._dateDisplay)
+    //     .attr('data-toggle', 'datetimepicker')
+    //     .attr('data-target', '#' + datefocusid)
+    //     .datetimepicker({
+    //         format: 'L'
+    //     });
+    // set date picker value
+    //$(this._dateDisplay).datetimepicker('date', this._focus);
+    // adjust chart when date picker changes
+    // $(this._dateDisplay).on('change.datetimepicker', (e) => {
+    //     var newFocus = moment(e.date).utc().startOf('day');
+    //     if(this._focus.format('YYYY-MM-DD') == newFocus.format('YYYY-MM-DD')) {
+    //         return;
+    //     }
+
+    //     console.log('date picker changed: ' + newFocus.format());
+    //     this._focus = newFocus;
+    //     this.updateChart();
+    // });
 
     this._btnRight = iconButton([], this._row1, 'fa-angle-double-right', () => {
         this.panRight();
@@ -1025,7 +1049,10 @@ p.updateChart = function (t) {
     this._chart.options.title.text = this.getRangeString();
 
     // set datepicker date to focus
-    $(this._dateDisplay).datetimepicker('date', this._focus);
+    this._pickadate.set('select', this._focus.format('YYYY-MM-DD'), {
+        muted: true
+    });
+    //$(this._dateDisplay).datetimepicker('date', this._focus);
 
     // set input value to focus
     this._inputValue.value = this.getDatasetValue(this._focus.format('YYYY-MM-DD'));
