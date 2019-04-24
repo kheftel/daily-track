@@ -55,7 +55,7 @@ ChartController = function (container) {
       </div>
     </div> */
 
-    this._editButton = iconLink(['dropdown-item'], this._drpHeaderBody, 'fa-edit', 'Edit');
+    this._editButton = iconLink(['d-none', 'dropdown-item'], this._drpHeaderBody, 'fa-edit', 'Edit');
     //iconButton(['ml-auto', 'dropdown-item'], this._drpHeaderBody, 'fa-edit');
     this._toggleHTML = {
         'bar': '<span class="fas fa-chart-line"></span><span class="ml-2">Switch to line Chart</span>',
@@ -418,10 +418,14 @@ p.addDatasetFromModel = function (dataset, complete) {
         //$(this._btnAdd).addClass('d-none');
         $(this._row2).removeClass('d-flex').addClass('d-none');
         $(this._deleteButton).addClass('d-none');
+        $(this._editButton).addClass('d-none');
     } else {
         // show type toggle btn
         $(this._btnType).removeClass('d-none').html(this._toggleHTML[dataset.type]);
         // $(this._btnAdd).removeClass('d-none').attr('href', '/set/' + dataset._id + '/new');
+
+        // show / activate edit button
+        $(this._editButton).removeClass('d-none').attr('href', '/set/' + dataset._id + '/edit');
 
         // show row 2
         $(this._row2).addClass('d-flex').removeClass('d-none');

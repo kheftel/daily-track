@@ -33,7 +33,12 @@ var state = {
         }
     ],
     dynamic: [{
-        regex: /^\/set\/.+/, //match /set/STUFF
+        regex: /^\/set\/.+\/edit/, //match /set/id/edit
+        title: 'Edit Dataset',
+        icon: '',
+        noscroll: true
+    }, {
+        regex: /^\/set\/.+/, //match /set/id
         title: 'Dataset Detail',
         icon: '',
         noscroll: true,
@@ -67,13 +72,15 @@ router.use(function (req, res, next) {
         setPageTitle(res, active.title);
     } else {
         // try dyanmic pages
-        state.dynamic.forEach((v, k, col) => {
+        state.dynamic.every((v, k, col) => {
             if (v.regex && v.regex.test(req.path)) {
                 // match!
                 console.log('matched a dynamic page');
                 res.locals.active = v;
                 if (v.title)
                     setPageTitle(res, v.title);
+                //break loop
+                return false;
             }
         });
     }
@@ -143,6 +150,26 @@ router.get('/set/:id', function (req, res, next) {
     });
 });
 
+// edit dataset
+router.get('/set/:id/edit', function (req, res, next) {
+    // grab the dataset from the db
+    Dataset.findById(req.params.id, function (err, dataset) {
+        if (err)
+            return next(err);
+
+        if (!dataset) {
+            console.log('no dataset found');
+
+            // dataset not found
+            return next('Dataset not found');
+        }
+        var result = dataset.toObject();
+        res.locals.dataset = result;
+
+        res.render('set_form');
+    });
+});
+
 // new data point on a dataset
 router.get('/set/:id/new', function (req, res, next) {
     console.log('new data point form');
@@ -152,7 +179,7 @@ router.get('/set/:id/new', function (req, res, next) {
         if (err)
             return next(err);
 
-        if(!dataset) {
+        if (!dataset) {
             console.log('no dataset found');
 
             // dataset not found
