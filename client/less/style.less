@@ -131,9 +131,26 @@
 }
 
 // fx
-.fx-blur {
+.blur {
     filter: blur(0.5rem);
     -webkit-filter: blur(0.5rem);
+}
+
+.blur-none, .blur-md {
+    filter: none;
+    -webkit-filter: none;
+}
+
+@media (min-width: 768px) {
+    .blur-md-none {
+        filter: none;
+        -webkit-filter: none;
+    }
+    
+    .blur-md {
+        filter: blur(0.5rem);
+        -webkit-filter: blur(0.5rem);
+    }
 }
 
 // flex
@@ -395,53 +412,55 @@ button[disabled]>span.fas {
 }
 
 // sidebar //////////
+// displays on top of content, hidden off-canvas until activated
 #sidebar {
     min-width: @sidebar-width;
     max-width: @sidebar-width;
-    // transition: all 0.3s;
-}
-
-#sidebar.active {
     margin-left: -@sidebar-width;
+    position: absolute;
+    height: 100%;
+    z-index: 15; // above shade, below navbar
 }
 
+// shown when active
+#sidebar.active {
+    margin-left: 0;
+}
+
+// used to dim out content when sidebar is active
 #sidebar-shade {
     z-index: 10; // between sidebar and content
     background-color: #334354;
-    display: none;
 }
 
-#sidebar-shade.show {
-    display: block;
+// no scrolling when sidebar is up
+body.sidebar-active {
+    overflow: hidden;   
+    position: fixed; // fix for ios     
 }
 
-// media queries
-@media (max-width: 767px) {
+// media queries ///////////////////////
 
-    // position sidebar on top of content at small screen sizes
+// medium screen and up
+@media (min-width: 768px) {
+
+    // position sidebar side by side with content
     #sidebar {
-        margin-left: -@sidebar-width;
-        position: absolute;
-        height: 100%;
-        z-index: 15; // above shade, below navbar
-    }
-
-    #sidebar.active {
         margin-left: 0;
+        position: initial;
+        height: initial;
+        z-index: initial;
     }
 
-    #sidebarCollapse span {
-        display: none;
+    // if sidebar is active, it hides
+    #sidebar.active {
+        margin-left: -@sidebar-width;
     }
 
-    #content.sidebar-active {
-        filter: blur(0.5rem);
-        -webkit-filter: blur(0.5rem);
-    }
-
+    // scrolling allowed
     body.sidebar-active {
-        overflow: hidden;   
-        position: fixed; // fix for ios     
+        overflow: initial;   
+        position: initial;
     }
 }
 

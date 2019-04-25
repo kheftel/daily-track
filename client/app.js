@@ -48,13 +48,13 @@ $(document).ready(function () {
         if(sidebarActive) {
             $('#sidebar').addClass('active');
             $('#sidebar-shade').addClass('show');
-            $('#content').addClass('sidebar-active');
+            $('#content').addClass('blur blur-md-none');
             $('body').addClass('sidebar-active');
         }
         else {
             $('#sidebar').removeClass('active');
             $('#sidebar-shade').removeClass('show');
-            $('#content').removeClass('sidebar-active');
+            $('#content').removeClass('blur blur-md-none');
             $('body').removeClass('sidebar-active');
         }
 

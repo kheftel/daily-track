@@ -41,7 +41,7 @@ html(lang='en')
                                         span(class="fas fa-fw mr-1 " + item.icon)
                                         =item.title
                 #content.w-100.py-2.transition-animate.d-flex.align-items-stretch
-                    #sidebar-shade.d-md-none.modal-backdrop.fade
+                    #sidebar-shade.d-block.d-md-none.modal-backdrop.fade
                     div(class="w-100 px-2" + ((active && active.noscroll) ? " d-flex flex-column" : ''))
                         if pageTitle && !(active && active.notitle)
                             h4.text-shadow= pageTitle
