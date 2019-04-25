@@ -592,61 +592,86 @@ p.addDatasetFromModel = function (dataset, complete) {
 
             });
 
-        // show and activate delete button - disabled for now
+        // show and activate delete button
         $(this._deleteButton).removeClass('d-none').confirmation({
             rootSelector: this._deleteButton,
             popout: true,
             container: 'body',
             title: 'Are you sure you want to delete ' + dataset.name + ' AND all of its data?'
         }).on('click', (e) => {
-            e.preventDefault();
-
-            $.toast({
-                title: 'Info',
-                content: 'Delete currently disabled',
-                type: 'info',
-                delay: 5000
-            });
-
             if (this.datasets.length != 1) throw new Error('cannot delete if empty or in multi-mode');
 
-            // TO DO: what to do with the dataset's points?
+            e.preventDefault();
 
             // delete set from database
-            /*$.ajax({
-                url: '/api/sets/' + dataset._id,
-                method: 'DELETE',
-                success: (response) => {
-                    console.log(response);
+            $.ajax({
+                    url: '/api/sets/' + dataset._id,
+                    method: 'POST',
+                    data: {
+                        name: dataset.name,
+                        yAxisLabel: dataset.yAxisLabel,
+                        delete: '1'
+                    },
+                    dataType: 'json',
+                    encode: true
+                })
+                .done((data) => {
+                    console.log('ajax resopnse:');
+                    console.log(data);
 
-                    $(this._main)
-                        .removeClass('anim-disappear')
-                        .addClass('anim-disappear')
-                        .on('animationend webkitanimationEnd', (e) => {
-                            // destroy chart and html
-                            this._chart.destroy();
-                            this._chart = null;
-                            this._main.remove();
+                    // enable btn
+                    $(this._deleteButton).prop('disabled', false);
 
-                            $.toast({
-                                title: 'Success!',
-                                content: response.message,
-                                type: 'success',
-                                delay: 5000
+                    if (!data.success) {
+                        // error in deletion
+                        if (data.errors) {
+                            data.errors.forEach((error) => {
+                                // add the error message
+
+                                $.toast({
+                                    title: 'Error',
+                                    content: error.msg,
+                                    type: 'error',
+                                    delay: 5000
+                                });
                             });
-                        });
-                },
-                error: (err) => {
-                    console.log(err);
+                        }
+                    } else {
+                        $(this._main)
+                            .removeClass('anim-disappear')
+                            .addClass('anim-disappear')
+                            .on('animationend webkitanimationEnd', (e) => {
+                                // destroy chart and html
+                                this._chart.destroy();
+                                this._chart = null;
+                                this._main.remove();
+
+                                $.toast({
+                                    title: 'Success!',
+                                    content: data.message,
+                                    type: 'success',
+                                    delay: 5000
+                                });
+
+                                // if we were on the set detail page, we should go somewhere else
+                                if(window.location.pathname != '/')
+                                    window.location.href = '/';
+                            });
+                    }
+                })
+                .fail((data) => {
+                    // enable btn
+                    $(this._deleteButton).prop('disabled', false);
 
                     $.toast({
                         title: 'Error!',
-                        content: err.message,
+                        content: 'Unable to delete, please try again later',
                         type: 'error',
                         delay: 5000
                     });
-                }
-            });*/
+                    console.log('ajax error:');
+                    console.log(data);
+                });
         });
     }
 

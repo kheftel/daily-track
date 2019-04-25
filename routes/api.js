@@ -158,78 +158,80 @@ apiRouter.post('/sets/:id', [
                 return res.send(err);
 
             // TO DO: is this a delete request?
-            // if (datapoint) {
-            //     if (req.body.delete == "1") {
-            //         // delete datapoint
-            //         datapoint.delete((err) => {
-            //             if (err)
-            //                 return res.send(err);
+            if (dataset) {
+                if (req.body.delete == "1") {
+                    // delete dataset, but only if it has no datapoints
 
-            //             return res.json({
-            //                 success: 'true',
-            //                 message: 'Datapoint deleted'
-            //             });
-            //         });
-            //     } else {
-            //         // update datapoint
-            //         datapoint.y = req.body.y;
-            //         datapoint.save((err) => {
-            //             if (err)
-            //                 return res.send(err);
+                    Datapoint.findOne({
+                        dataset: req.params.id
+                    })
+                    .exec((err, datapoint) => {
+                        if (err)
+                            return res.send(err);
 
-            //             return res.json({
-            //                 success: 'true',
-            //                 message: 'Datapoint updated'
-            //             });
-            //         });
-            //     }
-            // } else {
-            //     // delete error
-            //     if (req.body.delete == "1") {
-            //         return res.json({
-            //             success: false,
-            //             errors: [{
-            //                 msg: "No datapoint to delete"
-            //             }]
-            //         });
-            //     }
-
-            //     // create new datapoint
-            //     var newpoint = new Datapoint();
-            //     newpoint.x = req.body.x;
-            //     newpoint.y = req.body.y;
-            //     newpoint.dataset = req.params.id;
-
-            //     // save the datapoint and check for errors
-            //     newpoint.save(function (err) {
-            //         if (err)
-            //             return res.send(err);
-            //         data.success = true;
-            //         data.message = 'Datapoint created for date ' + req.body.x;
-            //         return res.json(data);
-            //     });
-            // }
+                        if(datapoint) {
+                            // cannot delete
+                            return res.json({
+                                success: false,
+                                errors: [{
+                                    msg: 'Cannot delete non-empty dataset. Please delete all points first.'
+                                }]
+                            });
+                        }
+                        else {
+                            //empty, can delete
+                            dataset.delete((err) => {
+                                if (err)
+                                    return res.send(err);
         
-            // update the dataset's info
-            dataset.name = req.body.name;
-            dataset.yAxisLabel = req.body.yAxisLabel;
-            dataset.chartType = req.body.chartType;
-    
-            // ['name', 'chartType', 'yAxisLabel'].forEach(function (element) {
-            //     if (req.body[element] !== undefined)
-            //         dataset[element] = req.body[element];
-            // });
+                                return res.json({
+                                    success: 'true',
+                                    message: 'Dataset deleted'
+                                });
+                            });
+                        }
+                    });
+                } else {
+                    // update dataset
+                    dataset.name = req.body.name;
+                    dataset.yAxisLabel = req.body.yAxisLabel;
+                    dataset.chartType = req.body.chartType;
 
-            // save the dataset
-            dataset.save(function (err) {
-                if (err)
-                    return res.send(err);
+                    // ['name', 'chartType', 'yAxisLabel'].forEach(function (element) {
+                    //     if (req.body[element] !== undefined)
+                    //         dataset[element] = req.body[element];
+                    // });
 
-                data.success = true;
-                data.message = 'Dataset ' + dataset.name + ' updated!';
-                return res.json(data);
-            });
+                    // save the dataset
+                    dataset.save(function (err) {
+                        if (err)
+                            return res.send(err);
 
+                        data.success = true;
+                        data.message = 'Dataset ' + dataset.name + ' updated!';
+                        return res.json(data);
+                    });
+                }
+            } else {
+                if (req.body.delete == "1") {
+                    // delete error
+                    return res.json({
+                        success: false,
+                        errors: [{
+                            msg: "No dataset to delete"
+                        }]
+                    });
+                }
+                else {
+                    // dataset not found
+                    return res.json({
+                        success: false,
+                        errors: [{
+                            msg: "No dataset found"
+                        }]
+                    });
+                }
+            }
         });
     }
 ]);
@@ -345,7 +347,7 @@ apiRouter.post('/sets/:id/data', [
                         if (err)
                             return res.send(err);
                         data.success = true;
-                        data.message = 'Datapoint created for date ' + req.body.x;
+                        data.message = 'Datapoint created for ' + req.body.x;
                         return res.json(data);
                     });
                 }

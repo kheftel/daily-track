@@ -4,10 +4,10 @@
  * @version 0.6.0
  **/
 #toast-container {
-    position: -webkit-sticky;
-    position: sticky;
+    position: fixed;
     z-index: 1055;
-    top: 0
+    top: 0;
+    width: 100%;
 }
 
 #toast-wrapper {

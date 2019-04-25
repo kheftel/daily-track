@@ -129,6 +129,13 @@ router.get('/set/:id', function (req, res, next) {
         if (err)
             return next(err);
 
+        if (!dataset) {
+            console.log('no dataset found');
+
+            // dataset not found
+            return next(new Error('Dataset not found'));
+        }
+
         // populate chart's datapoints
         Datapoint.find({
                 'dataset': req.params.id,
@@ -161,7 +168,7 @@ router.get('/set/:id/edit', function (req, res, next) {
             console.log('no dataset found');
 
             // dataset not found
-            return next('Dataset not found');
+            return next(new Error('Dataset not found'));
         }
         var result = dataset.toObject();
         res.locals.dataset = result;
