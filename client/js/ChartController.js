@@ -597,7 +597,7 @@ p.addDatasetFromModel = function (dataset, complete) {
             rootSelector: this._deleteButton,
             popout: true,
             container: 'body',
-            title: 'Are you sure you want to delete ' + dataset.name + ' AND all of its data?'
+            title: 'Are you sure you want to delete ' + dataset.name + '?'
         }).on('click', (e) => {
             if (this.datasets.length != 1) throw new Error('cannot delete if empty or in multi-mode');
 

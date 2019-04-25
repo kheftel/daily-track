@@ -44,90 +44,6 @@
 @light: @gray-800;
 @dark: @gray-500;
 
-// RULES /////////////////
-
-body,
-html {
-    width: 100%;
-    height: 100%;
-    margin: 0;
-    padding: 0;
-}
-
-// page container uses a row layout
-#page-container {
-    height: 100%;
-    width: 100%;
-    // display: flex;
-    // flex-direction: column;
-}
-
-// header
-.navbar-brand {
-    background-image: url("/img/dailytracklogo.png");
-    background-repeat: no-repeat;
-    background-position: left center;
-    padding: 0.25rem 0 0.25rem 3rem;
-    font-size: 1.5rem;
-    background-size: 2.5rem;
-    position: absolute;
-    transform: translateX(-50%);
-    left: 50%;
-}
-
-// holds sidebar and content, fills available space under header
-#content-container {
-    // position: relative;
-    // display: flex;
-    // width: 100%;
-    // align-items: stretch;
-    // flex: 1;
-}
-
-// holds content
-#content {
-    // width: 100%;
-    // padding: 20px;
-    // transition: all 0.3s;
-}
-
-// holds a chart.js chart
-.chartcontainer {
-    position: absolute;
-    top: 0;
-    right: 0;
-    bottom: 0;
-    left: 0;
-    padding: 0 0.5rem;
-}
-
-// notifications
-.toast-body {
-    color: #444;
-}
-
-// sidebar //////////
-#sidebar {
-    min-width: @sidebar-width;
-    max-width: @sidebar-width;
-    // transition: all 0.3s;
-}
-
-#sidebar.active {
-    margin-left: -@sidebar-width;
-}
-
-// chart controls
-.controlbar .buttonrow {
-    height: @controlbar-height;
-}
-
-.controlbar .btn,
-.controlbar .input-group,
-.card-header .btn {
-    margin: 0 .125rem;
-}
-
 // UTILITY CLASSES
 // darkly bg gray levels and colorsZ
 .bg-white {
@@ -272,14 +188,94 @@ html {
 
 // END UTILITY CLASSES
 
+// RULES /////////////////
+
+body,
+html {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+// above sidebar and shade
+#topnav {
+    z-index: 20;
+}
+
+// page container uses a row layout
+#page-container {
+    height: 100%;
+    width: 100%;
+    // display: flex;
+    // flex-direction: column;
+}
+
+// header
+.navbar-brand {
+    background-image: url("/img/dailytracklogo.png");
+    background-repeat: no-repeat;
+    background-position: left center;
+    padding: 0.25rem 0 0.25rem 3rem;
+    font-size: 1.5rem;
+    background-size: 2.5rem;
+    position: absolute;
+    transform: translateX(-50%);
+    left: 50%;
+}
+
+// holds sidebar and content, fills available space under header
+#content-container {
+    // position: relative;
+    // display: flex;
+    // width: 100%;
+    // align-items: stretch;
+    // flex: 1;
+}
+
+// holds content
+#content {
+    // width: 100%;
+    // padding: 20px;
+    // transition: all 0.3s;
+}
+
+// holds a chart.js chart
+.chartcontainer {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    padding: 0 0.5rem;
+}
+
+// notifications - overrides darkly and/or toast.css
+
+// chart controls
+.controlbar .buttonrow {
+    height: @controlbar-height;
+}
+
+.controlbar .btn,
+.controlbar .input-group,
+.card-header .btn {
+    margin: 0 .125rem;
+}
+
 // bootstrap/darkly overrides
+// notifications
+.toast-body {
+    color: #444;
+}
+
 // sidebar link hover
 .navbar-light .navbar-nav .nav-link:hover {
     color: #fff;
     background-color: #375a7f;
 }
 
-// active links
+// active sidebar links
 .navbar-light .navbar-nav .show>.nav-link,
 .navbar-light .navbar-nav .active>.nav-link,
 .navbar-light .navbar-nav .nav-link.show,
@@ -398,6 +394,27 @@ button[disabled]>span.fas {
     display: none;
 }
 
+// sidebar //////////
+#sidebar {
+    min-width: @sidebar-width;
+    max-width: @sidebar-width;
+    // transition: all 0.3s;
+}
+
+#sidebar.active {
+    margin-left: -@sidebar-width;
+}
+
+#sidebar-shade {
+    z-index: 10; // between sidebar and content
+    background-color: #334354;
+    display: none;
+}
+
+#sidebar-shade.show {
+    display: block;
+}
+
 // media queries
 @media (max-width: 767px) {
 
@@ -417,26 +434,14 @@ button[disabled]>span.fas {
         display: none;
     }
 
-    .fx-blur-when-small {
+    #content.sidebar-active {
         filter: blur(0.5rem);
         -webkit-filter: blur(0.5rem);
     }
-}
 
-// above sidebar and shade
-#topnav {
-    z-index: 20;
-}
-
-#sidebar-shade {
-    z-index: 10; // between sidebar and content
-    // background-color: rgb(128, 0, 128);
-    background-color: #334354;
-    display: none;
-}
-
-#sidebar-shade.show {
-    display: block;
+    body.sidebar-active {
+        overflow: hidden;        
+    }
 }
 
 // animations!
