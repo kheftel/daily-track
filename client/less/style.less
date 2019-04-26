@@ -267,8 +267,6 @@ html {
     padding: 0 0.5rem;
 }
 
-// notifications - overrides darkly and/or toast.css
-
 // chart controls
 .controlbar .buttonrow {
     height: @controlbar-height;
@@ -309,6 +307,11 @@ html {
 .btn,
 .input-group-text {
     padding: 0.25rem 0.5rem !important;
+}
+
+// modal backdrop
+.modal-backdrop {
+    background-color: #334354;
 }
 
 // form controls
@@ -430,7 +433,6 @@ button[disabled]>span.fas {
 // used to dim out content when sidebar is active
 #sidebar-shade {
     z-index: 10; // between sidebar and content
-    background-color: #334354;
 }
 
 // no scrolling when sidebar is up
