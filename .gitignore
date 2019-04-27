@@ -1,6 +1,10 @@
 # app config file
 config.json
 
+# output dir
+/dist
+
+# macos
 .DS_Store
 
 # Logs
