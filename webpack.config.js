@@ -3,6 +3,7 @@ const webpack = require('webpack');
 const CleanWebpackPlugin = require('clean-webpack-plugin');
 const utils = require("./webpack.utils");
 const merge = require('webpack-merge');
+const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 
 var baseConfig = merge([{
     mode: 'development',
@@ -26,7 +27,7 @@ var baseConfig = merge([{
             {
                 test: /\.css$/,
                 use: [{
-                    loader: 'style-loader'
+                    loader: MiniCssExtractPlugin.loader
                 }, {
                     loader: 'css-loader',
                     options: {
@@ -36,28 +37,24 @@ var baseConfig = merge([{
             },
             {
                 test: /\.less$/,
-                use: [{ // creates style nodes from JS strings
-                    loader: 'style-loader'
-                }, { // translates CSS into CommonJS
-                    loader: 'css-loader',
-                    options: {
-                        sourceMap: true
-                    }
-                }, { // compiles Less to CSS
-                    loader: 'less-loader',
-                    options: {
-                        sourceMap: true
-                    }
-                }]
-            }, /*{
-                test: /\.(jpg|png|gif)$/,
-                use: {
-                    loader: 'file-loader',
-                    options: {
-                        name: '[path][name].[hash].[ext]',
+                use: [{
+                        loader: MiniCssExtractPlugin.loader
                     },
-                },
-            },*/
+                    {
+                        loader: 'css-loader',
+                        options: {
+                            sourceMap: true
+                        }
+                    },
+                    utils.autoprefix(),
+                    {
+                        loader: 'less-loader',
+                        options: {
+                            sourceMap: true
+                        }
+                    }
+                ]
+            },
             {
                 test: /\.(woff|woff2|eot|ttf|otf|svg)$/,
                 use: [{
@@ -77,12 +74,18 @@ var baseConfig = merge([{
         }),
         new webpack.ProvidePlugin({
             moment: 'moment'
+        }),
+        new MiniCssExtractPlugin({
+            filename: "[name].css",
         })
     ]
 }]);
 
 module.exports = merge([
     baseConfig,
+    // utils.extractCSS({
+    //     use: ["css-loader", utils.autoprefix()],
+    // }),
     utils.loadImages({
         options: {
             limit: 10000,
