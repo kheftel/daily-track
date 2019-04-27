@@ -5,17 +5,17 @@
   "main": "server.js",
   "scripts": {
     "start:dev": "nodemon server.js",
-    "build:lessold": "lessc ./client/less/style.less ./public/css/style.css && copyfiles --flat ./client/css/*.css ./public/css",
-    "build:img":"copyfiles --flat ./client/img/* ./public/img && copyfiles --flat ./client/favicon.ico ./public",
-    "build:bundleold": "browserify ./client/app.js -o ./public/js/bundle.js && copyfiles --flat ./client/js/*.js ./public/js",
+    "build:lessold": "lessc ./src/less/style.less ./dist/css/style.css && copyfiles --flat ./src/css/*.css ./dist/css",
+    "build:imgold": "copyfiles --flat ./src/img/* ./dist/img && copyfiles --flat ./src/favicon.ico ./dist",
+    "build:bundleold": "browserify ./src/index.js -o ./dist/js/bundle.js && copyfiles --flat ./src/js/*.js ./dist/js",
     "build:bundle": "webpack",
-    "build:cleanold": "rimraf ./public/css/* ./public/js/* ./public/img/*",
-    "watch:bundle": "watchify ./client/app.js -o ./public/js/bundle.js -v -d",
+    "build:cleanold": "rimraf ./dist/css/* ./dist/js/* ./dist/img/*",
+    "watch:bundle": "watchify ./src/index.js -o ./dist/js/bundle.js -v -d",
     "deploy:heroku": "git push heroku master",
     "server": "npm run test && npm run start",
     "lint": "clear && jshint .",
     "test": "npm run lint && mocha test -u bdd -R spec",
-    "build": "npm run build:bundle && npm run build:img",
+    "build": "npm run build:bundle",
     "start": "npm run build && node server.js",
     "deploy": "npm run test && npm run build && npm run deploy:heroku"
   },
@@ -44,6 +44,7 @@
     "css-loader": "^2.1.1",
     "expose-loader": "^0.7.5",
     "file-loader": "^3.0.1",
+    "html-webpack-plugin": "^3.2.0",
     "jshint": "^2.10.2",
     "less": "^3.9.0",
     "less-loader": "^4.1.0",
@@ -53,9 +54,12 @@
     "should": "^13.2.3",
     "style-loader": "^0.23.1",
     "uglify-js": "^3.5.4",
+    "url-loader": "^1.1.2",
     "watchify": "^3.11.1",
     "webpack": "^4.30.0",
-    "webpack-cli": "^3.3.0"
+    "webpack-cli": "^3.3.0",
+    "webpack-dev-server": "^3.3.1",
+    "webpack-merge": "^4.2.1"
   },
   "engines": {
     "node": "8.11.1"

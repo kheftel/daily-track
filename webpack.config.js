@@ -1,13 +1,16 @@
 const path = require('path');
 const webpack = require('webpack');
 const CleanWebpackPlugin = require('clean-webpack-plugin');
+const utils = require("./webpack.utils");
+const merge = require('webpack-merge');
 
-module.exports = {
+var baseConfig = merge([{
     mode: 'development',
-    entry: './client/app.js',
+    entry: './src/index.js',
     output: {
         filename: 'bundle.js',
-        path: path.resolve(__dirname, 'public')
+        // path: path.resolve(__dirname, 'public'),
+        publicPath: "/"
     },
     module: {
         rules: [{
@@ -46,7 +49,16 @@ module.exports = {
                         sourceMap: true
                     }
                 }]
-            }, {
+            }, /*{
+                test: /\.(jpg|png|gif)$/,
+                use: {
+                    loader: 'file-loader',
+                    options: {
+                        name: '[path][name].[hash].[ext]',
+                    },
+                },
+            },*/
+            {
                 test: /\.(woff|woff2|eot|ttf|otf|svg)$/,
                 use: [{
                     loader: 'file-loader',
@@ -67,4 +79,14 @@ module.exports = {
             moment: 'moment'
         })
     ]
-};
+}]);
+
+module.exports = merge([
+    baseConfig,
+    utils.loadImages({
+        options: {
+            limit: 10000,
+            name: "img/[name].[hash:4].[ext]",
+        },
+    })
+]);

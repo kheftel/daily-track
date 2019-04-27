@@ -1,0 +1,488 @@
+// VARIABLES /////////////////////
+@sidebar-width: 200px;
+@transition-duration: 0.2s;
+
+@controlbar-height: 48px;
+@ios-bar-height: 60px;
+
+@shadow-color: rgba(0, 0, 0, 0.5);
+@shadow-length: 0.25rem;
+@shadow-blur: 0.5rem;
+@text-shadow-length: 2px;
+@text-shadow-blur: 2px;
+
+// DARKLY VARIABLES
+@white: #fff;
+@gray-100: #f8f9fa;
+@gray-200: #ebebeb;
+@gray-300: #dee2e6;
+@gray-400: #ced4da;
+@gray-500: #adb5bd;
+@gray-600: #999;
+@gray-700: #444;
+@gray-800: #303030;
+@gray-900: #222;
+@black: #000;
+
+@blue: #375a7f;
+@indigo: #6610f2;
+@purple: #6f42c1;
+@pink: #e83e8c;
+@red: #E74C3C;
+@orange: #fd7e14;
+@yellow: #F39C12;
+@green: #00bc8c;
+@teal: #20c997;
+@cyan: #3498DB;
+
+@primary: @blue;
+@secondary: @gray-700;
+@success: @green;
+@info: @cyan;
+@warning: @yellow;
+@danger: @red;
+@light: @gray-800;
+@dark: @gray-500;
+
+// UTILITY CLASSES
+// darkly bg gray levels and colorsZ
+.bg-white {
+    background-color: @white;
+}
+
+.bg-gray-100 {
+    background-color: @gray-100;
+}
+
+.bg-gray-200 {
+    background-color: @gray-200;
+}
+
+.bg-gray-300 {
+    background-color: @gray-300;
+}
+
+.bg-gray-400 {
+    background-color: @gray-400;
+}
+
+.bg-gray-500 {
+    background-color: @gray-500;
+}
+
+.bg-gray-600 {
+    background-color: @gray-600;
+}
+
+.bg-gray-700 {
+    background-color: @gray-700;
+}
+
+.bg-gray-800 {
+    background-color: @gray-800;
+}
+
+.bg-gray-900 {
+    background-color: @gray-900;
+}
+
+.bg-black {
+    background-color: @black;
+}
+
+.blue {
+    background-color: @blue;
+}
+
+.indigo {
+    background-color: @indigo;
+}
+
+.purple {
+    background-color: @purple;
+}
+
+.pink {
+    background-color: @pink;
+}
+
+.red {
+    background-color: @red;
+}
+
+.orange {
+    background-color: @orange;
+}
+
+.yellow {
+    background-color: @yellow;
+}
+
+.green {
+    background-color: @green;
+}
+
+.teal {
+    background-color: @teal;
+}
+
+.cyan {
+    background-color: @cyan;
+}
+
+// fx
+.blur {
+    filter: blur(0.5rem);
+    -webkit-filter: blur(0.5rem);
+}
+
+.blur-none, .blur-md {
+    filter: none;
+    -webkit-filter: none;
+}
+
+@media (min-width: 768px) {
+    .blur-md-none {
+        filter: none;
+        -webkit-filter: none;
+    }
+    
+    .blur-md {
+        filter: blur(0.5rem);
+        -webkit-filter: blur(0.5rem);
+    }
+}
+
+// flex
+.flex-1,
+.flex-expand {
+    -webkit-box-flex: 1;
+    -ms-flex: 1 1 0%;
+    flex: 1 1 0%;
+}
+
+// animated transitions
+.transition-animate {
+    -webkit-transition: all @transition-duration;
+    -o-transition: all @transition-duration;
+    transition: all @transition-duration;
+}
+
+// shadows
+.text-shadow {
+    text-shadow: @text-shadow-length @text-shadow-length @text-shadow-blur @shadow-color;
+}
+
+.btn-shadow {
+    -webkit-box-shadow: @text-shadow-length @text-shadow-length @text-shadow-blur @shadow-color;
+    box-shadow: @text-shadow-length @text-shadow-length @text-shadow-blur @shadow-color;
+}
+
+.shadow-b {
+    -webkit-box-shadow: 0 @shadow-length @shadow-blur @shadow-color  !important;
+    box-shadow: 0 @shadow-length @shadow-blur @shadow-color  !important;
+}
+
+.shadow-r {
+    -webkit-box-shadow: @shadow-length 0 @shadow-blur @shadow-color  !important;
+    box-shadow: @shadow-length 0 @shadow-blur @shadow-color  !important;
+}
+
+.shadow-br,
+.shadow-rb {
+    -webkit-box-shadow: @shadow-length @shadow-length @shadow-blur @shadow-color  !important;
+    box-shadow: @shadow-length @shadow-length @shadow-blur @shadow-color  !important;
+}
+
+// rounded
+.rounded-1 {
+    border-radius: 0.25rem !important;
+}
+
+.rounded-2 {
+    border-radius: 0.5rem !important;
+}
+
+// END UTILITY CLASSES
+
+// RULES /////////////////
+
+body,
+html {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+// above sidebar and shade
+#topnav {
+    z-index: 20;
+}
+
+// page container uses a row layout
+#page-container {
+    height: 100%;
+    width: 100%;
+    // display: flex;
+    // flex-direction: column;
+}
+
+// header
+.navbar-brand {
+    background-image: url("../img/dailytracklogo.png");
+    background-repeat: no-repeat;
+    background-position: left center;
+    padding: 0.25rem 0 0.25rem 3rem;
+    font-size: 1.5rem;
+    background-size: 2.5rem;
+    position: absolute;
+    transform: translateX(-50%);
+    left: 50%;
+}
+
+// holds sidebar and content, fills available space under header
+#content-container {
+    // position: relative;
+    // display: flex;
+    // width: 100%;
+    // align-items: stretch;
+    // flex: 1;
+}
+
+// holds content
+#content {
+    // width: 100%;
+    // padding: 20px;
+    // transition: all 0.3s;
+}
+
+// holds a chart.js chart
+.chartcontainer {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    padding: 0 0.5rem;
+}
+
+// chart controls
+.controlbar .buttonrow {
+    height: @controlbar-height;
+}
+
+.controlbar .btn,
+.controlbar .input-group,
+.card-header .btn {
+    margin: 0 .125rem;
+}
+
+// bootstrap/darkly overrides
+// notifications
+.toast-body {
+    color: #444;
+}
+
+// sidebar link hover
+.navbar-light .navbar-nav .nav-link:hover {
+    color: #fff;
+    background-color: #375a7f;
+}
+
+// active sidebar links
+.navbar-light .navbar-nav .show>.nav-link,
+.navbar-light .navbar-nav .active>.nav-link,
+.navbar-light .navbar-nav .nav-link.show,
+.navbar-light .navbar-nav .nav-link.active {
+    color: #fff;
+    background-color: #3498DB;
+}
+
+.navbar-light .navbar-nav .active>.nav-link:hover {
+    background-color: #3498DB;
+}
+
+// btn / input group text padding
+.btn,
+.input-group-text {
+    padding: 0.25rem 0.5rem !important;
+}
+
+// modal backdrop
+.modal-backdrop {
+    background-color: #334354;
+}
+
+// form controls
+
+// button rollovers
+.btn-outline-success:hover {
+    -webkit-box-shadow: 0 0 0 0.2rem rgba(0, 188, 140, 0.5);
+    box-shadow: 0 0 0 0.2rem rgba(0, 188, 140, 0.5);
+}
+
+// don't break small screen layout
+.form-inline .input-group,
+.form-inline .custom-select {
+    width: auto;
+}
+
+// form element basic styling
+.form-control {
+    height: initial;
+    padding: 0.25rem 0.75rem;
+    color: @white;
+    background-color: @gray-900 !important;
+    border-color: #666;
+}
+
+// input groups get same transitions as buttons
+.input-group {
+    border: 1px solid #666;
+    border-radius: 0.25rem;
+    -webkit-transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out, border-color 0.15s ease-in-out, -webkit-box-shadow 0.15s ease-in-out;
+    transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out, border-color 0.15s ease-in-out, -webkit-box-shadow 0.15s ease-in-out;
+    transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out, border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+    transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out, border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out, -webkit-box-shadow 0.15s ease-in-out;
+}
+
+.input-group-text {
+    color: @white;
+}
+
+.input-group>.form-control,
+.input-group>.form-control:hover,
+.input-group>.form-control:focus {
+    border: none;
+    box-shadow: none;
+    -webkit-box-shadow: none;
+}
+
+.input-group>.form-control:hover,
+.input-group>.form-control:focus {
+    background-color: @black;
+}
+
+// rollovers
+.form-control:focus,
+.form-control:hover,
+.input-group:hover,
+.input-group:focus,
+.input-group:focus-within,
+.picker__input.picker__input--active {
+    border-color: @white !important;
+    background-color: @black !important;
+    color: @white !important;
+    -webkit-box-shadow: 0 0 0 0.2rem rgba(255, 255, 255, 0.5) !important;
+    box-shadow: 0 0 0 0.2rem rgba(255, 255, 255, 0.5) !important;
+}
+
+.inconspicuous {
+    border-color: transparent;
+    background-color: transparent;
+}
+
+.inconspicuous:focus,
+.inconspicuous:hover {
+    color: @white;
+    background-color: @gray-900;
+}
+
+// show/hide spinners in disabled/enabled buttons
+button:not(:disabled)>.spinner-border,
+button:not(:disabled)>.spinner-grow {
+    display: none;
+}
+
+button:not(:disabled)>span.fas,
+button:not(:disabled)>span.fas {
+    display: inline-block;
+}
+
+button:disabled>.spinner-border,
+button[disabled]>.spinner-border,
+button:disabled>.spinner-grow,
+button[disabled]>.spinner-grow {
+    display: inline-block;
+}
+
+button:disabled>span.fas,
+button[disabled]>span.fas,
+button:disabled>span.fas,
+button[disabled]>span.fas {
+    display: none;
+}
+
+// sidebar //////////
+// displays on top of content, hidden off-canvas until activated
+#sidebar {
+    min-width: @sidebar-width;
+    max-width: @sidebar-width;
+    margin-left: -@sidebar-width;
+    position: absolute;
+    height: 100%;
+    z-index: 15; // above shade, below navbar
+}
+
+// shown when active
+#sidebar.active {
+    margin-left: 0;
+}
+
+// used to dim out content when sidebar is active
+#sidebar-shade {
+    z-index: 10; // between sidebar and content
+}
+
+// no scrolling when sidebar is up
+body.sidebar-active {
+    overflow: hidden;
+    position: fixed; // fix for ios     
+}
+
+// media queries ///////////////////////
+
+// medium screen and up
+@media (min-width: 768px) {
+
+    // position sidebar side by side with content
+    #sidebar {
+        margin-left: 0;
+        position: initial;
+        height: initial;
+        z-index: initial;
+    }
+
+    // if sidebar is active, it hides
+    #sidebar.active {
+        margin-left: -@sidebar-width;
+    }
+
+    // scrolling allowed
+    body.sidebar-active {
+        overflow: initial;   
+        position: initial;
+    }
+}
+
+// animations!
+@keyframes disappear {
+    0% {
+        transform: scale(100%, 100%);
+    }
+
+    50% {
+        transform: scale(0, 0);
+    }
+
+    100% {
+        height: 0;
+        transform: scale(0, 0);
+    }
+}
+
+.anim-disappear {
+    animation-name: disappear;
+    animation-duration: 2s;
+}

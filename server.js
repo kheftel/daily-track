@@ -41,10 +41,10 @@ app.set('view engine', 'pug');
 
 // ROUTES //////////////////////
 // serve static files
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(__dirname, 'dist')));
 
 // app.get('/', (request, response) => {
-//     response.sendFile(__dirname + 'public/index.html');
+//     response.sendFile(__dirname + 'dist/index.html');
 // });
 
 // register /api routes
