@@ -64,7 +64,8 @@ var devConfig = merge([
     utils.loadImages({
         options: {
             limit: 10000,
-            name: "img/[name].[hash].[ext]",
+            include: 'img/',
+            name: "img/[name].[ext]",
         },
     })
 ]);
@@ -110,7 +111,7 @@ var prodConfig = merge([{
     utils.loadImages({
         options: {
             limit: 10000,
-            name: "img/[name].[hash].[ext]",
+            name: "img/[name].[ext]",
         },
     }),
     utils.generateSourceMaps({

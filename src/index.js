@@ -20,6 +20,10 @@ import './css/pickadate/default.date.css';
 // import './css/fontawesome-v5.8.1-solid.css';
 // import './css/fontawesome-v5.8.1-fontawesome.css';
 import './favicon.ico';
+import "./img/touch-icon-iphone.png";
+import "./img/touch-icon-ipad.png";
+import "./img/touch-icon-iphone-retina.png";
+import "./img/touch-icon-ipad-retina.png";
 
 window.helpers = window.helpers || {};
 

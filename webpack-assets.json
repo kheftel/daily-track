@@ -1,11 +1,23 @@
 {
   "main": {
-    "js": "/main.js"
+    "css": "/main.12e44cc652d342b7496b.css",
+    "js": "/main.844d99c94b592fa578d7.js"
+  },
+  "runtime~main": {
+    "js": "/runtime~main.25c3056e02460ce75bc5.js"
+  },
+  "vendors~main": {
+    "js": "/vendors~main.234691c488bcf390d85b.js"
   },
   "": {
     "ico": "/favicon.ico",
     "html": "/generated.html",
-    "png": "/img/dailytracklogo.932e0df31ccd29fb097ade38e3357534.png",
+    "png": [
+      "/img/dailytracklogo.png",
+      "/img/touch-icon-ipad-retina.png",
+      "/img/touch-icon-ipad.png",
+      "/img/touch-icon-iphone-retina.png"
+    ],
     "json": "/manifest.json"
   }
 }
