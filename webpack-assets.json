@@ -1,13 +1,6 @@
 {
   "main": {
-    "css": "/main.87e2c58138402af5ecee.css",
-    "js": "/main.8a6a288792ae51268e0e.js"
-  },
-  "runtime~main": {
-    "js": "/runtime~main.25c3056e02460ce75bc5.js"
-  },
-  "vendors~main": {
-    "js": "/vendors~main.234691c488bcf390d85b.js"
+    "js": "/main.js"
   },
   "": {
     "ico": "/favicon.ico",
