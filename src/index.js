@@ -24,6 +24,8 @@ import "./img/touch-icon-iphone.png";
 import "./img/touch-icon-ipad.png";
 import "./img/touch-icon-iphone-retina.png";
 import "./img/touch-icon-ipad-retina.png";
+import "./img/dailytracklogo.png";
+import "./img/dailytracklogolong.png";
 
 window.helpers = window.helpers || {};
 

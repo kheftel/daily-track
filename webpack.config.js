@@ -63,8 +63,8 @@ var devConfig = merge([
     utils.inlineLESS(),
     utils.loadImages({
         options: {
-            limit: 10000,
-            include: 'img/',
+            include: "./img",
+            limit: 100,
             name: "img/[name].[ext]",
         },
     })
@@ -111,6 +111,7 @@ var prodConfig = merge([{
     utils.loadImages({
         options: {
             limit: 10000,
+            include: "./img",
             name: "img/[name].[ext]",
         },
     }),

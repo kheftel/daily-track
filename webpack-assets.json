@@ -1,7 +1,7 @@
 {
   "main": {
-    "css": "/main.12e44cc652d342b7496b.css",
-    "js": "/main.844d99c94b592fa578d7.js"
+    "css": "/main.1fc0f386e9266fe12ec9.css",
+    "js": "/main.5fe7991d5fc4bb81a364.js"
   },
   "runtime~main": {
     "js": "/runtime~main.25c3056e02460ce75bc5.js"
@@ -14,6 +14,7 @@
     "html": "/generated.html",
     "png": [
       "/img/dailytracklogo.png",
+      "/img/dailytracklogolong.png",
       "/img/touch-icon-ipad-retina.png",
       "/img/touch-icon-ipad.png",
       "/img/touch-icon-iphone-retina.png"
