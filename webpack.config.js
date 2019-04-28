@@ -110,7 +110,7 @@ var prodConfig = merge([{
     }),
     utils.loadImages({
         options: {
-            limit: 10000,
+            limit: 100,     // don't embed images that are referenced from outside stylesheets! doh
             include: "./img",
             name: "img/[name].[ext]",
         },
