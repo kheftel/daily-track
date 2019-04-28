@@ -19,6 +19,7 @@ import './css/pickadate/default.css';
 import './css/pickadate/default.date.css';
 // import './css/fontawesome-v5.8.1-solid.css';
 // import './css/fontawesome-v5.8.1-fontawesome.css';
+import './favicon.ico';
 
 window.helpers = window.helpers || {};
 
@@ -33,7 +34,6 @@ window.helpers.createChartControllerFromId = function(container, id) {
     controller.addDataset(id);
     return controller;
 };
-
 
 $(document).ready(function () {
     // backdrop for sidebar to block touches on content
