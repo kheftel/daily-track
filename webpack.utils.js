@@ -210,8 +210,8 @@ exports.generateSourceMaps = ({
 
 exports.attachRevision = () => ({
     plugins: [
-        new webpack.BannerPlugin({
-            banner: new GitRevisionPlugin().version(),
-        }),
+        // new webpack.BannerPlugin({
+        //     banner: new GitRevisionPlugin().version(),
+        // }),
     ],
 });
