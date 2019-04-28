@@ -7,7 +7,7 @@ const apiRouter = require('./routes/api');
 const indexRouter = require('./routes/index');
 const createError = require('http-errors');
 const logger = require('morgan');
-
+var webpackAssets = require('express-webpack-assets');
 
 var port = process.env.PORT || 8080;
 
@@ -24,10 +24,6 @@ var db = mongoose.connection;
 db.on('error', console.error.bind(console, 'MongoDB connection error:'));
 module.exports = db;
 
-// more routes for our API will happen here
-
-// const users = require('./users');
-
 // APP /////////////
 var app = express();
 app.use(logger('dev'));
@@ -40,6 +36,12 @@ app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'pug');
 
 // ROUTES //////////////////////
+
+// allow app to find list of webpack-ified assets
+app.use(webpackAssets('./webpack-assets.json', {
+    devMode: true
+}));
+
 // serve static files
 app.use(express.static(path.join(__dirname, 'dist')));
 

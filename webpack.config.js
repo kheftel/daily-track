@@ -4,14 +4,26 @@ const CleanWebpackPlugin = require('clean-webpack-plugin');
 const utils = require("./webpack.utils");
 const merge = require('webpack-merge');
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
+var AssetsPlugin = require('assets-webpack-plugin');
+var ManifestPlugin = require('webpack-manifest-plugin');
+var Visualizer = require('webpack-visualizer-plugin');
+const HtmlWebpackPlugin = require('html-webpack-plugin');
 
 var baseConfig = merge([{
-    mode: 'development',
     entry: './src/index.js',
     output: {
-        filename: 'bundle.js',
+        filename: '[name].[contenthash].js',
+        path: path.resolve(__dirname, 'dist'),
         // path: path.resolve(__dirname, 'public'),
         publicPath: "/"
+    },
+    optimization: {
+        splitChunks: {
+            chunks: "all",
+        },
+        runtimeChunk: true,
+        namedModules: true,
+        namedChunks: true
     },
     module: {
         rules: [{
@@ -76,20 +88,34 @@ var baseConfig = merge([{
             moment: 'moment'
         }),
         new MiniCssExtractPlugin({
-            filename: "[name].css",
-        })
+            filename: "[name].[contenthash].css",
+        }),
+        new AssetsPlugin({
+            prettyPrint: true,
+            manifestFirst: true
+        }),
+        new ManifestPlugin({}),
+        new Visualizer(),
+        new HtmlWebpackPlugin({
+            title: 'generated index',
+            filename: 'generated.html'
+        }),
+        new webpack.NamedModulesPlugin()
     ]
 }]);
 
-module.exports = merge([
+var config = merge([
     baseConfig,
-    // utils.extractCSS({
-    //     use: ["css-loader", utils.autoprefix()],
-    // }),
     utils.loadImages({
         options: {
             limit: 10000,
-            name: "img/[name].[hash:4].[ext]",
+            name: "img/[name].[hash].[ext]",
         },
-    })
+    }) 
 ]);
+
+module.exports = mode => {
+    // const config = mode === "production" ? productionConfig : developmentConfig;
+    return merge([{mode}, config]);
+
+};

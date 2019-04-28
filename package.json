@@ -8,15 +8,19 @@
     "build:lessold": "lessc ./src/less/style.less ./dist/css/style.css && copyfiles --flat ./src/css/*.css ./dist/css",
     "build:imgold": "copyfiles --flat ./src/img/* ./dist/img && copyfiles --flat ./src/favicon.ico ./dist",
     "build:bundleold": "browserify ./src/index.js -o ./dist/js/bundle.js && copyfiles --flat ./src/js/*.js ./dist/js",
-    "build:bundle": "webpack",
     "build:cleanold": "rimraf ./dist/css/* ./dist/js/* ./dist/img/*",
-    "watch:bundle": "watchify ./src/index.js -o ./dist/js/bundle.js -v -d",
-    "deploy:heroku": "git push heroku master",
-    "server": "npm run test && npm run start",
+    "watch:bundleold": "watchify ./src/index.js -o ./dist/js/bundle.js -v -d",
     "lint": "clear && jshint .",
     "test": "npm run lint && mocha test -u bdd -R spec",
-    "build": "npm run build:bundle",
-    "start": "npm run build && node server.js",
+    "build:prod": "webpack --env production",
+    "build:dev": "webpack --env development",
+    "deploy:heroku": "git push heroku master",
+    "server:dev": "npm run test && npm run build:dev && node server.js",
+    "server:prod": "npm run test && npm run build:prod && node server.js",
+    "build": "npm run build:prod",
+    "build:stats": "webpack --env production --profile --json > stats.json",
+    "stats": "npm run build:stats && webpack-bundle-analyzer stats.json",
+    "start": "node server.js",
     "deploy": "npm run test && npm run build && npm run deploy:heroku"
   },
   "author": "Kawika Heftel",
@@ -27,6 +31,7 @@
     "chart.js": "^2.8.0",
     "express": "^4.16.4",
     "express-validator": "^5.3.1",
+    "express-webpack-assets": "^0.1.0",
     "http-errors": "^1.7.2",
     "jquery": "^3.4.0",
     "lodash": "^4.17.11",
@@ -38,6 +43,7 @@
     "pug": "^2.0.3"
   },
   "devDependencies": {
+    "assets-webpack-plugin": "^3.9.10",
     "autoprefixer": "^9.5.1",
     "browserify": "^16.2.3",
     "clean-webpack-plugin": "^2.0.1",
@@ -60,9 +66,12 @@
     "url-loader": "^1.1.2",
     "watchify": "^3.11.1",
     "webpack": "^4.30.0",
+    "webpack-bundle-analyzer": "^3.3.2",
     "webpack-cli": "^3.3.0",
     "webpack-dev-server": "^3.3.1",
-    "webpack-merge": "^4.2.1"
+    "webpack-manifest-plugin": "^2.0.4",
+    "webpack-merge": "^4.2.1",
+    "webpack-visualizer-plugin": "^0.1.11"
   },
   "engines": {
     "node": "8.11.1"

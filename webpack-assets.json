@@ -1,0 +1,17 @@
+{
+  "main": {
+    "css": "/main.f397770c3e8b75663725.css",
+    "js": "/main.a70ffc02648c2b8a7fbd.js"
+  },
+  "runtime~main": {
+    "js": "/runtime~main.8958036324c1c1ffa22c.js"
+  },
+  "vendors~main": {
+    "js": "/vendors~main.f74d69bc4846a8c23b55.js"
+  },
+  "": {
+    "html": "/generated.html",
+    "png": "/img/dailytracklogo.932e0df31ccd29fb097ade38e3357534.png",
+    "json": "/manifest.json"
+  }
+}
