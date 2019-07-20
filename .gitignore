@@ -1,8 +1,9 @@
 # app config file
 config.json
 
-# output dir
+# output dir and files
 dist/
+webpack-assets.json
 
 # macos
 .DS_Store
