@@ -72,7 +72,8 @@ router.use(function (req, res, next) {
         setPageTitle(res, active.title);
     } else {
         // try dyanmic pages
-        state.dynamic.every((v, k, col) => {
+        state.dynamic.some((v, k, col) => {
+            console.log(v.regex + ' testing vs ' + req.path);
             if (v.regex && v.regex.test(req.path)) {
                 // match!
                 console.log('matched a dynamic page');
@@ -80,7 +81,7 @@ router.use(function (req, res, next) {
                 if (v.title)
                     setPageTitle(res, v.title);
                 //break loop
-                return false;
+                return true;
             }
         });
     }
@@ -114,7 +115,6 @@ router.get('/', function (req, res, next) {
             res.render('datasets');
         });
 });
-
 
 // new dataset
 router.get('/set/new', function (req, res, next) {
