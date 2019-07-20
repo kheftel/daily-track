@@ -68,7 +68,7 @@ ModuleChartOverview = function (container) {
     var col12 = elem('div', row1, ['col-12', 'p-0']);
 
     // last tracked values
-    this._lastTracked = elem('p', col12, ['m-0', 'd-none'], '', '');
+    this._lastTracked = elem('p', col12, ['m-0', 'd-none'], 'font-size: 90%;', '');
 
     var row2 = elem('div', this._content, ['row', 'm-0'], 'font-align: center');
     var col1 = elem('div', row2, ['col-6', 'p-1']);
@@ -237,7 +237,7 @@ p.setDatasetFromModel = function (dataset, complete) {
 
 p.updateLastTracked = function() {
     var numPoints = this._dataset.data.length;
-    var tracked = 'Tracked ';
+    var tracked = '';
     var value = 'Value: ';
     if(numPoints > 0)
     {
