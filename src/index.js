@@ -1,4 +1,5 @@
-var ChartController = require('./js/ChartController');
+require('./js/ChartController');
+ModuleChartOverview = require('./js/ModuleChartOverview');
 require('jquery');
 require('popper.js');
 require('bootstrap');
@@ -29,17 +30,17 @@ import "./img/dailytracklogolong.png";
 
 window.helpers = window.helpers || {};
 
-window.helpers.createChartControllerFromModel = function(container, dataset) {
-    var controller = new ChartController(container);
-    controller.addDatasetFromModel(dataset);
-    return controller;
-};
+// window.helpers.createChartControllerFromModel = function(container, dataset) {
+//     var controller = new ChartController(container);
+//     controller.addDatasetFromModel(dataset);
+//     return controller;
+// };
 
-window.helpers.createChartControllerFromId = function(container, id) {
-    var controller = new ChartController(container);
-    controller.addDataset(id);
-    return controller;
-};
+// window.helpers.createChartControllerFromId = function(container, id) {
+//     var controller = new ChartController(container);
+//     controller.addDataset(id);
+//     return controller;
+// };
 
 $(document).ready(function () {
     // backdrop for sidebar to block touches on content
@@ -83,7 +84,6 @@ $(document).ready(function () {
         // $('#sidebar-shade').toggleClass('show');
     });
 });
-
 
 // set up variables ///////////////
 

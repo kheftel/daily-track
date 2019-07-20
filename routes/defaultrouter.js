@@ -1,6 +1,5 @@
 // INDEX /////////////////////////////
 const express = require('express');
-const router = express.Router();
 const mongoose = require('mongoose');
 const Dataset = require('../models/dataset');
 const Datapoint = require('../models/datapoint');
@@ -9,14 +8,15 @@ const moment = require('moment');
 
 const set_controller = require('../controllers/datasetController');
 
+const defaultRouter = express.Router();
+
 // template data
 var state = {
     siteTitle: 'DailyTrack',
     nav: [{
-            title: 'Datasets',
+            title: 'Overview',
             icon: 'fa-list',
-            path: '/',
-            notitle: true
+            path: '/'
         },
         {
             title: 'New Dataset',
@@ -50,7 +50,7 @@ var state = {
 };
 
 // prep state
-router.use(function (req, res, next) {
+defaultRouter.use(function (req, res, next) {
     console.log('initialization: ' + req.path);
 
     // configure template locals
@@ -94,8 +94,30 @@ router.use(function (req, res, next) {
     next();
 });
 
-// list all datasets
-router.get('/', function (req, res, next) {
+// show overview page
+defaultRouter.get('/', function (req, res, next) {
+    Dataset.find()
+        .sort({
+            name: 'asc'
+        })
+        .exec(function (err, datasets) {
+            //to do: do something useful with error
+            if (err)
+                return next(err);
+
+            res.locals.datasets = datasets;
+
+            // today's date
+            res.locals.defaults = {
+                x: moment().format('YYYY-MM-DD')
+            };
+
+            res.render('overview');
+        });
+});
+
+// deprecated: all dataset detail views on one page
+defaultRouter.get('/datasets', function (req, res, next) {
     Dataset.find()
         .sort({
             name: 'asc'
@@ -117,12 +139,12 @@ router.get('/', function (req, res, next) {
 });
 
 // new dataset
-router.get('/set/new', function (req, res, next) {
+defaultRouter.get('/set/new', function (req, res, next) {
     res.render('set_form');
 });
 
 // view dataset
-router.get('/set/:id', function (req, res, next) {
+defaultRouter.get('/set/:id', function (req, res, next) {
 
     // grab the dataset from the db
     Dataset.findById(req.params.id, function (err, dataset) {
@@ -158,7 +180,7 @@ router.get('/set/:id', function (req, res, next) {
 });
 
 // edit dataset
-router.get('/set/:id/edit', function (req, res, next) {
+defaultRouter.get('/set/:id/edit', function (req, res, next) {
     // grab the dataset from the db
     Dataset.findById(req.params.id, function (err, dataset) {
         if (err)
@@ -178,7 +200,7 @@ router.get('/set/:id/edit', function (req, res, next) {
 });
 
 // new data point on a dataset
-router.get('/set/:id/new', function (req, res, next) {
+defaultRouter.get('/set/:id/new', function (req, res, next) {
     console.log('new data point form');
 
     // grab the dataset from the db
@@ -213,7 +235,7 @@ router.get('/set/:id/new', function (req, res, next) {
 });
 
 // view multiple datasets on the same chart
-router.get('/multi', function (req, res, next) {
+defaultRouter.get('/multi', function (req, res, next) {
     Dataset.find()
         .sort({
             name: 'asc'
@@ -248,4 +270,4 @@ function setPageTitle(res, title) {
 // router.get('/set/:id', set_controller.detail);
 // router.get('/sets', set_controller.list);
 
-module.exports = router;
+module.exports = defaultRouter;

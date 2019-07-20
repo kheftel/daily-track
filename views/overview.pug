@@ -1,0 +1,61 @@
+extends layout
+
+block content
+    //- each set, i in datasets
+    //-     .chartholder.mb-2(data-setid=set._id data-setname=set.name)
+
+    .container.p-0
+        .row.m-0
+            each set, i in datasets
+                .col-6.col-lg-4.col-xl-3.p-1
+                    .modulechartcontainer(data-setid=set._id data-setname=set.name)
+
+                //- .card.border-light.shadow-rb(style="height: " + style.chartRowHeight)
+                //-     .card-header.p-2
+                //-         .card-title.m-0.d-flex.content-justify-between
+                //-             h4.m-0.text-shadow
+                //-                 a.align-middle(href="/set/" + set._id)= set.name
+                //-             button.ml-auto.btn.btn-primary.btn-shadow
+                //-                 span.fas.fa-edit
+                //-     .card-body(style="position: relative;")
+                //-         .chartcontainer(id="set-" + i + "-" + set._id data-setid=set._id)
+
+block pagescript
+    script.
+
+        $(".modulechartcontainer").each(function(i, container) {
+            var setid = container.dataset.setid;
+            console.log(setid);
+            var module = new ModuleChartOverview(container);
+            //- controller.colorOffset = i;
+            module.setDataset(setid);
+        });
+
+        //- $(".chartholder").each(function(i, container) {
+        //-     var setid = container.dataset.setid;
+        //-     console.log(setid);
+        //-     var controller = new ChartController(container);
+        //-     controller.colorOffset = i;
+        //-     controller.addDataset(setid);
+        //- });
+
+        //- $.ajax({
+        //-     url: '/api/sets',
+        //-     method: 'GET',
+        //-     success: (datasets) => {
+        //-         console.log(datasets);
+        //-         for(var i = 0; i < datasets.length; i++) {
+        //-             var set = datasets[i];
+        //-             var containerid = "set-" + i + "-" + set._id;
+        //-             console.log(containerid)
+        //-             var controller = new ChartController($("#" + containerid)[0]);
+        //-             controller.colorOffset = i;
+        //-             controller.addDataset(set._id);
+        //-         }
+        //-     },
+        //-     error: (err) => {
+        //-         console.log(err);
+
+        //-         if (complete) complete();
+        //-     }
+        //- });

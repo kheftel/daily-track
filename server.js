@@ -3,8 +3,8 @@ const express = require('express');
 const path = require('path');
 const mongoose = require('mongoose');
 const moment = require('moment');
-const apiRouter = require('./routes/api');
-const indexRouter = require('./routes/index');
+const apiRouter = require('./routes/apirouter');
+const defaultRouter = require('./routes/defaultrouter');
 const createError = require('http-errors');
 const logger = require('morgan');
 var webpackAssets = require('express-webpack-assets');
@@ -52,8 +52,8 @@ app.use(express.static(path.join(__dirname, 'dist')));
 // register /api routes
 app.use('/api', apiRouter);
 
-// add index router
-app.use('/', indexRouter);
+// add default router
+app.use('/', defaultRouter);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
