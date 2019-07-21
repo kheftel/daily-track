@@ -1,5 +1,6 @@
 require('./js/ChartController');
 ModuleChartOverview = require('./js/ModuleChartOverview');
+NewDatapointModalController = require('./js/NewDatapointModalController');
 require('jquery');
 require('popper.js');
 require('bootstrap');

@@ -19,16 +19,20 @@ block content
                 //-                 span.fas.fa-edit
                 //-     .card-body(style="position: relative;")
                 //-         .chartcontainer(id="set-" + i + "-" + set._id data-setid=set._id)
+    include modals/new-datapoint
 
 block pagescript
     script.
+        var controller = new NewDatapointModalController();
 
-        $(".modulechartcontainer").each(function(i, container) {
+        $('.modulechartcontainer').each(function(i, container) {
             var setid = container.dataset.setid;
             console.log(setid);
             var module = new ModuleChartOverview(container);
             //- controller.colorOffset = i;
             module.setDataset(setid);
+
+            $('#new-datapoint').on('hidden.bs.modal', () => module.refresh() );
         });
 
         //- $(".chartholder").each(function(i, container) {

@@ -10,7 +10,6 @@ ModuleChartOverview = function (container) {
     // parent container can be id or html elem
     if (typeof container == 'string')
         container = document.getElementById(container);
-
     if (!container)
         throw new Error('ModuleChartOverview: container not found');
 
@@ -33,12 +32,12 @@ ModuleChartOverview = function (container) {
         ['card', 'border-light', 'shadow-rb']
     );
     this._cardHeader = elem('div', this._main, ['card-header', 'd-flex', 'align-items-center', 'p-2']);
-    this._detailLink = elem('a', this._cardHeader, ['align-middle', 'm-0', 'h5'], null, parentData.setname);
+    this._detailLink = elem('a', this._cardHeader, ['text-white', 'align-middle', 'm-0'], null, parentData.setname);
     this._detailLink.href = '/set/' + parentData.setid;
 
     // dropdown
     this._drpHeader = elem('div', this._cardHeader, ['dropdown', 'ml-auto']);
-    this._drpHeaderBtn = elem('button', this._drpHeader, ['btn', 'btn-outline-success', 'dropdown-toggle']);
+    this._drpHeaderBtn = elem('button', this._drpHeader, ['btn', 'btn-primary', 'btn-shadow', 'dropdown-toggle']);
     $(this._drpHeaderBtn)
         .attr('type', 'button')
         .attr('data-toggle', 'dropdown');
@@ -68,18 +67,34 @@ ModuleChartOverview = function (container) {
     var col12 = elem('div', row1, ['col-12', 'p-0']);
 
     // last tracked values
-    this._lastTracked = elem('p', col12, ['m-0', 'd-none'], 'font-size: 90%;', '');
+    this._lastTracked = elem('p', col12, ['text-dark', 'm-0', 'd-none'], 'font-size: 90%;', '');
 
     var row2 = elem('div', this._content, ['row', 'm-0'], 'font-align: center');
     var col1 = elem('div', row2, ['col-6', 'p-1']);
+    
     // track button
     this._btnTrack = largeIconButton([], col1, 'fa-plus-square fa-2x', 'Track', () => {
+        // set up modal data
+        $('#new-datapoint #title').html('Track ' + parentData.setname);
+        $('#new-datapoint #x').val(moment().format('YYYY-MM-DD'));
+        $('#new-datapoint #y').val('');
+        $('#new-datapoint-form').attr('action', '/api/sets/' + parentData.setid + '/data');
+
+        // reset validation
+        $('#new-datapoint .form-control').removeClass('is-valid');
+        $('#new-datapoint .form-control').removeClass('is-invalid');
         
+        // set all the valid feedback messages the same
+        $('#new-datapoint .valid-feedback').html('OK');
+
+        // show modal
+        $('#new-datapoint').modal('show');
     }, 'width:100%');
     var col2 = elem('div', row2, ['col-6', 'p-1']);
+    
     // details button
     this._btnDetails = largeIconButton([], col2, 'fa-chart-line fa-2x', 'Details', () => {
-        
+        window.location.href = this._detailLink.href;
     }, 'width:100%');
 };
 var p = ModuleChartOverview.prototype;
@@ -89,7 +104,7 @@ p.dateFormat = 'MM/DD/YYYY';
 
 p.defaultZoomLevel = 6;
 
-p.defaultButtonClasses = ['btn', 'btn-outline-success'];
+p.defaultButtonClasses = ['btn', 'btn-primary', 'text-dark', 'btn-shadow'];
 
 p.defaultFocusStyle = {
     borderColor: '#00bc8c', //'#375a7f',
@@ -185,6 +200,15 @@ function iconLink(classList, parent, icon, text, href, click, style) {
 
 //     $(modal).show();
 // }
+
+/**
+ * refresh module's content
+ */
+p.refresh = function() {
+    $(this._spinner).removeClass('d-none');
+    $(this._content).addClass('d-none');
+    this.setDataset(this._dataset._id);
+};
 
 /**
  * set the module's dataset, it will populate itself via AJAX
