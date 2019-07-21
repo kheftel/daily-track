@@ -13,7 +13,8 @@ dist/
 # node
 node_modules/
 
-
+#mongo dumpfiles
+dump/
 
 
 
