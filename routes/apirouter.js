@@ -1,9 +1,10 @@
 // REQUIRES /////////////////////////////
 const express = require('express'),
     moment = require('moment'),
-    bodyParser = require('body-parser'),
+    // bodyParser = require('body-parser'),
     Dataset = require('../models/dataset'),
     Datapoint = require('../models/datapoint');
+const User = require('../models/user');
 
 const {
     body,
@@ -31,6 +32,49 @@ apiRouter.get('/', function (req, res) {
         message: 'hooray! welcome to our api!'
     });
 });
+
+// register user
+apiRouter.post('/register', [
+    // validate / sanitize username
+    body('username', 'Userame is required.').not().isEmpty().trim().escape(),
+
+    // validate / sanitize password
+    body('password', 'Password is required.').not().isEmpty().trim().escape(),
+
+    (req, res, next) => {
+        // handle validation errors
+        const errors = validationResult(req);
+
+        var data = {};
+
+        if (!errors.isEmpty()) {
+            console.log('validation errors:');
+            var arr = errors.array();
+            console.log(arr);
+
+            data.success = false;
+            data.errors = arr;
+
+            return res.json(data);
+        }
+
+        // Create user with validated / sanitized data
+        console.log('registering user');
+        User.register(new User({
+            username: req.body.username
+        }), req.body.password, function (err) {
+            if (err) {
+                data.success = false;
+                data.error = err;
+                return res.json(data);
+            }
+
+            data.success = true;
+            data.message = 'User registered!';
+            return res.json(data);
+        });
+    }
+]);
 
 // create a dataset
 apiRouter.post('/sets', [
@@ -167,34 +211,33 @@ apiRouter.post('/sets/:id', [
                     // delete dataset, but only if it has no datapoints
 
                     Datapoint.findOne({
-                        dataset: req.params.id
-                    })
-                    .exec((err, datapoint) => {
-                        if (err)
-                            return res.send(err);
+                            dataset: req.params.id
+                        })
+                        .exec((err, datapoint) => {
+                            if (err)
+                                return res.send(err);
 
-                        if(datapoint) {
-                            // cannot delete
-                            return res.json({
-                                success: false,
-                                errors: [{
-                                    msg: 'Cannot delete non-empty dataset. Please delete all points first.'
-                                }]
-                            });
-                        }
-                        else {
-                            //empty, can delete
-                            dataset.delete((err) => {
-                                if (err)
-                                    return res.send(err);
-        
+                            if (datapoint) {
+                                // cannot delete
                                 return res.json({
-                                    success: 'true',
-                                    message: 'Dataset deleted'
+                                    success: false,
+                                    errors: [{
+                                        msg: 'Cannot delete non-empty dataset. Please delete all points first.'
+                                    }]
                                 });
-                            });
-                        }
-                    });
+                            } else {
+                                //empty, can delete
+                                dataset.delete((err) => {
+                                    if (err)
+                                        return res.send(err);
+
+                                    return res.json({
+                                        success: 'true',
+                                        message: 'Dataset deleted'
+                                    });
+                                });
+                            }
+                        });
                 } else {
                     // update dataset
                     dataset.name = req.body.name;
@@ -225,8 +268,7 @@ apiRouter.post('/sets/:id', [
                             msg: "No dataset to delete"
                         }]
                     });
-                }
-                else {
+                } else {
                     // dataset not found
                     return res.json({
                         success: false,
