@@ -1,8 +1,10 @@
-// INDEX /////////////////////////////
+// DEFAULT ROUTER /////////////////////////////
 const express = require('express');
 const mongoose = require('mongoose');
 const Dataset = require('../models/dataset');
 const Datapoint = require('../models/datapoint');
+const User = require('../models/user');
+const passport = require('passport');
 const _ = require('lodash');
 const moment = require('moment');
 
@@ -60,6 +62,7 @@ defaultRouter.use(function (req, res, next) {
     res.locals.req = {
         path: req.path
     };
+    res.locals.user = req.user;
 
     // grab current page from nav
     let active = _.find(state.nav, {
@@ -71,7 +74,7 @@ defaultRouter.use(function (req, res, next) {
         res.locals.active = active;
         setPageTitle(res, active.title);
     } else {
-        // try dyanmic pages
+        // try dynamic pages
         state.dynamic.some((v, k, col) => {
             console.log(v.regex + ' testing vs ' + req.path);
             if (v.regex && v.regex.test(req.path)) {
@@ -114,6 +117,42 @@ defaultRouter.get('/', function (req, res, next) {
 
             res.render('overview');
         });
+});
+
+// register
+defaultRouter.get('/register', function (req, res) {
+    res.render('register');
+});
+
+defaultRouter.post('/register', function (req, res, next) {
+    console.log('registering user');
+    User.register(new User({
+        username: req.body.username
+    }), req.body.password, function (err) {
+        if (err) {
+            console.log('error while user register!', err);
+            return next(err);
+        }
+
+        console.log('user registered!');
+
+        res.redirect('/');
+    });
+});
+
+// login
+defaultRouter.get('/login', function (req, res) {
+    res.render('login');
+});
+
+defaultRouter.post('/login', passport.authenticate('local'), function (req, res) {
+    res.redirect('/');
+});
+
+// logout
+defaultRouter.get('/logout', function (req, res) {
+    req.logout();
+    res.redirect('/');
 });
 
 // deprecated: all dataset detail views on one page

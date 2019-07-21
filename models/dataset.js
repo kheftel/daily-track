@@ -2,6 +2,11 @@ var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 
 var DatasetSchema = new Schema({
+    owner: {
+        type: Schema.Types.ObjectId,
+        ref: 'User',
+        required: true
+    }, //reference to the associated user
     name: {
         type: String,
         required: true

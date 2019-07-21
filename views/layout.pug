@@ -26,8 +26,18 @@ html(lang='en')
             nav#topnav.navbar.navbar-dark.p-1.bg-primary.shadow-b
                 button#sidebarCollapse.btn.btn-info.btn-shadow(type="button")
                     i.fas.fa-bars
-                a.navbar-brand.mx-auto.text-shadow(href="/")
+                a.navbar-brand.text-shadow(href="/")
                     img(src="/img/dailytracklogolong.png")
+                ul.nav
+                    if (typeof(user) == 'undefined')
+                        li
+                            a.mr-2(href="/register") Register
+                        li
+                            a.mr-2(href="/login") Log In
+                    else
+                        li
+                            a.mr-2(href="/logout") Log Out
+                
             #content-container.d-flex.flex-expand.w-100.align-items-stretch
                 //- nav#sidebar.nav.flex-column.transition-animate.shadow-right.bg-secondary
                 //-     block sidebar

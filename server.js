@@ -1,7 +1,12 @@
 // REQUIRES /////////////////////////////
 const express = require('express');
 const path = require('path');
+const cookieParser = require('cookie-parser');
+const session = require('cookie-session');
+const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
+const passport = require('passport');
+const LocalStrategy = require('passport-local').Strategy;
 const moment = require('moment');
 const apiRouter = require('./routes/apirouter');
 const defaultRouter = require('./routes/defaultrouter');
@@ -10,19 +15,6 @@ const logger = require('morgan');
 var webpackAssets = require('express-webpack-assets');
 
 var port = process.env.PORT || 8080;
-
-// DATABASE ////////////////////////
-var mongoDB = process.env.MONGODB_URI;
-if (!mongoDB) {
-    var config = require('./config.json');
-    mongoDB = config.db.dev;
-}
-mongoose.connect(mongoDB, {
-    useNewUrlParser: true
-});
-var db = mongoose.connection;
-db.on('error', console.error.bind(console, 'MongoDB connection error:'));
-module.exports = db;
 
 // APP /////////////
 var app = express();
@@ -35,7 +27,11 @@ if (app.get('env') === 'development') {
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'pug');
 
-// ROUTES //////////////////////
+// other stuff
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({extended: false}));
+app.use(cookieParser());
+app.use(session({keys: ['secretkey1', 'secretkey2', '...']}));
 
 // allow app to find list of webpack-ified assets
 app.use(webpackAssets('./webpack-assets.json', {
@@ -45,9 +41,31 @@ app.use(webpackAssets('./webpack-assets.json', {
 // serve static files
 app.use(express.static(path.join(__dirname, 'dist')));
 
-// app.get('/', (request, response) => {
-//     response.sendFile(__dirname + 'dist/index.html');
-// });
+// Configure passport middleware
+app.use(passport.initialize());
+app.use(passport.session());
+
+// Configure passport-local to use account model for authentication
+const User = require('./models/user');
+passport.use(new LocalStrategy(User.authenticate()));
+
+passport.serializeUser(User.serializeUser());
+passport.deserializeUser(User.deserializeUser());
+
+// DATABASE ////////////////////////
+var mongoDB = process.env.MONGODB_URI;
+if (!mongoDB) {
+    var config = require('./config.json');
+    mongoDB = config.db.dev;
+}
+mongoose.connect(mongoDB, {
+    useNewUrlParser: true
+});
+mongoose.set('useCreateIndex', true);
+var db = mongoose.connection;
+db.on('error', console.error.bind(console, 'MongoDB connection error:'));
+
+// ROUTES //////////////////////
 
 // register /api routes
 app.use('/api', apiRouter);

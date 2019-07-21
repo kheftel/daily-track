@@ -19,11 +19,11 @@ require('moment-round');
 // API /////////////////////////////
 var apiRouter = express.Router();
 
-// use bodyparser on apiRouter to get POST vars
-apiRouter.use(bodyParser.urlencoded({
-    extended: true
-}));
-apiRouter.use(bodyParser.json());
+// use bodyparser on apiRouter to get POST vars - app now uses bodyparser
+// apiRouter.use(bodyParser.urlencoded({
+//     extended: true
+// }));
+// apiRouter.use(bodyParser.json());
 
 // test route to make sure everything is working (accessed at GET http://localhost:8080/api)
 apiRouter.get('/', function (req, res) {
@@ -39,6 +39,9 @@ apiRouter.post('/sets', [
 
     // validate / sanitize unit
     body('yAxisLabel', 'Unit is required.').not().isEmpty().trim().escape(),
+
+    // validate / sanitize owner
+    body('owner', 'Owner is required.').not().isEmpty().trim().escape(),
 
     // sanitize chartType
     sanitizeBody('chartType').escape(),
@@ -64,7 +67,8 @@ apiRouter.post('/sets', [
         var dataset = new Dataset();
         dataset.name = req.body.name;
         dataset.yAxisLabel = req.body.yAxisLabel;
-        dataset.chartType = req.body.chartType;
+        dataset.owner = req.body.owner; // hidden field
+        dataset.chartType = 'line'; // req.body.chartType;
         dataset.precision = 'daily';
         dataset.xAxisLabel = 'Date';
 

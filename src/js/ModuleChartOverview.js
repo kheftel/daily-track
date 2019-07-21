@@ -15,6 +15,8 @@ ModuleChartOverview = function (container, modalController) {
 
     this._parentContainer = container;
     var parentData = container.dataset;
+    var setid = parentData.setid;
+    var setname = parentData.setname;
 
     this._modalController = modalController;
     this._modalController.modal.on('save', (event, id) => {
@@ -40,11 +42,12 @@ ModuleChartOverview = function (container, modalController) {
     this._main = elem(
         'div',
         this._parentContainer,
-        ['card', 'border-light', 'shadow-rb']
+        ['card', 'border-light', 'shadow-rb'],
+        'width: 100%; height: 100%;'
     );
-    this._cardHeader = elem('div', this._main, ['card-header', 'd-flex', 'align-items-center', 'p-2']);
-    this._detailLink = elem('a', this._cardHeader, ['text-white', 'align-middle', 'm-0'], null, parentData.setname);
-    this._detailLink.href = '/set/' + parentData.setid;
+    this._cardHeader = elem('div', this._main, ['card-header', 'navbar', 'p-2']);
+    this._detailLink = elem('a', this._cardHeader, ['text-white', 'align-middle', 'm-0'], null, setid ? setname : 'Create Dataset');
+    this._detailLink.href = setid ? '/set/' + setid : '/set/new';
 
     // dropdown
     this._drpHeader = elem('div', this._cardHeader, ['dropdown', 'ml-auto']);
@@ -67,6 +70,8 @@ ModuleChartOverview = function (container, modalController) {
     // edit item in dropdown
     this._editButton = iconLink(['d-none', 'dropdown-item'], this._drpHeaderBody, 'fa-edit', 'Edit');
 
+    // three visual states: showing _cntent, _spinner, or _createSet
+
     // content
     this._cardBody = elem('div', this._main, ['card-body', 'p-2']);
     this._content = elem('div', this._cardBody, ['d-none', 'container', 'p-0']);
@@ -74,18 +79,23 @@ ModuleChartOverview = function (container, modalController) {
     // loading spinner
     this._spinner = elem('span', this._cardBody, ['spinner-border', 'spinner-border-sm', 'd-none']);
 
+    // button to create new dataset
+    this._createSet = largeIconButton([], this._cardBody, 'fa-plus-square fa-3x', 'Create Dataset', () => {
+        window.location.href = '/set/new';
+    }, 'width:100%; height: 100%');
+
     var row1 = elem('div', this._content, ['row', 'm-0']);
     var col12 = elem('div', row1, ['col-12', 'p-0']);
 
     // last tracked values
-    this._lastTracked = elem('p', col12, ['text-dark', 'm-0', 'd-none'], 'font-size: 90%;', '');
+    this._lastTracked = elem('p', col12, ['text-dark', 'm-0'], 'font-size: 90%;', '');
 
     var row2 = elem('div', this._content, ['row', 'm-0'], 'font-align: center');
     var col1 = elem('div', row2, ['col-6', 'p-1']);
     
     // track button
     this._btnTrack = largeIconButton([], col1, 'fa-plus-square fa-2x', 'Track', () => {
-        this._modalController.show('Track ' + parentData.setname, parentData.setid);
+        this._modalController.show('Track ' + setname, setid);
     }, 'width:100%');
     var col2 = elem('div', row2, ['col-6', 'p-1']);
     
@@ -93,6 +103,12 @@ ModuleChartOverview = function (container, modalController) {
     this._btnDetails = largeIconButton([], col2, 'fa-chart-line fa-2x', 'Details', () => {
         window.location.href = this._detailLink.href;
     }, 'width:100%');
+
+    // set dataset
+    if(setid)
+        this.setDataset(setid);
+    else
+        this.setVisualState(this._createSet);
 };
 var p = ModuleChartOverview.prototype;
 
@@ -106,6 +122,20 @@ p.defaultButtonClasses = ['btn', 'btn-primary', 'text-dark', 'btn-shadow'];
 p.defaultFocusStyle = {
     borderColor: '#00bc8c', //'#375a7f',
     borderWidth: 3
+};
+
+p.setVisualState = function(state) {
+    this._state = state;
+
+    $(this._spinner).addClass('d-none');
+    $(this._content).addClass('d-none');
+    $(this._createSet).addClass('d-none');
+
+    $(state).removeClass('d-none');
+
+    $(this._drpHeader).removeClass('d-none');
+    if(state == this._createSet)
+        $(this._drpHeader).addClass('d-none');       
 };
 
 // convenience functions ////////////////////////
@@ -202,8 +232,7 @@ function iconLink(classList, parent, icon, text, href, click, style) {
  * refresh module's content
  */
 p.refresh = function() {
-    $(this._spinner).removeClass('d-none');
-    $(this._content).addClass('d-none');
+    if(!this._dataset) return;
     this.setDataset(this._dataset._id);
 };
 
@@ -214,19 +243,17 @@ p.refresh = function() {
  * @param  {} complete
  */
 p.setDataset = function (id, complete) {
-    $(this._spinner).removeClass('d-none');
+    this.setVisualState(this._spinner);
     $.ajax({
         url: '/api/sets/' + id,
         method: 'GET',
         success: (dataset) => {
-            $(this._spinner).addClass('d-none');
-            $(this._content).removeClass('d-none');
+            this.setVisualState(this._content);
             
             this.setDatasetFromModel(dataset, complete);
         },
         error: (err) => {
-            $(this._spinner).addClass('d-none');
-            $(this._content).removeClass('d-none');
+            this.setVisualState(this._content);
             this._content.innerHTML = 'loading error';
 
             console.log(err);
@@ -268,10 +295,9 @@ p.updateLastTracked = function() {
     }
     else
     {
-        tracked += 'never';
+        tracked += 'Never tracked';
         value += 'N/A';
     }
-    $(this._lastTracked).removeClass('d-none');
     this._lastTracked.innerHTML = tracked + '<br />' + value;
 };
 
