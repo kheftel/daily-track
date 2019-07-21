@@ -6,7 +6,7 @@
 
 const moment = require('moment');
 
-ModuleChartOverview = function (container) {
+ModuleChartOverview = function (container, modalController) {
     // parent container can be id or html elem
     if (typeof container == 'string')
         container = document.getElementById(container);
@@ -15,6 +15,17 @@ ModuleChartOverview = function (container) {
 
     this._parentContainer = container;
     var parentData = container.dataset;
+
+    this._modalController = modalController;
+    this._modalController.modal.on('save', (event, id) => {
+        if(!this._dataset) return;
+        console.log(id + ' vs ' + this._dataset._id);
+        if(id == this._dataset._id)
+        {
+            console.log('refresh');
+            this.refresh();
+        }
+    });
 
     // create html
     // .card.border-light.shadow-rb(style="height: " + style.chartRowHeight)
@@ -74,21 +85,7 @@ ModuleChartOverview = function (container) {
     
     // track button
     this._btnTrack = largeIconButton([], col1, 'fa-plus-square fa-2x', 'Track', () => {
-        // set up modal data
-        $('#new-datapoint #title').html('Track ' + parentData.setname);
-        $('#new-datapoint #x').val(moment().format('YYYY-MM-DD'));
-        $('#new-datapoint #y').val('');
-        $('#new-datapoint-form').attr('action', '/api/sets/' + parentData.setid + '/data');
-
-        // reset validation
-        $('#new-datapoint .form-control').removeClass('is-valid');
-        $('#new-datapoint .form-control').removeClass('is-invalid');
-        
-        // set all the valid feedback messages the same
-        $('#new-datapoint .valid-feedback').html('OK');
-
-        // show modal
-        $('#new-datapoint').modal('show');
+        this._modalController.show('Track ' + parentData.setname, parentData.setid);
     }, 'width:100%');
     var col2 = elem('div', row2, ['col-6', 'p-1']);
     

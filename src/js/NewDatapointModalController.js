@@ -1,4 +1,6 @@
-NewDatapointModalController = function() {
+NewDatapointModalController = function () {
+    this.modal = $('#new-datapoint');
+
     // hook up submit button to form submission
     $('#new-datapoint #save').click(() => $('#new-datapoint-form').submit());
 
@@ -51,6 +53,8 @@ NewDatapointModalController = function() {
                         delay: 5000
                     });
 
+                    $('#new-datapoint').trigger('save', [$('#new-datapoint').data('setid')]);
+
                     // hide modal
                     $('#new-datapoint').modal('hide');
 
@@ -82,6 +86,26 @@ NewDatapointModalController = function() {
         // stop the form from submitting the normal way and refreshing the page
         event.preventDefault();
     });
+};
+var p = NewDatapointModalController.prototype;
+
+p.show = function (title, setid) {
+    // set up modal data
+    $('#new-datapoint #title').html(title);
+    $('#new-datapoint #x').val(moment().format('YYYY-MM-DD'));
+    $('#new-datapoint #y').val('');
+    $('#new-datapoint-form').attr('action', '/api/sets/' + setid + '/data');
+    $('#new-datapoint').data('setid', setid);
+
+    // reset validation
+    $('#new-datapoint .form-control').removeClass('is-valid');
+    $('#new-datapoint .form-control').removeClass('is-invalid');
+
+    // set all the valid feedback messages the same
+    $('#new-datapoint .valid-feedback').html('OK');
+
+    // show modal
+    $('#new-datapoint').modal('show');
 };
 
 module.exports = NewDatapointModalController;

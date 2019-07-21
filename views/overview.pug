@@ -28,11 +28,9 @@ block pagescript
         $('.modulechartcontainer').each(function(i, container) {
             var setid = container.dataset.setid;
             console.log(setid);
-            var module = new ModuleChartOverview(container);
+            var module = new ModuleChartOverview(container, controller);
             //- controller.colorOffset = i;
             module.setDataset(setid);
-
-            $('#new-datapoint').on('hidden.bs.modal', () => module.refresh() );
         });
 
         //- $(".chartholder").each(function(i, container) {
