@@ -45,7 +45,7 @@ ModuleChartOverview = function (container, modalController) {
         ['card', 'border-light', 'shadow-rb'],
         'width: 100%; height: 100%;'
     );
-    this._cardHeader = elem('div', this._main, ['card-header', 'navbar', 'p-2']);
+    this._cardHeader = elem('div', this._main, ['card-header', 'navbar', 'p-1']);
     this._detailLink = elem('a', this._cardHeader, ['text-white', 'align-middle', 'm-0'], null, setid ? setname : 'Create Dataset');
     this._detailLink.href = setid ? '/set/' + setid : '/set/new';
 
@@ -73,7 +73,7 @@ ModuleChartOverview = function (container, modalController) {
     // three visual states: showing _cntent, _spinner, or _createSet
 
     // content
-    this._cardBody = elem('div', this._main, ['card-body', 'p-2']);
+    this._cardBody = elem('div', this._main, ['card-body', 'p-1']);
     this._content = elem('div', this._cardBody, ['d-none', 'container', 'p-0']);
 
     // loading spinner

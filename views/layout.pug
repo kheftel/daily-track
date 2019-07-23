@@ -23,24 +23,24 @@ html(lang='en')
 
     body
         #page-container.d-flex.flex-column
-            nav#topnav.navbar.navbar-dark.navbar-expand.p-1.bg-primary.shadow-b
-                ul.navbar-nav
+            nav#topnav.navbar.navbar-dark.navbar-expand.p-0.bg-primary.shadow-b
+                ul.navbar-nav.ml-1
                     li.nav-item
                         button#sidebarCollapse.btn.btn-info.btn-shadow(type="button")
                             i.fas.fa-bars
-                ul.navbar-nav.ml-2
+                ul.navbar-nav.ml-1
                     li.nav-item
-                        a.navbar-brand.text-shadow(href="/")
+                        a.navbar-brand.m-1.p-0(href="/")
                             img(src="/img/dailytracklogolong.png")
                 ul.navbar-nav.ml-auto
                     if (typeof(user) == 'undefined')
                         li.nav-item
-                            a.nav-link(href="/register") Register
+                            a.nav-link.p-1(href="/register") Register
                         li.nav-item
-                            a.nav-link(href="/login") Log In
+                            a.nav-link.p-1(href="/login") Log In
                     else
-                        li.nav-link.nav-item
-                            a.mr-2(href="/logout") Log Out
+                        li.nav-item
+                            a.nav-link.p-1(href="/logout") Log Out
                 
             #content-container.d-flex.flex-expand.w-100.align-items-stretch
                 //- nav#sidebar.nav.flex-column.transition-animate.shadow-right.bg-secondary
