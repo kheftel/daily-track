@@ -42,8 +42,8 @@ ModuleChartOverview = function (container, modalController) {
     this._main = elem(
         'div',
         this._parentContainer,
-        ['card', 'border-light', 'shadow-rb'],
-        'width: 100%; height: 100%;'
+        ['card', 'border-light', 'shadow-rb', 'w-100', 'h-100'],
+        ''
     );
     this._cardHeader = elem('div', this._main, ['card-header', 'navbar', 'p-1']);
     this._detailLink = elem('a', this._cardHeader, ['text-white', 'align-middle', 'm-0'], null, setid ? setname : 'Create Dataset');
@@ -80,29 +80,29 @@ ModuleChartOverview = function (container, modalController) {
     this._spinner = elem('span', this._cardBody, ['spinner-border', 'spinner-border-sm', 'd-none']);
 
     // button to create new dataset
-    this._createSet = largeIconButton([], this._cardBody, 'fa-plus-square fa-3x', 'Create Dataset', () => {
+    this._createSet = largeIconButton(['w-100', 'h-100'], this._cardBody, 'fa-plus-square fa-3x', 'Create Dataset', () => {
         window.location.href = '/set/new';
-    }, 'width:100%; height: 100%');
+    }, '');
 
     var row1 = elem('div', this._content, ['row', 'm-0']);
     var col12 = elem('div', row1, ['col-12', 'p-0']);
 
     // last tracked values
-    this._lastTracked = elem('p', col12, ['text-dark', 'm-0'], 'font-size: 90%;', '');
+    this._lastTracked = elem('p', col12, ['text-dark', 'm-0', 'font-90'], '', '');
 
-    var row2 = elem('div', this._content, ['row', 'm-0'], 'font-align: center');
+    var row2 = elem('div', this._content, ['row', 'm-0']);
     var col1 = elem('div', row2, ['col-6', 'p-1']);
     
     // track button
-    this._btnTrack = largeIconButton([], col1, 'fa-plus-square fa-2x', 'Track', () => {
+    this._btnTrack = largeIconButton(['w-100'], col1, 'fa-plus-square fa-2x', 'Track', () => {
         this._modalController.show('Track ' + setname, setid);
-    }, 'width:100%');
+    }, '');
+
     var col2 = elem('div', row2, ['col-6', 'p-1']);
-    
     // details button
-    this._btnDetails = largeIconButton([], col2, 'fa-chart-line fa-2x', 'Details', () => {
+    this._btnDetails = largeIconButton(['w-100'], col2, 'fa-chart-line fa-2x', 'Details', () => {
         window.location.href = this._detailLink.href;
-    }, 'width:100%');
+    }, '');
 
     // set dataset
     if(setid)
@@ -176,7 +176,7 @@ function elem(type, parent, classList, style, innerHTML) {
  * @param  {} style
  */
 function largeIconButton(classList, parent, icon, caption, click, style) {
-    var result = elem('button', parent, p.defaultButtonClasses.concat(classList), style, `<span class="fas ${icon}"></span><br /><span style="font-size: 80%;">${caption}</span>`);
+    var result = elem('button', parent, p.defaultButtonClasses.concat(classList), style, `<span class="fas ${icon}"></span><br /><span class="font-80">${caption}</span>`);
     if (click)
         $(result).click(click);
     return result;
