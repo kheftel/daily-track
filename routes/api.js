@@ -129,18 +129,29 @@ apiRouter.post('/sets', [
 ]);
 
 // get all the datasets
-apiRouter.get('/sets', function (req, res) {
-    Dataset.find()
-        .sort({
-            name: 'asc'
-        })
-        .exec(function (err, datasets) {
-            if (err)
-                return res.send(err);
+apiRouter.get('/sets', function (req, res, next) {
+        // ensure they're logged in
+        if(!req.isAuthenticated()) {
+            var data = {
+                success: false,
+                message: 'Unauthorized'
+            };
+            return res.json(data);
+        }
+        next();
+    },
+    function (req, res) {
+        Dataset.find()
+            .sort({
+                name: 'asc'
+            })
+            .exec(function (err, datasets) {
+                if (err)
+                    return res.send(err);
 
-            return res.json(datasets);
-        });
-});
+                return res.json(datasets);
+            });
+    });
 
 // get dataset (includes datapoints)
 apiRouter.get('/sets/:id', function (req, res, next) {
@@ -284,16 +295,16 @@ apiRouter.post('/sets/:id', [
 
 // delete a dataset
 // TO DO: what to do about the points?
-apiRouter.delete('/sets/:id', function (req, res) {
-    Dataset.findByIdAndDelete(req.params.id, function (err, dataset) {
-        if (err)
-            res.send(err);
+// apiRouter.delete('/sets/:id', function (req, res) {
+//     Dataset.findByIdAndDelete(req.params.id, function (err, dataset) {
+//         if (err)
+//             res.send(err);
 
-        res.json({
-            message: 'Successfully deleted ' + (dataset ? dataset.name : '')
-        });
-    });
-});
+//         res.json({
+//             message: 'Successfully deleted ' + (dataset ? dataset.name : '')
+//         });
+//     });
+// });
 
 // create OR update OR delete a datapoint
 apiRouter.post('/sets/:id/data', [

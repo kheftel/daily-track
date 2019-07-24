@@ -43,14 +43,8 @@ html(lang='en')
                             a.nav-link.p-1(href="/logout") Log Out
                 
             #content-container.d-flex.flex-expand.w-100.align-items-stretch
-                //- nav#sidebar.nav.flex-column.transition-animate.shadow-right.bg-secondary
-                //-     block sidebar
-                //-         each item in nav
-                //-             a(class="nav-link text-shadow" + (item.active ? ' active' : ''), href=item.href)
-                //-                 span(class="fas fa-fw mr-1 " + item.icon)
-                //-                 =item.title
-
-                nav#sidebar.navbar.navbar-light.flex-column.align-items-stretch.bg-gray-800.px-0.py-2.transition-animate.shadow-b
+                //- nav#sidebar.navbar.navbar-light.flex-column.align-items-stretch.bg-gray-800.px-0.py-2.shadow-b.transition-animate
+                nav#sidebar.navbar.navbar-light.flex-column.align-items-stretch.bg-gray-800.px-0.py-2.shadow-b
                     block sidebar
                         ul.navbar-nav
                             li
@@ -61,7 +55,8 @@ html(lang='en')
                                         a.nav-link.p-2.text-shadow.transition-animate(href=item.path)
                                             span(class="fas fa-fw mr-1 " + item.icon)
                                             =item.title
-                #content.w-100.py-2.transition-animate.d-flex.align-items-stretch
+                //- #content.w-100.py-2.transition-animate.d-flex.align-items-stretch
+                #content.w-100.py-2.d-flex.align-items-stretch
                     //- #sidebar-shade.d-block.d-md-none.modal-backdrop.fade
                     div(class="w-100 px-2" + ((active && active.noscroll) ? " d-flex flex-column" : ''))
                         //- message output

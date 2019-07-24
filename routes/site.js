@@ -102,9 +102,9 @@ siteRouter.use(function (req, res, next) {
     }
 
     // process permissions
-    if(active) {
+    if (active) {
         if (active.onlyLoggedIn && !req.isAuthenticated()) {
-            if(req.path != '/')
+            if (req.path != '/')
                 req.flash('error', 'You must log in first.');
             return res.redirect('/login');
         }
@@ -118,15 +118,10 @@ siteRouter.use(function (req, res, next) {
             setPageTitle(res, active.title);
     }
 
-    // add flash messages, rewrite passport's "error" to "danger" for bootstrap classes
-    var messages = req.flash();
-    res.locals.messages = {};
-    for (var k in messages) {
-        res.locals.messages[k == 'error' ? 'danger' : k] = messages[k];
-    }
+    setFlashMessages(res, req.flash());
 
-    console.log('locals:');
-    console.log(res.locals);
+    // console.log('locals:');
+    // console.log(res.locals);
 
     // pass some node module utility stuff along too!
     res.locals.moment = moment;
@@ -176,19 +171,59 @@ siteRouter.get('/login', function (req, res) {
     res.render('login');
 });
 
-siteRouter.post('/login', passport.authenticate('local', {
-    failureRedirect: '/login',
-    failureFlash: true
-}), function (req, res) {
-    if (req.user)
+siteRouter.post('/login',
+    passport.authenticate('local', {
+        failWithError: true,
+        failureFlash: true
+    }),
+    function (req, res, next) {
+        // handle success
+        if (req.xhr) {
+            return res.json({
+                success: true,
+                message: "Login successful for " + req.user.username
+            });
+        }
         req.flash('success', 'Welcome, ' + req.user.username + '!');
-    res.redirect('/');
-});
+        return res.redirect('/');
+    },
+    function (err, req, res, next) {
+        // handle error
+        console.log('auth error');
+
+        if (req.xhr) {
+            // only call req.flash() here, because it consumes the messages
+            var errorMessages = req.flash('error');
+            console.log(errorMessages.join());
+                return res.json({
+                success: false,
+                message: errorMessages.join(), // not sure if comma is correct
+                passporterror: err
+            });
+        }
+        return res.redirect('/login');
+    }
+);
+
+// siteRouter.post('/login', passport.authenticate('local', {
+//     failureRedirect: '/login',
+//     failureFlash: true
+// }), function (req, res) {
+//     if (req.user)
+//         req.flash('success', 'Welcome, ' + req.user.username + '!');
+//     res.redirect('/');
+// });
 
 // logout
 siteRouter.get('/logout', function (req, res) {
     req.logout();
-    res.redirect('/');
+    if(req.xhr) {
+        return res.json({
+            success: true,
+            message: 'You have been logged out'
+        });
+    }
+    return res.redirect('/');
 });
 
 // deprecated: all dataset detail views on one page
@@ -325,7 +360,7 @@ siteRouter.get('/multi', function (req, res, next) {
         });
 });
 
-// helper functions
+// helper functions ///////////////////
 
 /**
  * add page title to res.locals
@@ -335,6 +370,19 @@ siteRouter.get('/multi', function (req, res, next) {
 function setPageTitle(res, title) {
     res.locals.pageTitle = title;
     res.locals.siteTitle = state.siteTitle + ' - ' + title;
+}
+
+/**
+ * add flash messages to res.locals
+ */
+function setFlashMessages(res, messages) {
+    // add flash messages to locals, rewrite passport's "error" to "danger" for bootstrap classes
+    res.locals.messages = {};
+    for (var k in messages) {
+        res.locals.messages[k == 'error' ? 'danger' : k] = messages[k];
+    }
+    if(!_.isEmpty(res.locals.messages))
+        console.log(res.locals.messages);
 }
 
 // router.post('/set/create', set_controller.create_post);
