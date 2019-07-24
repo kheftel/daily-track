@@ -1,4 +1,4 @@
-// DEFAULT ROUTER /////////////////////////////
+// SITE ROUTER /////////////////////////////
 const express = require('express');
 const mongoose = require('mongoose');
 const Dataset = require('../models/dataset');
@@ -12,7 +12,7 @@ const ensureLoggedOut = require('connect-ensure-login').ensureLoggedOut;
 
 const set_controller = require('../controllers/datasetController');
 
-const defaultRouter = express.Router();
+const siteRouter = express.Router();
 
 // template data
 var state = {
@@ -39,7 +39,7 @@ var state = {
             onlyLoggedIn: true
         },
         {
-            title: 'Register',
+            title: 'Sign Up',
             path: '/register',
             nolink: true,
             onlyLoggedOut: true
@@ -71,7 +71,7 @@ var state = {
 };
 
 // prep state
-defaultRouter.use(function (req, res, next) {
+siteRouter.use(function (req, res, next) {
     console.log('initialization: ' + req.path);
 
     // configure template locals
@@ -135,7 +135,7 @@ defaultRouter.use(function (req, res, next) {
 });
 
 // show overview page
-defaultRouter.get('/', require('connect-ensure-login').ensureLoggedIn(), function (req, res, next) {
+siteRouter.get('/', function (req, res, next) {
     Dataset.find()
         .sort({
             name: 'asc'
@@ -157,7 +157,7 @@ defaultRouter.get('/', require('connect-ensure-login').ensureLoggedIn(), functio
 });
 
 // debug
-defaultRouter.get('/flash', function (req, res) {
+siteRouter.get('/flash', function (req, res) {
     // Set a flash message by passing the key, followed by the value, to req.flash().
     req.flash('info', ['flash message 1', 'flash message 2']);
     req.flash('warning', ['flash message 1', 'flash message 2']);
@@ -167,16 +167,16 @@ defaultRouter.get('/flash', function (req, res) {
 });
 
 // register
-defaultRouter.get('/register', require('connect-ensure-login').ensureLoggedOut(), function (req, res) {
+siteRouter.get('/register', function (req, res) {
     res.render('register');
 });
 
 // login
-defaultRouter.get('/login', require('connect-ensure-login').ensureLoggedOut(), function (req, res) {
+siteRouter.get('/login', function (req, res) {
     res.render('login');
 });
 
-defaultRouter.post('/login', passport.authenticate('local', {
+siteRouter.post('/login', passport.authenticate('local', {
     failureRedirect: '/login',
     failureFlash: true
 }), function (req, res) {
@@ -186,13 +186,13 @@ defaultRouter.post('/login', passport.authenticate('local', {
 });
 
 // logout
-defaultRouter.get('/logout', function (req, res) {
+siteRouter.get('/logout', function (req, res) {
     req.logout();
     res.redirect('/');
 });
 
 // deprecated: all dataset detail views on one page
-defaultRouter.get('/datasets', function (req, res, next) {
+siteRouter.get('/datasets', function (req, res, next) {
     Dataset.find()
         .sort({
             name: 'asc'
@@ -214,12 +214,12 @@ defaultRouter.get('/datasets', function (req, res, next) {
 });
 
 // new dataset
-defaultRouter.get('/set/new', function (req, res, next) {
+siteRouter.get('/set/new', function (req, res, next) {
     res.render('set_form');
 });
 
 // view dataset
-defaultRouter.get('/set/:id', function (req, res, next) {
+siteRouter.get('/set/:id', function (req, res, next) {
 
     // grab the dataset from the db
     Dataset.findById(req.params.id, function (err, dataset) {
@@ -255,7 +255,7 @@ defaultRouter.get('/set/:id', function (req, res, next) {
 });
 
 // edit dataset
-defaultRouter.get('/set/:id/edit', function (req, res, next) {
+siteRouter.get('/set/:id/edit', function (req, res, next) {
     // grab the dataset from the db
     Dataset.findById(req.params.id, function (err, dataset) {
         if (err)
@@ -275,7 +275,7 @@ defaultRouter.get('/set/:id/edit', function (req, res, next) {
 });
 
 // new data point on a dataset
-defaultRouter.get('/set/:id/new', function (req, res, next) {
+siteRouter.get('/set/:id/new', function (req, res, next) {
     console.log('new data point form');
 
     // grab the dataset from the db
@@ -310,7 +310,7 @@ defaultRouter.get('/set/:id/new', function (req, res, next) {
 });
 
 // view multiple datasets on the same chart
-defaultRouter.get('/multi', function (req, res, next) {
+siteRouter.get('/multi', function (req, res, next) {
     Dataset.find()
         .sort({
             name: 'asc'
@@ -345,4 +345,4 @@ function setPageTitle(res, title) {
 // router.get('/set/:id', set_controller.detail);
 // router.get('/sets', set_controller.list);
 
-module.exports = defaultRouter;
+module.exports = siteRouter;

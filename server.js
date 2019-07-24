@@ -8,8 +8,8 @@ const mongoose = require('mongoose');
 const passport = require('passport');
 const LocalStrategy = require('passport-local').Strategy;
 const moment = require('moment');
-const apiRouter = require('./routes/apirouter');
-const defaultRouter = require('./routes/defaultrouter');
+const apiRouter = require('./routes/api');
+const siteRouter = require('./routes/site');
 const createError = require('http-errors');
 const logger = require('morgan');
 const webpackAssets = require('express-webpack-assets');
@@ -72,8 +72,8 @@ db.on('error', console.error.bind(console, 'MongoDB connection error:'));
 // register /api routes
 app.use('/api', apiRouter);
 
-// add default router
-app.use('/', defaultRouter);
+// add site router
+app.use('/', siteRouter);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
