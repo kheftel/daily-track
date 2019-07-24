@@ -56,13 +56,21 @@ html(lang='en')
                             li
                                 h4.px-2.text-shadow Navigation
                             each item in nav
-                                li(class="nav-item" + (item.path == req.path ? ' active' : ''))
-                                    a.nav-link.p-2.text-shadow.transition-animate(href=item.path)
-                                        span(class="fas fa-fw mr-1 " + item.icon)
-                                        =item.title
+                                if !item.nolink
+                                    li(class="nav-item" + (item.path == req.path ? ' active' : ''))
+                                        a.nav-link.p-2.text-shadow.transition-animate(href=item.path)
+                                            span(class="fas fa-fw mr-1 " + item.icon)
+                                            =item.title
                 #content.w-100.py-2.transition-animate.d-flex.align-items-stretch
                     //- #sidebar-shade.d-block.d-md-none.modal-backdrop.fade
                     div(class="w-100 px-2" + ((active && active.noscroll) ? " d-flex flex-column" : ''))
+                        //- message output
+                        if messages
+                            each arr, msgtype in messages
+                                each msg in arr
+                                    div(class="m-1 p-1 alert alert-" + msgtype)= msg
+                                        button.close(type="button" data-dismiss="alert") ×
+
                         if pageTitle && !(active && active.notitle)
                             h4.text-shadow= pageTitle
                         block content

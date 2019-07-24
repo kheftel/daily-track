@@ -1,22 +1,24 @@
 extends layout
 
 block content
-    h2 Register
-
-    form#register-form(method="post" novalidate)
-        div#username-group.form-group
-            label(for='username') Username:
-            input#username.form-control(type='text', placeholder='' name='username' required)
-            #username-invalid.invalid-feedback
-            #username-valid.valid-feedback
-        div#password-group.form-group
-            label(for='password') Password:
-            input#password.form-control(type='password', placeholder='' name='password' required)
-            #password-invalid.invalid-feedback
-            #password-valid.valid-feedback
-        button#save.btn.btn-success(type='submit')
-            | Register
-            span.spinner-border.spinner-border-sm.ml-1(role="status" aria-hidden="true")
+    .container-fluid
+        .row.justify-content-center
+            .col.col-sm-8.col-md-6.bg-secondary.p-2
+                form#register-form(method="post" novalidate)
+                    div#username-group.form-group
+                        label(for='username') Username:
+                        input#username.form-control(type='text', placeholder='' name='username' required)
+                        #username-invalid.invalid-feedback
+                        #username-valid.valid-feedback
+                    div#password-group.form-group
+                        label(for='password') Password:
+                        input#password.form-control(type='password', placeholder='' name='password' required)
+                        #password-invalid.invalid-feedback
+                        #password-valid.valid-feedback
+                    button#save.btn.btn-success(type='submit')
+                        | Register
+                        span.spinner-border.spinner-border-sm.ml-1(role="status" aria-hidden="true")
+                div.mt-2 Already have an account? #[a(href="/login") Log in!]
 
 block pagescript
     script.

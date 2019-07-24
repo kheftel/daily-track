@@ -7,6 +7,8 @@ const User = require('../models/user');
 const passport = require('passport');
 const _ = require('lodash');
 const moment = require('moment');
+const ensureLoggedIn = require('connect-ensure-login').ensureLoggedIn;
+const ensureLoggedOut = require('connect-ensure-login').ensureLoggedOut;
 
 const set_controller = require('../controllers/datasetController');
 
@@ -18,33 +20,50 @@ var state = {
     nav: [{
             title: 'Overview',
             icon: 'fa-list',
-            path: '/'
+            path: '/',
+            onlyLoggedIn: true
         },
         {
             title: 'New Dataset',
             icon: 'fa-plus-square',
             path: '/set/new',
-            noscroll: true
+            noscroll: true,
+            onlyLoggedIn: true
         },
         {
             title: 'Multi-View',
             icon: 'fa-chart-pie',
             path: '/multi',
             noscroll: true,
-            notitle: true
+            notitle: true,
+            onlyLoggedIn: true
+        },
+        {
+            title: 'Register',
+            path: '/register',
+            nolink: true,
+            onlyLoggedOut: true
+        },
+        {
+            title: 'Log In',
+            path: '/login',
+            nolink: true,
+            onlyLoggedOut: true
         }
     ],
     dynamic: [{
         regex: /^\/set\/.+\/edit/, //match /set/id/edit
         title: 'Edit Dataset',
         icon: '',
-        noscroll: true
+        noscroll: true,
+        onlyLoggedIn: true
     }, {
         regex: /^\/set\/.+/, //match /set/id
         title: 'Dataset Detail',
         icon: '',
         noscroll: true,
-        notitle: true
+        notitle: true,
+        onlyLoggedIn: true
     }],
     style: {
         chartRowHeight: '320px'
@@ -68,26 +87,44 @@ defaultRouter.use(function (req, res, next) {
     let active = _.find(state.nav, {
         path: req.path
     });
-
-    // add info about current page
-    if (active) {
-        res.locals.active = active;
-        setPageTitle(res, active.title);
-    } else {
-        // try dynamic pages
+    if (!active) {
+        // match dynamic pages
         state.dynamic.some((v, k, col) => {
             console.log(v.regex + ' testing vs ' + req.path);
             if (v.regex && v.regex.test(req.path)) {
                 // match!
                 console.log('matched a dynamic page');
-                res.locals.active = v;
-                if (v.title)
-                    setPageTitle(res, v.title);
+                active = v;
                 //break loop
                 return true;
             }
         });
     }
+
+    // process permissions
+    if(active) {
+        if (active.onlyLoggedIn && !req.isAuthenticated()) {
+            if(req.path != '/')
+                req.flash('error', 'You must log in first.');
+            return res.redirect('/login');
+        }
+        if (active.onlyLoggedOut && req.isAuthenticated()) {
+            return res.redirect('/');
+        }
+
+        // set template variables for active page
+        res.locals.active = active;
+        if (active.title)
+            setPageTitle(res, active.title);
+    }
+
+    // add flash messages, rewrite passport's "error" to "danger" for bootstrap classes
+    var messages = req.flash();
+    res.locals.messages = {};
+    for (var k in messages) {
+        res.locals.messages[k == 'error' ? 'danger' : k] = messages[k];
+    }
+
     console.log('locals:');
     console.log(res.locals);
 
@@ -98,7 +135,7 @@ defaultRouter.use(function (req, res, next) {
 });
 
 // show overview page
-defaultRouter.get('/', function (req, res, next) {
+defaultRouter.get('/', require('connect-ensure-login').ensureLoggedIn(), function (req, res, next) {
     Dataset.find()
         .sort({
             name: 'asc'
@@ -119,17 +156,32 @@ defaultRouter.get('/', function (req, res, next) {
         });
 });
 
+// debug
+defaultRouter.get('/flash', function (req, res) {
+    // Set a flash message by passing the key, followed by the value, to req.flash().
+    req.flash('info', ['flash message 1', 'flash message 2']);
+    req.flash('warning', ['flash message 1', 'flash message 2']);
+    req.flash('error', ['flash message 1', 'flash message 2']);
+    req.flash('success', ['flash message 1', 'flash message 2']);
+    res.redirect('/');
+});
+
 // register
-defaultRouter.get('/register', function (req, res) {
+defaultRouter.get('/register', require('connect-ensure-login').ensureLoggedOut(), function (req, res) {
     res.render('register');
 });
 
 // login
-defaultRouter.get('/login', function (req, res) {
+defaultRouter.get('/login', require('connect-ensure-login').ensureLoggedOut(), function (req, res) {
     res.render('login');
 });
 
-defaultRouter.post('/login', passport.authenticate('local'), function (req, res) {
+defaultRouter.post('/login', passport.authenticate('local', {
+    failureRedirect: '/login',
+    failureFlash: true
+}), function (req, res) {
+    if (req.user)
+        req.flash('success', 'Welcome, ' + req.user.username + '!');
     res.redirect('/');
 });
 

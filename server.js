@@ -12,7 +12,8 @@ const apiRouter = require('./routes/apirouter');
 const defaultRouter = require('./routes/defaultrouter');
 const createError = require('http-errors');
 const logger = require('morgan');
-var webpackAssets = require('express-webpack-assets');
+const webpackAssets = require('express-webpack-assets');
+const flash = require('connect-flash');
 
 var port = process.env.PORT || 8080;
 
@@ -32,6 +33,7 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: false}));
 app.use(cookieParser());
 app.use(session({keys: ['secretkey1', 'secretkey2', '...']}));
+app.use(flash());
 
 // allow app to find list of webpack-ified assets
 app.use(webpackAssets('./webpack-assets.json', {

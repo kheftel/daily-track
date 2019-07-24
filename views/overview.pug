@@ -3,8 +3,6 @@ extends layout
 block content
     //- each set, i in datasets
     //-     .chartholder.mb-2(data-setid=set._id data-setname=set.name)
-    if user
-        h6 Welcome #{user.username}
     #overview-container.container.p-0
         .row.m-0
             each set, i in datasets
