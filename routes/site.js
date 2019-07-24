@@ -7,6 +7,7 @@ const User = require('../models/user');
 const passport = require('passport');
 const _ = require('lodash');
 const moment = require('moment');
+const createError = require('http-errors');
 const ensureLoggedIn = require('connect-ensure-login').ensureLoggedIn;
 const ensureLoggedOut = require('connect-ensure-login').ensureLoggedOut;
 
@@ -358,6 +359,33 @@ siteRouter.get('/multi', function (req, res, next) {
             res.locals.datasets = datasets;
             res.render('multi');
         });
+});
+
+// catch 404 and forward to error handler
+siteRouter.use(function (req, res, next) {
+    next(createError(404));
+});
+
+// error handler
+siteRouter.use(function (err, req, res, next) {
+    // set locals, only providing error in development
+    res.locals.message = err.message;
+    res.locals.error = req.app.get('env') === 'development' ? err : {};
+
+    res.locals.siteTitle = 'DailyTrack - Error';
+    res.locals.pageTitle = 'Error';
+
+    var active = {
+        noscroll: true
+    };
+
+    res.locals.active = active;
+    res.locals.nav = [];
+
+    // render the error page
+    err.status = err.status || 500;
+    res.status(err.status || 500);
+    res.render('error');
 });
 
 // helper functions ///////////////////

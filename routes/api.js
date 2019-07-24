@@ -1,10 +1,11 @@
 // REQUIRES /////////////////////////////
-const express = require('express'),
-    moment = require('moment'),
-    // bodyParser = require('body-parser'),
-    Dataset = require('../models/dataset'),
-    Datapoint = require('../models/datapoint');
+const express = require('express');
+const moment = require('moment');
+// const bodyParser = require('body-parser');
+const Dataset = require('../models/dataset');
+const Datapoint = require('../models/datapoint');
 const User = require('../models/user');
+const createError = require('http-errors');
 
 const {
     body,
@@ -27,13 +28,13 @@ var apiRouter = express.Router();
 // apiRouter.use(bodyParser.json());
 
 // test route to make sure everything is working (accessed at GET http://localhost:8080/api)
-apiRouter.get('/', function (req, res) {
+apiRouter.get('/', authorize, function (req, res) {
     return res.json({
         message: 'hooray! welcome to our api!'
     });
 });
 
-// register user
+// register user - the only unprotected endpoint. maybe ensure logged out?
 apiRouter.post('/register', [
     // validate / sanitize username
     body('username', 'Userame is required.').not().isEmpty().trim().escape(),
@@ -78,6 +79,9 @@ apiRouter.post('/register', [
 
 // create a dataset
 apiRouter.post('/sets', [
+    // authenticate
+    authorize,
+
     // validate / sanitize name
     body('name', 'Name is required.').not().isEmpty().trim().escape(),
 
@@ -129,17 +133,11 @@ apiRouter.post('/sets', [
 ]);
 
 // get all the datasets
-apiRouter.get('/sets', function (req, res, next) {
-        // ensure they're logged in
-        if(!req.isAuthenticated()) {
-            var data = {
-                success: false,
-                message: 'Unauthorized'
-            };
-            return res.json(data);
-        }
-        next();
-    },
+apiRouter.get('/sets',
+
+    // authenticate
+    authorize,
+
     function (req, res) {
         Dataset.find()
             .sort({
@@ -154,41 +152,49 @@ apiRouter.get('/sets', function (req, res, next) {
     });
 
 // get dataset (includes datapoints)
-apiRouter.get('/sets/:id', function (req, res, next) {
-    // grab the dataset from the db
-    Dataset.findById(req.params.id, function (err, dataset) {
-        if (err)
-            return res.send(err);
+apiRouter.get('/sets/:id',
 
-        // bad id? no dataset found?
-        if (!dataset) {
-            return res.json({
-                success: false,
-                message: "no dataset found for id " + req.params.id
-            });
-        }
+    // authenticate
+    authorize,
 
-        // populate its datapoints
-        Datapoint.find({
-                'dataset': req.params.id,
-            })
-            .sort({
-                x: 'asc'
-            })
-            .exec(function (err, datapoints) {
-                if (err)
-                    return res.send(err);
+    function (req, res, next) {
+        // grab the dataset from the db
+        Dataset.findById(req.params.id, function (err, dataset) {
+            if (err)
+                return res.send(err);
 
-                var result = dataset.toObject();
-                result.data = datapoints;
+            // bad id? no dataset found?
+            if (!dataset) {
+                return res.json({
+                    success: false,
+                    message: "no dataset found for id " + req.params.id
+                });
+            }
 
-                return res.json(result);
-            });
+            // populate its datapoints
+            Datapoint.find({
+                    'dataset': req.params.id,
+                })
+                .sort({
+                    x: 'asc'
+                })
+                .exec(function (err, datapoints) {
+                    if (err)
+                        return res.send(err);
+
+                    var result = dataset.toObject();
+                    result.data = datapoints;
+
+                    return res.json(result);
+                });
+        });
     });
-});
 
 // update OR delete a dataset
 apiRouter.post('/sets/:id', [
+
+    // authenticate
+    authorize,
 
     // validate / sanitize name
     body('name', 'Name is required.').not().isEmpty().trim().escape(),
@@ -308,6 +314,10 @@ apiRouter.post('/sets/:id', [
 
 // create OR update OR delete a datapoint
 apiRouter.post('/sets/:id/data', [
+
+    // authenticate
+    authorize,
+
     // validate date
     body('x')
     .custom((value, {
@@ -413,19 +423,19 @@ apiRouter.post('/sets/:id/data', [
 ]);
 
 // get all the datapoints for this set (obsolete)
-apiRouter.get('/sets/:id/data', function (req, res) {
-    Datapoint.find({
-            'dataset': req.params.id,
-        })
-        .sort({
-            x: 'asc'
-        })
-        .exec(function (err, datapoints) {
-            if (err)
-                return res.send(err);
-            return res.json(datapoints);
-        });
-});
+// apiRouter.get('/sets/:id/data', function (req, res) {
+//     Datapoint.find({
+//             'dataset': req.params.id,
+//         })
+//         .sort({
+//             x: 'asc'
+//         })
+//         .exec(function (err, datapoints) {
+//             if (err)
+//                 return res.send(err);
+//             return res.json(datapoints);
+//         });
+// });
 
 // get a range of datapoints for a dataset
 apiRouter.get('/sets/:id/range/:start/:end', function (req, res) {
@@ -444,45 +454,95 @@ apiRouter.get('/sets/:id/range/:start/:end', function (req, res) {
 });
 
 // get a single datapoint - kinda redundant
-apiRouter.get('/points/:id', function (req, res) {
-    // grab the dataset from the db
-    Datapoint.findById(req.params.id, function (err, datapoint) {
-        if (err)
-            return res.send(err);
+apiRouter.get('/points/:id',
 
-        return res.json(datapoint);
-    });
-});
+    // authenticate
+    authorize,
 
-// PUT = update the datapoint
-apiRouter.put('/points/:id', function (req, res) {
-    Datapoint.findById(req.params.id, function (err, datapoint) {
-        if (err)
-            return res.send(err);
-
-        // update the datapoint's info - for now, only y supported
-        // TO DO: update datapoint's x value, but test for dups
-        ['y'].forEach(function (element) {
-            if (req.body[element] !== undefined)
-                datapoint[element] = req.body[element];
-        });
-
-        // save the datapoint
-        datapoint.save(function (err) {
+    function (req, res) {
+        // grab the dataset from the db
+        Datapoint.findById(req.params.id, function (err, datapoint) {
             if (err)
                 return res.send(err);
 
-            return res.json({
-                message: 'Datapoint updated!'
+            return res.json(datapoint);
+        });
+    });
+
+// PUT = update the datapoint
+apiRouter.put('/points/:id',
+
+    // authenticate
+    authorize,
+
+    function (req, res) {
+
+        Datapoint.findById(req.params.id, function (err, datapoint) {
+            if (err)
+                return res.send(err);
+
+            // update the datapoint's info - for now, only y supported
+            // TO DO: update datapoint's x value, but test for dups
+            ['y'].forEach(function (element) {
+                if (req.body[element] !== undefined)
+                    datapoint[element] = req.body[element];
+            });
+
+            // save the datapoint
+            datapoint.save(function (err) {
+                if (err)
+                    return res.send(err);
+
+                return res.json({
+                    message: 'Datapoint updated!'
+                });
             });
         });
     });
-});
 
 // sample data
 apiRouter.get('/sampledata', (request, response) => {
     response.json(generateSampleData());
 });
+
+// catch 404 and forward to error handler
+apiRouter.use(function (req, res, next) {
+    next(createError(404));
+});
+
+// error handler
+apiRouter.use(handleError);
+
+// helper functions /////////
+
+/**
+ * route handler to make sure user is authorized to access api
+ * @param {*} req 
+ * @param {*} res 
+ * @param {*} next 
+ */
+function authorize(req, res, next) {
+    // ensure they're logged in
+    if (!req.isAuthenticated()) {
+        var data = {
+            success: false,
+            message: 'Unauthorized'
+        };
+        return res.json(data);
+    }
+    next();
+}
+
+function handleError(err, req, res, next) {
+    console.log('api errror handler');
+    var data = {
+        success: false,
+        message: err.message,
+        text: err.toString()
+    };
+    var statusCode = err.status || 500;
+    return res.status(statusCode).json(data);
+}
 
 // generate some data
 function generateSampleData(type = "line", label = "Meditation") {
