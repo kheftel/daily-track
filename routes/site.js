@@ -133,7 +133,9 @@ siteRouter.use(function (req, res, next) {
 
 // show overview page
 siteRouter.get('/', function (req, res, next) {
-    Dataset.find()
+    Dataset.find({
+            owner: req.user._id
+        })
         .sort({
             name: 'asc'
         })
@@ -143,11 +145,6 @@ siteRouter.get('/', function (req, res, next) {
                 return next(err);
 
             res.locals.datasets = datasets;
-
-            // today's date
-            res.locals.defaults = {
-                x: moment().format('YYYY-MM-DD')
-            };
 
             res.render('overview');
         });
@@ -197,7 +194,7 @@ siteRouter.post('/login',
             // only call req.flash() here, because it consumes the messages
             var errorMessages = req.flash('error');
             console.log(errorMessages.join());
-                return res.json({
+            return res.json({
                 success: false,
                 message: errorMessages.join(), // not sure if comma is correct
                 passporterror: err
@@ -219,7 +216,7 @@ siteRouter.post('/login',
 // logout
 siteRouter.get('/logout', function (req, res) {
     req.logout();
-    if(req.xhr) {
+    if (req.xhr) {
         return res.json({
             success: true,
             message: 'You have been logged out'
@@ -410,7 +407,7 @@ function setFlashMessages(res, messages) {
     for (var k in messages) {
         res.locals.messages[k == 'error' ? 'danger' : k] = messages[k];
     }
-    if(!_.isEmpty(res.locals.messages))
+    if (!_.isEmpty(res.locals.messages))
         console.log(res.locals.messages);
 }
 

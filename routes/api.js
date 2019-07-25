@@ -139,7 +139,9 @@ apiRouter.get('/sets',
     authorize,
 
     function (req, res) {
-        Dataset.find()
+        Dataset.find({
+                owner: req.user._id
+            })
             .sort({
                 name: 'asc'
             })
@@ -222,8 +224,17 @@ apiRouter.post('/sets/:id', [
             if (err)
                 return res.send(err);
 
-            // TO DO: is this a delete request?
             if (dataset) {
+                // does the current user own this dataset?
+                if(dataset.owner != req.user._id) {
+                    return res.json({
+                        success: false,
+                        errors: [{
+                            msg: 'Permission denied, you do not own this dataset'
+                        }]
+                    });
+                }
+
                 if (req.body.delete == "1") {
                     // delete dataset, but only if it has no datapoints
 
@@ -277,23 +288,13 @@ apiRouter.post('/sets/:id', [
                     });
                 }
             } else {
-                if (req.body.delete == "1") {
-                    // delete error
-                    return res.json({
-                        success: false,
-                        errors: [{
-                            msg: "No dataset to delete"
-                        }]
-                    });
-                } else {
-                    // dataset not found
-                    return res.json({
-                        success: false,
-                        errors: [{
-                            msg: "No dataset found"
-                        }]
-                    });
-                }
+                // dataset not found
+                return res.json({
+                    success: false,
+                    errors: [{
+                        msg: "No dataset found"
+                    }]
+                });
             }
         });
     }
