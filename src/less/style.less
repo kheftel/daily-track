@@ -280,7 +280,6 @@ html {
     right: 0;
     bottom: 0;
     left: 0;
-    padding: 0 0.5rem;
 }
 
 // chart controls
@@ -506,15 +505,14 @@ body.sidebar-active {
 
 // individual pages /////////////////////////
 
-// overview
 // break out of the main content div's padding
-#overview-container {
+#overview-container, #detail-container {
     margin-left: -0.25rem;
     margin-right: -0.25rem;
     width: calc(100% + 0.5rem);
 }
 
-.module-chart-container {
+.module-chart-overview, .module-chart-detail {
     width: 100%;
     height: 100%;
 }

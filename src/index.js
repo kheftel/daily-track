@@ -1,18 +1,27 @@
-require('./js/ChartController');
-ModuleChartOverview = require('./js/ModuleChartOverview');
-NewDatapointModalController = require('./js/NewDatapointModalController');
+// jquery/bootstrap/ui stuff
 require('jquery');
 require('popper.js');
 require('bootstrap');
-require('moment');
-require('chart.js');
 require('./js/lib/bootstrap-confirmation.min');
-// require('./js/lib/tempusdominus-bootstrap-4.min');
 require('./js/lib/toast');
-require('./js/lib/chartjs-plugin-vh-line');
 require('./js/lib/picker');
 require('./js/lib/picker.date');
+// require('./js/lib/tempusdominus-bootstrap-4.min');
 
+// chartJS
+require('moment');
+require('chart.js');
+require('hammerjs');
+require('./js/lib/chartjs-plugin-vh-line');
+require('./js/lib/chartjs-plugin-zoom.js');
+
+// custom code
+require('./js/ChartConfig');
+require('./js/ModuleChartDetail');
+require('./js/ModuleChartOverview');
+require('./js/NewDatapointModalController');
+
+// CSS
 import './css/bootstrap-darkly.css';
 import './less/style.less';
 import './css/toast.css';
@@ -21,6 +30,8 @@ import './css/pickadate/default.css';
 import './css/pickadate/default.date.css';
 // import './css/fontawesome-v5.8.1-solid.css';
 // import './css/fontawesome-v5.8.1-fontawesome.css';
+
+// assets
 import './favicon.ico';
 import "./img/touch-icon-iphone.png";
 import "./img/touch-icon-ipad.png";
@@ -28,20 +39,6 @@ import "./img/touch-icon-iphone-retina.png";
 import "./img/touch-icon-ipad-retina.png";
 import "./img/dailytracklogo.png";
 import "./img/dailytracklogolong.png";
-
-window.helpers = window.helpers || {};
-
-// window.helpers.createChartControllerFromModel = function(container, dataset) {
-//     var controller = new ChartController(container);
-//     controller.addDatasetFromModel(dataset);
-//     return controller;
-// };
-
-// window.helpers.createChartControllerFromId = function(container, id) {
-//     var controller = new ChartController(container);
-//     controller.addDataset(id);
-//     return controller;
-// };
 
 $(document).ready(function () {
     // backdrop for sidebar to block touches on content
@@ -85,38 +82,3 @@ $(document).ready(function () {
         // $('#sidebar-shade').toggleClass('show');
     });
 });
-
-// set up variables ///////////////
-
-// $(() => {
-//     console.log('main onload');
-
-//     // controller for chart
-//     var controller = new ChartController('mainChart');
-//     controller.addDataset('5ca00f23f968e4b0a2f36e0e', function() {
-//         controller.addDataset('5ca4dc5a85df2293711ef8a8');
-//     });
-//     window.controller = controller;
-
-//     console.log('setting up interactivity');
-
-//     $('#minus').click(() => {
-//         controller.zoomOut();
-//     });
-
-//     $('#plus').click(() => {
-//         controller.zoomIn();
-//     });
-
-//     $('#left').click(() => {
-//         controller.panLeft();
-//     });
-
-//     $('#right').click(() => {
-//         controller.panRight();
-//     });
-
-//     $('#showall').click(() => {
-//         controller.showAll();
-//     });
-// });

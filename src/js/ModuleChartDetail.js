@@ -1,19 +1,19 @@
 /**
- * Wraps a chart.js chart and provides an interface to it
+ * Dataset detail view, wraps a ChartJS chart
  * 
- * @param  {} container the html element where we put our markup
+ * @param  {} container the html element (or id of an element) that will contain this module
  */
 var _numControllers = 0;
-ChartController = function (container) {
-    // parent container can be id or html elem
+ModuleChartDetail = function (container) {
     if (typeof container == 'string')
         container = document.getElementById(container);
 
     if (!container)
         throw new Error('chart: container not found');
 
-    this._parentContainer = container;
-    var parentData = container.dataset;
+    // grab data from the container
+    this._container = container;
+    this._containerData = container.dataset;
 
     this._focus = moment.utc().startOf('day');
 
@@ -29,13 +29,12 @@ ChartController = function (container) {
     //         .chartcontainer(id="set-" + i + "-" + set._id data-setid=set._id)
     this._main = elem(
         'div',
-        this._parentContainer,
+        this._container,
         ['card', 'border-light', 'shadow-rb'],
         'height: 400px; opacity: 0; transition: opacity 0.5s;'
     );
-    this._cardHeader = elem('div', this._main, ['card-header', 'd-flex', 'align-items-center', 'p-2']);
-    this._detailLink = elem('a', this._cardHeader, ['align-middle', 'm-0', 'h5'], null, parentData.setname);
-    this._detailLink.href = '/set/' + parentData.setid;
+    this._cardHeader = elem('div', this._main, ['card-header', 'd-flex', 'align-items-center', 'p-1']);
+    this._setLabel = elem('h5', this._cardHeader, ['align-middle', 'm-0'], null, this._containerData.setname);
 
     this._drpHeader = elem('div', this._cardHeader, ['dropdown', 'ml-auto']);
     this._drpHeaderBtn = elem('button', this._drpHeader, ['btn', 'btn-outline-success', 'dropdown-toggle']);
@@ -78,8 +77,9 @@ ChartController = function (container) {
     });
     this._deleteButton = iconLink(['d-none', 'dropdown-item'], this._drpHeaderBody, 'fa-trash-alt', 'Delete', '#');
 
-    this._cardBody = elem('div', this._main, 'card-body', 'position: relative;');
-    this._chartContainer = elem('div', this._cardBody, 'chartcontainer');
+    this._cardBody = elem('div', this._main, ['card-body', 'p-1'], 'position: relative;');
+    this._chartContainer = elem('div', this._cardBody, ['chartcontainer', 'p-1', 'text-center']);
+    this._rangeLabel = elem('h6', this._chartContainer, ['align-middle', 'text-center']);
 
     // holds the canvas for the chart
     this._canvasholder = elem(
@@ -92,8 +92,21 @@ ChartController = function (container) {
     // canvas the chart is rendered on
     this._canvas = elem('canvas', this._canvasholder);
 
+    this._buttonRow = elem('div', this._chartContainer, ['btn-group', 'mt-2']);
+    this._buttons = {};
+    Object.keys(ChartConfig.zoomData).forEach((k) => {
+        var data = ChartConfig.zoomData[k];
+        var btn = elem('button', this._buttonRow, ['btn', 'btn-primary', 'p-1', 'font-80'], null, data.label);
+        btn.id = k;
+        this._buttons[k] = btn;
+        $(btn).click(() => {
+            this.newZoom(k);
+        });
+    });
+
     // footer with buttons to manipulate chart
     this._footer = elem('div', this._chartContainer, ['controlbar', 'shadow-rb'], `max-width: 300px; margin: 0 auto; border-radius: 1rem; border: ${this.defaultFocusStyle.borderWidth}px solid ${this.defaultFocusStyle.borderColor}; height: 84px; background: #383838;`);
+    $(this._footer).addClass('d-none'); // hidden for now
     this._row1 = elem('div', this._footer, ['d-flex', 'justify-content-center', 'align-items-center', 'pt-1']);
     this._row2 = elem('div', this._footer, ['d-flex', 'form-inline', 'justify-content-center', 'align-items-center', 'pt-1']);
 
@@ -130,10 +143,7 @@ ChartController = function (container) {
             this._focus = newFocus;
             this.updateChart();
         }
-
     });
-
-
 
     // this._dateDisplay = elem('input', this._row1, ['form-control', 'datetimepicker-input'], 'max-width: 8rem;');
     // this._dateDisplay.id = datefocusid;
@@ -164,7 +174,6 @@ ChartController = function (container) {
         e.preventDefault();
         this.zoomIn();
     });
-
 
     this._formgroupValue = elem('div', this._row2, ['input-group']);
     // this._btnAdd = iconLinkButton([, 'd-none'], this._row2, 'fa-plus-square');
@@ -206,21 +215,44 @@ ChartController = function (container) {
         this.updateChart();
     };
 
-    this._config.options.verticalLine = [{
-        x: this._focus.format('YYYY-MM-DD'),
-        borderColor: this.defaultFocusStyle.borderColor,
-        borderWidth: this.defaultFocusStyle.borderWidth
-    }];
+    // this._config.options.verticalLine = [{
+    //     x: this._focus.format('YYYY-MM-DD'),
+    //     borderColor: this.defaultFocusStyle.borderColor,
+    //     borderWidth: this.defaultFocusStyle.borderWidth
+    // }];
 
     this._chart = new Chart(this._canvas, this._config);
     this._datasetIds = [];
 
-    this.setZoomLevel(this.defaultZoomLevel, false);
+    // this.setZoomLevel(this.defaultZoomLevel, false);
+    this.newZoom('week');
 
     this._id = _numControllers;
     _numControllers++;
+
+    // set dataset
+    if (this._containerData.setid)
+        this.addDataset(this._containerData.setid);
+
 };
-var p = ChartController.prototype;
+var p = ModuleChartDetail.prototype;
+
+p.newZoom = function (level) {
+    var data = ChartConfig.zoomData[level];
+
+    this._chart.options.scales.xAxes[0].time.unit = data.unit;
+    this._chart.options.scales.xAxes[0].time.min = moment(ChartConfig.today).add(data.viewport).format('YYYY-MM-DD');
+    this._chart.options.scales.xAxes[0].time.max = ChartConfig.today.format('YYYY-MM-DD');
+    this._chart.data.labels = data.labels;
+
+    this._chart.update();
+
+    this._rangeLabel.innerHTML = this.getRangeString();
+};
+
+p.updateRangeLabel = function () {
+    this._rangeLabel.innerHTML = this.getRangeString();
+};
 
 // some defaults
 p.dateFormat = 'MM/DD/YYYY';
@@ -396,7 +428,7 @@ p.addDatasetsFromIds = function (ids) {
 p.addDatasetFromModel = function (dataset, complete) {
     // translate for chart dataset object
     dataset.type = dataset.chartType;
-    dataset.label = dataset.name;
+    dataset.label = dataset.name + ' (' + dataset.yAxisLabel + ')';
     dataset.data = this.normalizeDates(dataset.data);
     dataset.fill = false;
     dataset.pointBackgroundColor = this.getColor(this.datasets.length);
@@ -419,7 +451,12 @@ p.addDatasetFromModel = function (dataset, complete) {
         $(this._row2).removeClass('d-flex').addClass('d-none');
         $(this._deleteButton).addClass('d-none');
         $(this._editButton).addClass('d-none');
+
+        $(this._setLabel).html('Multi' + ' (' + dataset.yAxisLabel + ')');
     } else {
+        // set the header text
+        $(this._setLabel).html(dataset.name + ' (' + dataset.yAxisLabel + ')');
+
         // show type toggle btn
         $(this._btnType).removeClass('d-none').html(this._toggleHTML[dataset.type]);
         // $(this._btnAdd).removeClass('d-none').attr('href', '/set/' + dataset._id + '/new');
@@ -654,7 +691,7 @@ p.addDatasetFromModel = function (dataset, complete) {
                                 });
 
                                 // if we were on the set detail page, we should go somewhere else
-                                if(window.location.pathname != '/')
+                                if (window.location.pathname != '/')
                                     window.location.href = '/';
                             });
                     }
@@ -682,7 +719,8 @@ p.addDatasetFromModel = function (dataset, complete) {
     console.log(Chart.scaleService.defaults.time);
 
     // update chart
-    this.updateChart();
+    // this.updateChart();
+    this._chart.update();
 
     this._main.style.opacity = 1;
 
@@ -786,7 +824,6 @@ p.getColor = function (i = 0) {
 }*/
 
 // ZOOMING and PANNING //////////
-
 p.timeScales = [{
         label: '1 year',
         zoom: {
@@ -1019,17 +1056,36 @@ p.showAll = function (update = true) {
 };
 
 /**
- * returns a convenience string for labeling
+ * labeling string representing the range of the chart
+ * 
+ * @param {*} scaleid which scale to use, defaults to the first horizontal one
  */
-p.getRangeString = function () {
-    // TO DO: don't repeat unnecessary information, like moodtrack
-    var leftString = moment.utc(this._focus).subtract(Array.isArray(this.timeScale.half) ? this.timeScale.half[0] : this.timeScale.half).format(this.dateFormat);
-    var rightString = moment.utc(this._focus).add(Array.isArray(this.timeScale.half) ? this.timeScale.half[1] : this.timeScale.half).format(this.dateFormat);
+p.getRangeString = function (scaleid = 'x-axis-0') {
+    var min = moment(this._chart.scales[scaleid].min);
+    var max = moment(this._chart.scales[scaleid].max);
+    var minYear = min.format('YYYY');
+    var maxYear = max.format('YYYY');
+    var minMonth = min.format('MMM');
+    var maxMonth = max.format('MMM');
+    var minDay = min.format('D');
+    var maxDay = max.format('D');
+    var rangeString;
+    if (minYear != maxYear) {
+        // years differ
+        rangeString = minMonth + ' ' + minYear + ' - ' + maxMonth + ' ' + maxYear;
+    } else if (minMonth != maxMonth) {
+        // years are same and months differ
+        rangeString = minMonth + ' ' + minDay + ' - ' + maxMonth + ' ' + maxDay + ', ' + minYear;
+    } else if (minDay != maxDay) {
+        // years/months are same and days differ
+        rangeString = minMonth + ' ' + minDay + ' - ' + maxDay + ', ' + minYear;
+    }
+    return rangeString;
 
-    // var rightString = this._focus.format(this.dateFormat);
-    // var leftString = moment.utc(this._focus).subtract(this.timeScale.zoom).format(this.dateFormat);
-    return leftString + ' - ' + rightString;
-    // return [leftString, rightString, this.timeScale.label];
+    // var leftString = moment.utc(this._focus).subtract(Array.isArray(this.timeScale.half) ? this.timeScale.half[0] : this.timeScale.half).format(this.dateFormat);
+    // var rightString = moment.utc(this._focus).add(Array.isArray(this.timeScale.half) ? this.timeScale.half[1] : this.timeScale.half).format(this.dateFormat);
+
+    // return leftString + ' - ' + rightString;
 };
 
 // CHART MANIPULATION /////////
@@ -1041,7 +1097,6 @@ p.getRangeString = function () {
 //     }
 //     return halfWidth;
 // }
-
 
 /**
  * update the chart
@@ -1087,8 +1142,8 @@ p.updateChart = function (t) {
     this._inputValue.value = this.getDatasetValue(this._focus.format('YYYY-MM-DD'));
 
     // add focus line
-    this._chart.options.verticalLine[0].x = this._focus.format('YYYY-MM-DD');
-    console.log('focus line set to ' + this._chart.options.verticalLine[0].x);
+    // this._chart.options.verticalLine[0].x = this._focus.format('YYYY-MM-DD');
+    // console.log('focus line set to ' + this._chart.options.verticalLine[0].x);
 
     // update chart
     this._chart.update(t);
@@ -1193,132 +1248,45 @@ p.normalizeDates = function (data) {
 // INTERNALS
 p.defaultXAxis = {
     type: 'time',
-    // time: {
-    //     unit: 'day',
-    //     tooltipFormat: 'MM/DD/YYYY'
-    // },
-    // distribution: 'linear',
-    // display: true,
-    // scaleLabel: {
-    //     display: false,
-    //     labelString: 'no data'
-    // },
-    // ticks: {
-    //     autoSkip: true,
-    //     source: 'auto'
-    // }
-};
-
-p.defaultYAxis = {
-    display: true,
-    scaleLabel: {
-        display: true,
-        labelString: 'no data'
+    time: {
+        displayFormats: {
+            day: 'M/D',
+            week: 'M/D',
+            month: 'MMM',
+            quarter: 'MMM YYYY'
+        }
     }
 };
 
+p.defaultYAxis = {};
+
 p.defaultConfig = {
-    type: "bar",
+    type: "line",
     options: {
         scales: {
             xAxes: [p.defaultXAxis],
             yAxes: [p.defaultYAxis]
         },
         plugins: {
-            /*zoom: {
+            zoom: {
                 pan: {
                     enabled: true,
-                    mode: 'x'
+                    mode: 'x',
+                    speed: 1,
+                    threshold: 1,
+                    onPan: ({
+                        chart
+                    }) => {
+                        this.updateRangeLabel();
+                    }
                 },
                 zoom: {
-                    enabled: true,
-                    mode: 'x'
+                    enabled: false,
+                    mode: 'y'
                 }
-            }*/
+            }
         }
     }
 };
 
-Chart.defaults.global.maintainAspectRatio = false;
-Chart.defaults.global.responsive = true;
-Chart.defaults.global.defaultFontFamily = '"Lato", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol"';
-Chart.defaults.global.animation.duration = 500;
-Chart.defaults.global.animation.easing = "easeOutCubic";
-Chart.defaults.global.layout.padding = 0;
-Chart.defaults.global.legend.position = 'top';
-Chart.defaults.global.legend.labels.padding = 8;
-Chart.defaults.global.legend.labels.usePointStyle = true;
-Chart.defaults.global.legend.labels.fontColor = 'white';
-
-Chart.defaults.global.title.display = true;
-Chart.defaults.global.title.fontColor = 'white';
-Chart.defaults.global.title.fontSize = 16;
-Chart.defaults.global.title.padding = 4;
-
-Chart.defaults.global.elements.point.radius = 5;
-Chart.defaults.global.elements.point.hoverRadius = 10;
-Chart.defaults.global.elements.point.hitRadius = 20;
-Chart.defaults.global.elements.line.tension = 0;
-Chart.defaults.global.elements.rectangle.borderWidth = 2;
-
-Chart.scaleService.updateScaleDefaults('linear', {
-    ticks: {
-        fontColor: 'white',
-        // callback: function (value, index, values) {
-        //     console.log('x-linear-tick: ' + value + ', ' + index + ', ' + values);
-        //     return value;
-        // },
-        maxRotation: 0,
-        min: 0
-
-        //showLabelBackdrop: false // hide square behind text
-    },
-    gridLines: {
-        color: 'rgba(255, 255, 255, 0.2)',
-        zeroLineColor: 'rgba(255, 255, 255, 0.2)'
-    },
-    scaleLabel: {
-        display: true,
-        fontColor: 'white',
-        labelString: 'no data'
-    },
-});
-
-// axes can be customized including ticks here: https://www.chartjs.org/docs/latest/axes/#callbacks
-// chart plugin info: https://www.chartjs.org/docs/latest/developers/plugins.html
-Chart.scaleService.updateScaleDefaults('time', {
-    minUnit: 'day',
-    gridLines: {
-        color: 'rgba(255, 255, 255, 0.2)'
-    },
-    ticks: {
-        fontColor: 'white',
-        source: 'auto', //default 'auto'
-        maxRotation: 0,
-        autoSkip: false
-    }
-    //     ticks: {
-    //         autoSkip: false,
-    //         fontColor: 'white',
-    //         maxRotation: 0
-    //     },
-    //     gridLines: {
-    //         color: 'rgba(255, 255, 255, 0.2)'
-    //     },
-    //     scaleLabel: {
-    //         display: true,
-    //         fontColor: 'white',
-    //         labelString: 'no data'
-    //     },
-});
-
-// Chart.scaleService.updateScaleDefaults('radial', {
-//     angleLines: {
-//         color: 'white' // lines radiating from the center
-//     },
-//     pointLabels: {
-//         fontColor: 'white' // labels around the edge like 'Running'
-//     }
-// });
-
-module.exports = ChartController;
+module.exports = ModuleChartDetail;

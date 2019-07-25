@@ -37,6 +37,7 @@ var state = {
             path: '/multi',
             noscroll: true,
             notitle: true,
+            nolink: true,
             onlyLoggedIn: true
         },
         {

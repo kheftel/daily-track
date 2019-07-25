@@ -13,10 +13,11 @@ ModuleChartOverview = function (container, modalController) {
     if (!container)
         throw new Error('ModuleChartOverview: container not found');
 
-    this._parentContainer = container;
-    var parentData = container.dataset;
-    var setid = parentData.setid;
-    var setname = parentData.setname;
+    // grab data from the container
+    this._container = container;
+    this._containerData = container.dataset;
+    var setid = this._containerData.setid;
+    var setname = this._containerData.setname;
 
     this._modalController = modalController;
     this._modalController.modal.on('save', (event, id) => {
@@ -41,7 +42,7 @@ ModuleChartOverview = function (container, modalController) {
     //         .chartcontainer(id="set-" + i + "-" + set._id data-setid=set._id)
     this._main = elem(
         'div',
-        this._parentContainer,
+        this._container,
         ['card', 'border-light', 'shadow-rb', 'w-100', 'h-100'],
         ''
     );

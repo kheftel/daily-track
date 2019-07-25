@@ -1,7 +1,10 @@
 extends layout
 
 block content
-    .chartholder(data-setid=dataset._id data-setname=dataset.name)
+    #detail-container.container-fluid.p-0
+        .row.m-0
+                .col-12.p-0
+                    .module-chart-detail(data-setid=dataset._id data-setname=dataset.name)
     //- .row.flex-expand
         //- .col
 
@@ -20,16 +23,9 @@ block content
 block pagescript
     script.
 
-        $(".chartholder").each(function(i, container) {
-            var setid = container.dataset.setid;
-            var controller = new ChartController(container);
-            controller.colorOffset = 0;
-            controller.addDataset(setid);
+        $(".module-chart-detail").each(function(i, container) {
+            var detailModule = new ModuleChartDetail(container);
         });
-
-        //- window.controller = window.helpers.createChartControllerFromId('mainChart', '#{dataset._id}');
-
-
 
         //- .row
         //-     .col

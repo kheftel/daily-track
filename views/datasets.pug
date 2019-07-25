@@ -39,11 +39,8 @@ block pagescript
     script.
 
         $(".chartholder").each(function(i, container) {
-            var setid = container.dataset.setid;
-            console.log(setid);
-            var controller = new ChartController(container);
-            controller.colorOffset = i;
-            controller.addDataset(setid);
+            var detailModule = new ModuleChartDetail(container);
+            detailModule.colorOffset = i;
         });
 
         //- $.ajax({

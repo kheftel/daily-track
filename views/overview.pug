@@ -7,7 +7,7 @@ block content
         .row.m-0
             each set, i in datasets
                 .col-6.col-lg-4.col-xl-3.p-1
-                    .module-chart-container(data-setid=set._id data-setname=set.name)
+                    .module-chart-overview(data-setid=set._id data-setname=set.name)
 
                 //- .card.border-light.shadow-rb(style="height: " + style.chartRowHeight)
                 //-     .card-header.p-2
@@ -21,14 +21,14 @@ block content
 
             //- one extra for creating a new set
             .col-6.col-lg-4.col-xl-3.p-1
-                .module-chart-container
+                .module-chart-overview
     include modals/new-datapoint
 
 block pagescript
     script.
         var controller = new NewDatapointModalController();
 
-        $('.module-chart-container').each(function(i, container) {
+        $('.module-chart-overview').each(function(i, container) {
             var module = new ModuleChartOverview(container, controller);
             //- controller.colorOffset = i;
         });
