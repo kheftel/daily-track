@@ -185,6 +185,14 @@ apiRouter.get('/sets/:id',
                         return res.send(err);
 
                     var result = dataset.toObject();
+
+                    // truncate to time only
+                    for (let i = 0; i < datapoints.length; i++) {
+                        var point = datapoints[i].toObject();
+                        point.x = moment(point.x).utc().format('YYYY-MM-DD');
+                        datapoints[i] = point;
+                    }
+
                     result.data = datapoints;
 
                     return res.json(result);
@@ -226,7 +234,7 @@ apiRouter.post('/sets/:id', [
 
             if (dataset) {
                 // does the current user own this dataset?
-                if(dataset.owner != req.user._id) {
+                if (dataset.owner != req.user._id) {
                     return res.json({
                         success: false,
                         errors: [{

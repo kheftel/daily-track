@@ -88,15 +88,15 @@ ModuleChartOverview = function (container, modalController) {
     var row1 = elem('div', this._content, ['row', 'm-0']);
     var col12 = elem('div', row1, ['col-12', 'p-0']);
 
-    // last tracked values
-    this._lastTracked = elem('p', col12, ['text-dark', 'm-0', 'font-90'], '', '');
+    // last tracked values etc
+    this._stats = elem('div', col12, ['text-dark', 'm-0', 'font-90'], '', '');
 
     var row2 = elem('div', this._content, ['row', 'm-0']);
     var col1 = elem('div', row2, ['col-6', 'p-1']);
     
     // track button
     this._btnTrack = largeIconButton(['w-100'], col1, 'fa-plus-square fa-2x', 'Track', () => {
-        this._modalController.show('Track ' + setname, setid);
+        this._modalController.show('Track ' + this._dataset.name, this._dataset._id, this._dataset.yAxisLabel);
     }, '');
 
     var col2 = elem('div', row2, ['col-6', 'p-1']);
@@ -278,28 +278,61 @@ p.setDatasetFromModel = function (dataset, complete) {
     // show / activate edit button
     $(this._editButton).removeClass('d-none').attr('href', '/set/' + dataset._id + '/edit');
 
-    // populate content
-    this.updateLastTracked();
+    // populate stats content
+    this.updateStats();
     
     if (complete) complete();
 };
 
-p.updateLastTracked = function() {
+p.updateStats = function() {
     var numPoints = this._dataset.data.length;
-    var tracked = '';
-    var value = 'Value: ';
+    var unit = this._dataset.yAxisLabel;
+    var trackedClass = 'text-dark';
+    var tracked, value;
+
     if(numPoints > 0)
     {
-        var lastPoint = this._dataset.data[numPoints - 1];
-        tracked += moment(lastPoint.x).fromNow();
-        value += lastPoint.y;
+        var mToday = moment().startOf('day');
+        var oLastPoint = this._dataset.data[numPoints - 1];
+        var mLastPoint = moment(oLastPoint.x);
+        var days = mLastPoint.diff(mToday, 'day');
+
+        // days ago
+        if(days == 0)
+            tracked = 'today';
+        else
+            tracked = mLastPoint.from(mToday);
+        
+        // style
+        console.log(days);
+        if(days == 0)
+            trackedClass = 'text-success';
+        else if(days >= -1)
+            trackedClass = 'text-dark';
+        else if(days >= -3)
+            trackedClass = 'text-warning';
+        else
+            trackedClass = 'text-danger';
+        
+        // value
+        // value = `${oLastPoint.y} (${unit})`;
+        value = `${oLastPoint.y}`;
     }
     else
     {
-        tracked += 'Never tracked';
-        value += 'N/A';
+        tracked = 'never tracked';
+        value = 'N/A';
     }
-    this._lastTracked.innerHTML = tracked + '<br />' + value;
+
+    var sTimes = numPoints == 1 ? 'time' : 'times';
+
+    var outputs = [
+        `Last value: ${value} (<span class="${trackedClass}">${tracked}</span>)`,
+        `Tracked ${numPoints} ${sTimes}`
+    ];
+    this._stats.innerHTML = outputs.join('<br />');
+
+    this._detailLink.innerHTML = `${this._dataset.name} (${unit})`;
 };
 
 module.exports = ModuleChartOverview;

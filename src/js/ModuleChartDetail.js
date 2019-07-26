@@ -217,7 +217,7 @@ ModuleChartDetail = function (container) {
         var newFocus = moment(datapoint.x).utc().startOf('day');
         console.log('clicked datapoint, focusing on: ' + newFocus.format());
         this._focus = newFocus;
-        this.updateChart();
+        // this.updateChart();
     };
 
     // this._config.options.verticalLine = [{
@@ -435,7 +435,7 @@ p.addDatasetFromModel = function (dataset, complete) {
     // translate for chart dataset object
     dataset.type = dataset.chartType;
     dataset.label = dataset.name + ' (' + dataset.yAxisLabel + ')';
-    dataset.data = this.normalizeDates(dataset.data);
+    dataset.data = dataset.data;
     dataset.fill = false;
     dataset.pointBackgroundColor = this.getColor(this.datasets.length);
     dataset.pointBorderColor = this.getColor(this.datasets.length);
@@ -1243,13 +1243,13 @@ p.deleteDatasetValue = function (x) {
     }
 };
 
-p.normalizeDates = function (data) {
-    for (var i = 0; i < data.length; i++) {
-        var datum = data[i];
-        datum.x = moment(datum.x).utc().format('YYYY-MM-DD');
-    }
-    return data;
-};
+// p.normalizeDates = function (data) {
+//     for (var i = 0; i < data.length; i++) {
+//         var datum = data[i];
+//         datum.x = moment(datum.x).utc().format('YYYY-MM-DD');
+//     }
+//     return data;
+// };
 
 // INTERNALS
 p.defaultXAxis = {
