@@ -19,12 +19,14 @@ block content
             //-     .card-body(style="position: relative;")
             //-         .chartcontainer(id="set-0-" + dataset._id data-setid=dataset._id)
 
+    include modals/create-datapoint
 
 block pagescript
     script.
+        var controller = new ModalControllerCreateDatapoint();
 
         $(".module-chart-detail").each(function(i, container) {
-            var detailModule = new ModuleChartDetail(container);
+            var detailModule = new ModuleChartDetail(container, controller);
         });
 
         //- .row

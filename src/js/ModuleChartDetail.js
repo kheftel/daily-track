@@ -4,7 +4,7 @@
  * @param  {} container the html element (or id of an element) that will contain this module
  */
 var _numControllers = 0;
-ModuleChartDetail = function (container) {
+ModuleChartDetail = function (container, createDatapointModal) {
     if (typeof container == 'string')
         container = document.getElementById(container);
 
@@ -14,6 +14,16 @@ ModuleChartDetail = function (container) {
     // grab data from the container
     this._container = container;
     this._containerData = container.dataset;
+
+    this._createDatapointModal = createDatapointModal;
+    this._createDatapointModal.getView().on('save', (event, id, x, y) => {
+        if(!this.datasets) return;
+        if(id == this.datasets[0]._id)
+        {
+            this.setDatasetValue(x, y);
+            this._chart.update();
+        }
+    });
 
     this._focus = moment.utc().startOf('day');
 
@@ -36,9 +46,8 @@ ModuleChartDetail = function (container) {
     this._cardHeader = elem('div', this._main, ['card-header', 'd-flex', 'align-items-center', 'p-1']);
     this._setLabel = elem('h5', this._cardHeader, ['align-middle', 'm-0'], null, this._containerData.setname);
 
-    this._btnAdd = iconButton(['ml-auto', 'btn-shadow'], this._cardHeader, 'fa-plus-square', (e) => {
-        console.log(e);
-        e.preventDefault();
+    this._btnAdd = iconButton(['ml-auto', 'btn-shadow'], this._cardHeader, 'fa-plus', () => {
+        this._createDatapointModal.show('Track ' + this.datasets[0].name, this.datasets[0]._id, this.datasets[0].yAxisLabel);
     });
 
     this._drpHeader = elem('div', this._cardHeader, ['dropdown']);
@@ -458,7 +467,7 @@ p.addDatasetFromModel = function (dataset, complete) {
     // disable some buttons if in multi-mode
     if (this.datasets.length > 1) {
         $(this._btnType).addClass('d-none');
-        //$(this._btnAdd).addClass('d-none');
+        $(this._btnAdd).addClass('d-none');
         $(this._row2).removeClass('d-flex').addClass('d-none');
         $(this._deleteButton).addClass('d-none');
         $(this._editButton).addClass('d-none');
@@ -470,7 +479,9 @@ p.addDatasetFromModel = function (dataset, complete) {
 
         // show type toggle btn
         // $(this._btnType).removeClass('d-none').html(this._toggleHTML[dataset.type]);
+        
         // $(this._btnAdd).removeClass('d-none').attr('href', '/set/' + dataset._id + '/new');
+        $(this._btnAdd).removeClass('d-none');
 
         // show / activate edit button
         $(this._editButton).removeClass('d-none').attr('href', '/set/' + dataset._id + '/edit');

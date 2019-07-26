@@ -6,7 +6,7 @@
 
 const moment = require('moment');
 
-ModuleChartOverview = function (container, modalController) {
+ModuleChartOverview = function (container, createDatapointModal) {
     // parent container can be id or html elem
     if (typeof container == 'string')
         container = document.getElementById(container);
@@ -19,8 +19,8 @@ ModuleChartOverview = function (container, modalController) {
     var setid = this._containerData.setid;
     var setname = this._containerData.setname;
 
-    this._modalController = modalController;
-    this._modalController.modal.on('save', (event, id) => {
+    this._createDatapointModal = createDatapointModal;
+    this._createDatapointModal.getView().on('save', (event, id) => {
         if(!this._dataset) return;
         console.log(id + ' vs ' + this._dataset._id);
         if(id == this._dataset._id)
@@ -97,7 +97,7 @@ ModuleChartOverview = function (container, modalController) {
     
     // track button
     this._btnTrack = largeIconButton(['w-100'], col1, 'fa-plus-square fa-2x', 'Track', () => {
-        this._modalController.show('Track ' + this._dataset.name, this._dataset._id, this._dataset.yAxisLabel);
+        this._createDatapointModal.show('Track ' + this._dataset.name, this._dataset._id, this._dataset.yAxisLabel);
     }, '');
 
     var col2 = elem('div', row2, ['col-6', 'p-1']);

@@ -19,7 +19,7 @@ require('./js/lib/chartjs-plugin-zoom.js');
 require('./js/ChartConfig');
 require('./js/ModuleChartDetail');
 require('./js/ModuleChartOverview');
-require('./js/NewDatapointModalController');
+require('./js/ModalControllerCreateDatapoint');
 
 // CSS
 import './css/bootstrap-darkly.css';
