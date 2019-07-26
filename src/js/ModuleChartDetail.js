@@ -204,6 +204,11 @@ ModuleChartDetail = function (container) {
 
     // create chart
     this._config = JSON.parse(JSON.stringify(p.defaultConfig));
+    this._config.options.plugins.zoom.pan.onPan = ({
+        chart
+    }) => {
+        this.updateRangeLabel();
+    };
     this._config.options.onClick = (e, arr) => {
         if (!Array.isArray(arr) || arr.length == 0) return;
         var p = arr[0];
@@ -247,6 +252,7 @@ p.newZoom = function (level) {
 
     this._chart.update();
 
+    this.updateRangeLabel();
     this._rangeLabel.innerHTML = this.getRangeString();
 };
 
@@ -1273,12 +1279,7 @@ p.defaultConfig = {
                     enabled: true,
                     mode: 'x',
                     speed: 1,
-                    threshold: 1,
-                    onPan: ({
-                        chart
-                    }) => {
-                        this.updateRangeLabel();
-                    }
+                    threshold: 1
                 },
                 zoom: {
                     enabled: false,
