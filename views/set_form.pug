@@ -88,15 +88,24 @@ block pagescript
                 $('#save').prop('disabled', false);
 
                 if (!data.success) {
-                    // validation error
                     //- $('#set-form').addClass('was-validated');
-
                     if(data.errors)
                     {
                         data.errors.forEach(function(error) {
                             // add the error message
-                            $('#' + error.param).addClass('is-invalid');
-                            $('#' + error.param + '-invalid').html(error.msg);
+                            if(error.param) {
+                                // validation error
+                                $('#' + error.param).addClass('is-invalid');
+                                $('#' + error.param + '-invalid').html(error.msg);
+                            }
+                            else {
+                                $.toast({
+                                    title: 'Error!',
+                                    content: error.msg || 'Unable to save, please try again later',
+                                    type: 'error',
+                                    delay: 5000
+                                });
+                            }
                         });
                     }
                 }

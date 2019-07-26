@@ -10,8 +10,11 @@ defaults.hover.animationDuration = 0;           // duration of animations when h
 defaults.responsiveAnimationDuration = 0;       // animation duration after a resize
 defaults.elements.line.tension = 0;             // disables bezier curves
 
-// layout/legend
+// layout
 defaults.layout.padding = 0;
+
+// legend
+defaults.legend.display = false;
 defaults.legend.position = 'top';
 defaults.legend.labels.padding = 8;
 defaults.legend.labels.usePointStyle = true;

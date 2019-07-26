@@ -53,6 +53,7 @@ ModuleChartOverview = function (container, modalController) {
     // dropdown
     this._drpHeader = elem('div', this._cardHeader, ['dropdown', 'ml-auto']);
     this._drpHeaderBtn = elem('button', this._drpHeader, ['btn', 'btn-primary', 'btn-shadow', 'dropdown-toggle']);
+    $(this._drpHeaderBtn).addClass('d-none');
     $(this._drpHeaderBtn)
         .attr('type', 'button')
         .attr('data-toggle', 'dropdown');
@@ -327,7 +328,7 @@ p.updateStats = function() {
     var sTimes = numPoints == 1 ? 'time' : 'times';
 
     var outputs = [
-        `Last value: ${value} (<span class="${trackedClass}">${tracked}</span>)`,
+        `Last: ${value} (<span class="${trackedClass}">${tracked}</span>)`,
         `Tracked ${numPoints} ${sTimes}`
     ];
     this._stats.innerHTML = outputs.join('<br />');

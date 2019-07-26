@@ -36,8 +36,13 @@ ModuleChartDetail = function (container) {
     this._cardHeader = elem('div', this._main, ['card-header', 'd-flex', 'align-items-center', 'p-1']);
     this._setLabel = elem('h5', this._cardHeader, ['align-middle', 'm-0'], null, this._containerData.setname);
 
-    this._drpHeader = elem('div', this._cardHeader, ['dropdown', 'ml-auto']);
-    this._drpHeaderBtn = elem('button', this._drpHeader, ['btn', 'btn-outline-success', 'dropdown-toggle']);
+    this._btnAdd = iconButton(['ml-auto', 'btn-shadow'], this._cardHeader, 'fa-plus-square', (e) => {
+        console.log(e);
+        e.preventDefault();
+    });
+
+    this._drpHeader = elem('div', this._cardHeader, ['dropdown']);
+    this._drpHeaderBtn = elem('button', this._drpHeader, ['btn', 'btn-primary', 'btn-shadow', 'dropdown-toggle']);
     $(this._drpHeaderBtn)
         .attr('type', 'button')
         .attr('id', 'dropdown' + _numControllers)
@@ -265,7 +270,7 @@ p.dateFormat = 'MM/DD/YYYY';
 
 p.defaultZoomLevel = 6;
 
-p.defaultButtonClasses = ['btn', 'btn-outline-success'];
+p.defaultButtonClasses = ['btn', 'btn-primary'];
 
 p.defaultFocusStyle = {
     borderColor: '#00bc8c', //'#375a7f',
@@ -464,7 +469,7 @@ p.addDatasetFromModel = function (dataset, complete) {
         $(this._setLabel).html(dataset.name + ' (' + dataset.yAxisLabel + ')');
 
         // show type toggle btn
-        $(this._btnType).removeClass('d-none').html(this._toggleHTML[dataset.type]);
+        // $(this._btnType).removeClass('d-none').html(this._toggleHTML[dataset.type]);
         // $(this._btnAdd).removeClass('d-none').attr('href', '/set/' + dataset._id + '/new');
 
         // show / activate edit button

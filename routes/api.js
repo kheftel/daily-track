@@ -213,7 +213,7 @@ apiRouter.post('/sets/:id', [
     body('yAxisLabel', 'Unit is required.').not().isEmpty().trim().escape(),
 
     // sanitize chartType
-    sanitizeBody('chartType').escape(),
+    // sanitizeBody('chartType').escape(),
 
     function (req, res, next) {
         // handle validation errors
@@ -234,7 +234,8 @@ apiRouter.post('/sets/:id', [
 
             if (dataset) {
                 // does the current user own this dataset?
-                if (dataset.owner != req.user._id) {
+                if (!dataset.owner.equals(req.user._id)) {
+                    console.log(dataset.owner, req.user._id);
                     return res.json({
                         success: false,
                         errors: [{
@@ -278,7 +279,7 @@ apiRouter.post('/sets/:id', [
                     // update dataset
                     dataset.name = req.body.name;
                     dataset.yAxisLabel = req.body.yAxisLabel;
-                    dataset.chartType = req.body.chartType;
+                    // dataset.chartType = req.body.chartType;
 
                     // ['name', 'chartType', 'yAxisLabel'].forEach(function (element) {
                     //     if (req.body[element] !== undefined)
