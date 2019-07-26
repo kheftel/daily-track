@@ -89,11 +89,12 @@ NewDatapointModalController = function () {
 };
 var p = NewDatapointModalController.prototype;
 
-p.show = function (title, setid) {
+p.show = function (title, setid, unit) {
     // set up modal data
     $('#new-datapoint #title').html(title);
     $('#new-datapoint #x').val(moment().format('YYYY-MM-DD'));
     $('#new-datapoint #y').val('');
+    $('#new-datapoint #y').attr('placeholder', unit);
     $('#new-datapoint-form').attr('action', '/api/sets/' + setid + '/data');
     $('#new-datapoint').data('setid', setid);
 

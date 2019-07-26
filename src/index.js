@@ -9,7 +9,7 @@ require('./js/lib/picker.date');
 // require('./js/lib/tempusdominus-bootstrap-4.min');
 
 // chartJS
-require('moment');
+const moment = require('moment');
 require('chart.js');
 require('hammerjs');
 require('./js/lib/chartjs-plugin-vh-line');
@@ -39,6 +39,9 @@ import "./img/touch-icon-iphone-retina.png";
 import "./img/touch-icon-ipad-retina.png";
 import "./img/dailytracklogo.png";
 import "./img/dailytracklogolong.png";
+
+// debug
+window.moment = moment;
 
 $(document).ready(function () {
     // backdrop for sidebar to block touches on content
