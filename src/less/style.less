@@ -349,8 +349,14 @@ html {
     height: initial;
     padding: 0.25rem 0.75rem;
     color: @white;
-    background-color: @gray-900 !important;
+    background-color: @gray-900;
     border-color: #666;
+}
+
+// disabled
+.form-control:disabled, .form-control[readonly] {
+    background-color: @gray-700;
+    color: @gray-600;
 }
 
 // input groups get same transitions as buttons
@@ -381,8 +387,8 @@ html {
 // }
 
 // rollovers
-.form-control:focus,
-.form-control:hover,
+.form-control:focus:not([disabled]),
+.form-control:hover:not([disabled]),
 // .input-group:hover,
 // .input-group:focus,
 // .input-group:focus-within,

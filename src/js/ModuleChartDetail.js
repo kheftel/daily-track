@@ -20,6 +20,7 @@ ModuleChartDetail = function (container, createDatapointModal) {
         if(!this.datasets) return;
         if(id == this.datasets[0]._id)
         {
+            console.log('save', id, x, y);
             this.setDatasetValue(x, y);
             this._chart.update();
         }
@@ -47,7 +48,7 @@ ModuleChartDetail = function (container, createDatapointModal) {
     this._setLabel = elem('h5', this._cardHeader, ['align-middle', 'm-0'], null, this._containerData.setname);
 
     this._btnAdd = iconButton(['ml-auto', 'btn-shadow'], this._cardHeader, 'fa-plus', () => {
-        this._createDatapointModal.show('Track ' + this.datasets[0].name, this.datasets[0]._id, this.datasets[0].yAxisLabel);
+        this._createDatapointModal.show(this.datasets[0]);
     });
 
     this._drpHeader = elem('div', this._cardHeader, ['dropdown']);
@@ -224,13 +225,16 @@ ModuleChartDetail = function (container, createDatapointModal) {
         this.updateRangeLabel();
     };
     this._config.options.onClick = (e, arr) => {
-        if (!Array.isArray(arr) || arr.length == 0) return;
+        if (!Array.isArray(arr) || arr.length == 0 || arr.length > 1) return; // only support single datasets for now
         var p = arr[0];
         if (p == null || p._datasetIndex == null || p._index == null) return;
         var datapoint = this.datasets[p._datasetIndex].data[p._index];
-        var newFocus = moment(datapoint.x).utc().startOf('day');
-        console.log('clicked datapoint, focusing on: ' + newFocus.format());
-        this._focus = newFocus;
+        
+        this._createDatapointModal.show(this.datasets[0], datapoint);
+
+        // var newFocus = moment(datapoint.x).utc().startOf('day');
+        // console.log('clicked datapoint, focusing on: ' + newFocus.format());
+        // this._focus = newFocus;
         // this.updateChart();
     };
 

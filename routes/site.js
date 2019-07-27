@@ -22,14 +22,14 @@ var state = {
             title: 'Overview',
             icon: 'fa-list',
             path: '/',
-            onlyLoggedIn: true
+            acl: 'loggedIn'
         },
         {
             title: 'New Dataset',
             icon: 'fa-plus-square',
             path: '/set/new',
             noscroll: true,
-            onlyLoggedIn: true
+            acl: 'loggedIn'
         },
         {
             title: 'Multi-View',
@@ -38,19 +38,25 @@ var state = {
             noscroll: true,
             notitle: true,
             nolink: true,
-            onlyLoggedIn: true
+            acl: 'loggedIn'
+        },
+        {
+            title: 'Log Out ${USERNAME}',
+            path: '/logout',
+            icon: 'fa-sign-out-alt',
+            acl: 'loggedIn'
         },
         {
             title: 'Sign Up',
             path: '/register',
-            nolink: true,
-            onlyLoggedOut: true
+            // nolink: true,
+            acl: 'loggedOut'
         },
         {
             title: 'Log In',
             path: '/login',
-            nolink: true,
-            onlyLoggedOut: true
+            // nolink: true,
+            acl: 'loggedOut'
         }
     ],
     dynamic: [{
@@ -58,14 +64,14 @@ var state = {
         title: 'Edit Dataset',
         icon: '',
         noscroll: true,
-        onlyLoggedIn: true
+        acl: 'loggedIn'
     }, {
         regex: /^\/set\/.+/, //match /set/id
         title: 'Dataset Detail',
         icon: '',
         noscroll: true,
         notitle: true,
-        onlyLoggedIn: true
+        acl: 'loggedIn'
     }],
     style: {
         chartRowHeight: '320px'
@@ -77,12 +83,17 @@ siteRouter.use(function (req, res, next) {
     console.log('initialization: ' + req.path);
 
     // configure template locals
+    // site title
     res.locals.siteTitle = state.siteTitle;
-    res.locals.nav = state.nav;
+    // nav - note it's a copy for string replacement
+    res.locals.nav = preProcessNav(req);
+    // style - not sure if still used
     res.locals.style = state.style;
+    // give the template a subset of the req object
     res.locals.req = {
         path: req.path
     };
+    // pass along the logged in user if any
     res.locals.user = req.user;
 
     // grab current page from nav
@@ -103,14 +114,14 @@ siteRouter.use(function (req, res, next) {
         });
     }
 
-    // process permissions
+    // process ACL
     if (active) {
-        if (active.onlyLoggedIn && !req.isAuthenticated()) {
+        if (active.acl == 'loggedIn' && !req.isAuthenticated()) {
             if (req.path != '/')
                 req.flash('error', 'You must log in first.');
             return res.redirect('/login');
         }
-        if (active.onlyLoggedOut && req.isAuthenticated()) {
+        if (active.acl == 'loggedOut' && req.isAuthenticated()) {
             return res.redirect('/');
         }
 
@@ -278,8 +289,6 @@ siteRouter.get('/set/:id', function (req, res, next) {
                 if (err)
                     return next(err);
 
-                // setPageTitle(res, dataset.name);
-
                 var result = dataset.toObject();
                 result.data = datapoints;
                 res.locals.dataset = result;
@@ -409,6 +418,29 @@ function setFlashMessages(res, messages) {
     }
     if (!_.isEmpty(res.locals.messages))
         console.log(res.locals.messages);
+}
+
+/**
+ * preprocess the nav object, do string replacement etc
+ */
+function preProcessNav(req) {
+    var retval = [];
+    for (let i = 0; i < state.nav.length; i++) {
+        let current = JSON.parse(JSON.stringify(state.nav[i]));
+
+        // determine whether to include this link
+        if (typeof current.acl === 'undefined' ||
+            (current.acl == 'loggedIn' && req.isAuthenticated()) ||
+            (current.acl == 'loggedOut' && !req.isAuthenticated())
+        ) {
+            // do some string replacements
+            current.title = current.title.replace('${USERNAME}', req.user ? req.user.username : '');
+
+            retval.push(current);
+        }
+    }
+
+    return retval;
 }
 
 // router.post('/set/create', set_controller.create_post);

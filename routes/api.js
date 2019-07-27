@@ -189,7 +189,7 @@ apiRouter.get('/sets/:id',
                     // truncate to time only
                     for (let i = 0; i < datapoints.length; i++) {
                         var point = datapoints[i].toObject();
-                        point.x = moment(point.x).utc().format('YYYY-MM-DD');
+                        point.x = truncateTime(point.x); //moment(point.x).utc().format('YYYY-MM-DD');
                         datapoints[i] = point;
                     }
 
@@ -398,7 +398,9 @@ apiRouter.post('/sets/:id/data', [
 
                             return res.json({
                                 success: 'true',
-                                message: 'Datapoint updated'
+                                message: 'Datapoint updated',
+                                x: truncateTime(datapoint.x),
+                                y: datapoint.y
                             });
                         });
                     }
@@ -425,6 +427,8 @@ apiRouter.post('/sets/:id/data', [
                             return res.send(err);
                         data.success = true;
                         data.message = 'Datapoint created for ' + req.body.x;
+                        data.x = truncateTime(newpoint.x);
+                        data.y = newpoint.y;
                         return res.json(data);
                     });
                 }
@@ -552,6 +556,11 @@ function handleError(err, req, res, next) {
     };
     var statusCode = err.status || 500;
     return res.status(statusCode).json(data);
+}
+
+// helper function to truncate time values from date objects
+function truncateTime(x) {
+    return moment(x).utc().format('YYYY-MM-DD');
 }
 
 // generate some data

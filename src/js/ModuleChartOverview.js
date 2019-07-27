@@ -97,7 +97,7 @@ ModuleChartOverview = function (container, createDatapointModal) {
     
     // track button
     this._btnTrack = largeIconButton(['w-100'], col1, 'fa-plus-square fa-2x', 'Track', () => {
-        this._createDatapointModal.show('Track ' + this._dataset.name, this._dataset._id, this._dataset.yAxisLabel);
+        this._createDatapointModal.show(this._dataset);
     }, '');
 
     var col2 = elem('div', row2, ['col-6', 'p-1']);
@@ -301,6 +301,8 @@ p.updateStats = function() {
         // days ago
         if(days == 0)
             tracked = 'today';
+        else if(days == -1)
+            tracked = 'yesterday';
         else
             tracked = mLastPoint.from(mToday);
         
@@ -308,8 +310,8 @@ p.updateStats = function() {
         console.log(days);
         if(days == 0)
             trackedClass = 'text-success';
-        else if(days >= -1)
-            trackedClass = 'text-dark';
+        // else if(days >= -1)
+        //     trackedClass = 'text-dark';
         else if(days >= -3)
             trackedClass = 'text-warning';
         else

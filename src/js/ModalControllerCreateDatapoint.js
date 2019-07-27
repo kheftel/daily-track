@@ -35,7 +35,7 @@ ModalControllerCreateDatapoint = function () {
                 encode: true
             })
             .done((data) => {
-                console.log('ajax response: ' + data);
+                console.log('ajax response:');
                 console.log(data);
 
                 // enable save btn
@@ -59,8 +59,7 @@ ModalControllerCreateDatapoint = function () {
                         delay: 5000
                     });
 
-                    // to do: what if post-save, formData was altered server-side?
-                    this.getView().trigger('save', [this.getView().data('setid'), formData.x, formData.y]);
+                    this.getView().trigger('save', [this.getView().data('setid'), data.x, data.y]);
 
                     // hide modal
                     this.getView().modal('hide');
@@ -104,14 +103,21 @@ p.getView = function (sub) {
     return $(this._selector + (sub.charAt(0) == '-' ? '' : ' ') + sub);
 };
 
-p.show = function (title, setid, unit) {
+/**
+ * show the modal
+ * 
+ * @param {*} dataset required, the dataset to add a point to
+ * @param {*} datapoint optional, if provided, indicates a datapoint to upate
+ */
+p.show = function (dataset, datapoint = null) {
     // set up modal data
-    this.getView('#title').html(title);
+    this.getView('#title').html((datapoint ? 'Edit entry for: ' : 'Track: ') + dataset.name);
     this.getView('#x').val(moment().format('YYYY-MM-DD'));
-    this.getView('#y').val('');
-    this.getView('#y').attr('placeholder', unit);
-    this.getView('-form').attr('action', '/api/sets/' + setid + '/data');
-    this.getView().data('setid', setid);
+    this.getView('#x').prop('disabled', datapoint ? true : false);
+    this.getView('#y').val(datapoint ? datapoint.y : '');
+    this.getView('#y').attr('placeholder', dataset.yAxisLabel);
+    this.getView('-form').attr('action', '/api/sets/' + dataset._id + '/data');
+    this.getView().data('setid', dataset._id);
 
     // reset validation
     this.getView('.form-control').removeClass('is-valid');
