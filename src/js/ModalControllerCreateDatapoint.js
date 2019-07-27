@@ -4,20 +4,21 @@
 ModalControllerCreateDatapoint = function () {
     this._selector = '#create-datapoint';
 
-    // hook up submit button to form submission
-    this.getView('#save').click(() => this.getView('-form').submit());
-
-    // handle modal submission
-    this.getView('-form').submit((e) => {
+    /**
+     * 
+     * @param {*} e event
+     * @param {*} btn '#save' or '#delete'
+     */
+    var submitForm = (e, btn) => {
         // stop the form from submitting the normal way and refreshing the page
-        e.preventDefault();
+        // e.preventDefault();
 
         // server-size validation, reset validation state
         this.getView('-form .form-control').removeClass('is-valid');
         this.getView('-form .form-control').removeClass('is-invalid');
 
         // disable submit button
-        this.getView('#save').prop('disabled', true);
+        this.getView(btn).prop('disabled', true);
 
         // get the form data
         // there are many ways to get this data using jQuery (you can use the class or id also)
@@ -25,6 +26,8 @@ ModalControllerCreateDatapoint = function () {
             'x': this.getView('input[name=x]').val(),
             'y': this.getView('input[name=y]').val(),
         };
+        if(btn == '#delete')
+            formData.delete = 1;
 
         // send data to server
         $.ajax({
@@ -38,8 +41,8 @@ ModalControllerCreateDatapoint = function () {
                 console.log('ajax response:');
                 console.log(data);
 
-                // enable save btn
-                this.getView('#save').prop('disabled', false);
+                // enable submit btn
+                this.getView(btn).prop('disabled', false);
 
                 if (!data.success) {
                     // validation error
@@ -59,7 +62,10 @@ ModalControllerCreateDatapoint = function () {
                         delay: 5000
                     });
 
-                    this.getView().trigger('save', [this.getView().data('setid'), data.x, data.y]);
+                    if(btn == '#save')
+                        this.getView().trigger('saved', [this.getView().data('setid'), data.datapoint]);
+                    else if(btn == '#delete')
+                        this.getView().trigger('deleted', [this.getView().data('setid'), data.datapoint]);
 
                     // hide modal
                     this.getView().modal('hide');
@@ -72,7 +78,7 @@ ModalControllerCreateDatapoint = function () {
             })
             .fail((data) => {
                 // enable save btn
-                this.getView('#save').prop('disabled', false);
+                this.getView(btn).prop('disabled', false);
                 // this.getView('#save .spinner-border').addClass('d-none');
 
                 // hide modal
@@ -88,6 +94,18 @@ ModalControllerCreateDatapoint = function () {
                 console.log('ajax error:');
                 console.log(data);
             });
+    };
+
+    // submit button clicks
+    this.getView('#save').click((e) => submitForm(e, '#save'));
+
+    this.getView('#delete').confirmation({
+        rootSelector: this.getView('#delete'),
+        popout: true,
+        container: 'body',
+        title: 'Are you sure you want to delete this value?'
+    }).on('click', (e) => {
+        submitForm(e, '#delete');
     });
 };
 var p = ModalControllerCreateDatapoint.prototype;
@@ -125,6 +143,16 @@ p.show = function (dataset, datapoint = null) {
 
     // set all the valid feedback messages the same
     this.getView('.valid-feedback').html('OK');
+
+    // manage button visibility
+    if(datapoint) {
+        this.getView('#save').removeClass('d-none');
+        this.getView('#delete').removeClass('d-none');
+    }
+    else {
+        this.getView('#save').removeClass('d-none');
+        this.getView('#delete').addClass('d-none');
+    }
 
     // show modal
     this.getView().modal('show');

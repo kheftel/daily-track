@@ -380,13 +380,16 @@ apiRouter.post('/sets/:id/data', [
                 if (datapoint) {
                     if (req.body.delete == "1") {
                         // delete datapoint
+                        var deletedPoint = datapoint.toObject();
+                        deletedPoint.x = truncateTime(deletedPoint.x);
                         datapoint.delete((err) => {
                             if (err)
                                 return res.send(err);
 
                             return res.json({
                                 success: 'true',
-                                message: 'Datapoint deleted'
+                                message: 'Datapoint deleted',
+                                datapoint: deletedPoint
                             });
                         });
                     } else {
@@ -395,12 +398,13 @@ apiRouter.post('/sets/:id/data', [
                         datapoint.save((err) => {
                             if (err)
                                 return res.send(err);
-
+                            
+                            var point = datapoint.toObject();
+                            point.x = truncateTime(point.x);
                             return res.json({
                                 success: 'true',
                                 message: 'Datapoint updated',
-                                x: truncateTime(datapoint.x),
-                                y: datapoint.y
+                                datapoint: point
                             });
                         });
                     }
@@ -425,10 +429,13 @@ apiRouter.post('/sets/:id/data', [
                     newpoint.save(function (err) {
                         if (err)
                             return res.send(err);
+                        
                         data.success = true;
                         data.message = 'Datapoint created for ' + req.body.x;
-                        data.x = truncateTime(newpoint.x);
-                        data.y = newpoint.y;
+
+                        var point = newpoint.toObject();
+                        point.x = truncateTime(point.x);
+                        data.datapoint = point;
                         return res.json(data);
                     });
                 }

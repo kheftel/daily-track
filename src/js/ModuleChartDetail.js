@@ -16,12 +16,23 @@ ModuleChartDetail = function (container, createDatapointModal) {
     this._containerData = container.dataset;
 
     this._createDatapointModal = createDatapointModal;
-    this._createDatapointModal.getView().on('save', (event, id, x, y) => {
+    this._createDatapointModal.getView().on('saved', (event, setid, datapoint) => {
         if(!this.datasets) return;
-        if(id == this.datasets[0]._id)
+        if(setid == this.datasets[0]._id)
         {
-            console.log('save', id, x, y);
-            this.setDatasetValue(x, y);
+            console.log('saved');
+            console.log(datapoint);
+            this.setDatasetValue(datapoint.x, datapoint.y);
+            this._chart.update();
+        }
+    });
+    this._createDatapointModal.getView().on('deleted', (event, setid, datapoint) => {
+        if(!this.datasets) return;
+        if(setid == this.datasets[0]._id)
+        {
+            console.log('deleted');
+            console.log(datapoint);
+            this.deleteDatasetValue(datapoint.x);
             this._chart.update();
         }
     });

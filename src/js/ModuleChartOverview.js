@@ -20,7 +20,7 @@ ModuleChartOverview = function (container, createDatapointModal) {
     var setname = this._containerData.setname;
 
     this._createDatapointModal = createDatapointModal;
-    this._createDatapointModal.getView().on('save', (event, id) => {
+    this._createDatapointModal.getView().on('saved', (event, id) => {
         if(!this._dataset) return;
         console.log(id + ' vs ' + this._dataset._id);
         if(id == this._dataset._id)
