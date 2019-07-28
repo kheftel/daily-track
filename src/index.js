@@ -2,7 +2,8 @@
 require('jquery');
 require('popper.js');
 require('bootstrap');
-require('./js/lib/bootstrap-confirmation.min');
+require ('bootstrap-confirmation2');
+// require('./js/lib/bootstrap-confirmation');
 require('./js/lib/toast');
 require('./js/lib/picker');
 require('./js/lib/picker.date');
