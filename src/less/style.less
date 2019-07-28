@@ -341,7 +341,11 @@ html {
 }
 
 // mixin to generate all the variants for popover arrow directions
-@directions : top, right, bottom, left;
+@directions : top,
+right,
+bottom,
+left;
+
 .arrow-directions(@directions; @border-color; @bg-color; @index) when (@index < 4) {
     .arrow-directions(@directions; @border-color; @bg-color; (@index + 1)); // increment
 
@@ -571,8 +575,7 @@ body.sidebar-active {
 // individual pages /////////////////////////
 
 // break out of the main content div's padding
-#overview-container,
-#detail-container {
+#overview-container {
     margin-left: -0.25rem;
     margin-right: -0.25rem;
     width: calc(100% + 0.5rem);

@@ -13,7 +13,7 @@ html(lang='en')
         //- link(rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous")
         //- link(rel="stylesheet" href="/css/bootstrap-darkly.min.css")
         link(rel="stylesheet" href=webpack_asset('main', 'css'))
-        
+
         //- link(rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.1/css/all.css" integrity="sha384-50oBUHEmvpQ+1lW4y57PTFmhCaXp0ML5d60M1M7uH2+nqUivzIebhndOJK28anvf" crossorigin="anonymous")
         link(rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.1/css/solid.css" integrity="sha384-QokYePQSOwpBDuhlHOsX0ymF6R/vLk/UQVz3WHa6wygxI5oGTmDTv8wahFOSspdm" crossorigin="anonymous")
         link(rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.1/css/fontawesome.css" integrity="sha384-vd1e11sR28tEK9YANUtpIOdjGW14pS87bUBuOIoBILVWLFnS+MCX9T6MMf0VdPGq" crossorigin="anonymous")
@@ -67,7 +67,13 @@ html(lang='en')
                                 each msg in arr
                                     div(class="m-1 p-1 alert alert-" + msgtype)= msg
                                         button.close(type="button" data-dismiss="alert") ×
-
+                        if breadcrumbs
+                            nav(aria-label="breadcrumb")
+                                ol.breadcrumb.p-1.mb-2
+                                    each breadcrumb, i in breadcrumbs
+                                        li.breadcrumb-item
+                                            a(href=breadcrumb.link)= breadcrumb.title
+                                    li.breadcrumb-item.active(aria-current="page")= pageTitle
                         if pageTitle && !(active && active.notitle)
                             h4.text-shadow= pageTitle
                         block content

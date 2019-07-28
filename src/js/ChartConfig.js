@@ -29,7 +29,7 @@ defaults.title.padding = 4;
 // point/bar styling
 defaults.elements.point.radius = 5;
 defaults.elements.point.hoverRadius = 10;
-defaults.elements.point.hitRadius = 20;
+defaults.elements.point.hitRadius = 10;
 defaults.elements.rectangle.borderWidth = 2;
 
 // time axes (horizontal)

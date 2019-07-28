@@ -29,15 +29,14 @@ var state = {
             icon: 'fa-plus-square',
             path: '/set/new',
             noscroll: true,
-            acl: 'loggedIn'
+            acl: 'loggedIn',
+            parent: '/'
         },
         {
             title: 'Multi-View',
             icon: 'fa-chart-pie',
             path: '/multi',
             noscroll: true,
-            notitle: true,
-            nolink: true,
             acl: 'loggedIn'
         },
         {
@@ -60,19 +59,31 @@ var state = {
         }
     ],
     dynamic: [{
-        regex: /^\/set\/.+\/edit/, //match /set/id/edit
-        title: 'Edit Dataset',
-        icon: '',
-        noscroll: true,
-        acl: 'loggedIn'
-    }, {
-        regex: /^\/set\/.+/, //match /set/id
-        title: 'Dataset Detail',
-        icon: '',
-        noscroll: true,
-        notitle: true,
-        acl: 'loggedIn'
-    }],
+            regex: /^\/set\/.+\/edit/, //match /set/id/edit
+            title: 'Edit ${DATASET_NAME}',
+            icon: '',
+            noscroll: true,
+            acl: 'loggedIn',
+            parent: /^\/set\/.+/
+        }, {
+            regex: /^\/set\/.+/, //match /set/id
+            title: '${DATASET_NAME}',
+            notitle: true,
+            icon: '',
+            noscroll: true,
+            acl: 'loggedIn',
+            parent: '/'
+        },
+        {
+            regex: /^\/multi\/.+/, //match /multi/:label
+            title: '${DATASET_UNIT}',
+            notitle: true,
+            icon: '',
+            noscroll: true,
+            acl: 'loggedIn',
+            parent: '/multi'
+        }
+    ],
     style: {
         chartRowHeight: '320px'
     }
@@ -103,10 +114,10 @@ siteRouter.use(function (req, res, next) {
     if (!active) {
         // match dynamic pages
         state.dynamic.some((v, k, col) => {
-            console.log(v.regex + ' testing vs ' + req.path);
+            console.log(`testing ${req.path} vs ${v.regex}`);
             if (v.regex && v.regex.test(req.path)) {
                 // match!
-                console.log('matched a dynamic page');
+                console.log('matched!');
                 active = v;
                 //break loop
                 return true;
@@ -129,6 +140,35 @@ siteRouter.use(function (req, res, next) {
         res.locals.active = active;
         if (active.title)
             setPageTitle(res, active.title);
+
+        var breadcrumbs = [];
+        if (active.parent) {
+            var parent = _.find(state.nav, {
+                path: active.parent
+            });
+            // check dynamic pages - unfortunately this doesn't work cuz we can't process the title :/
+            // if(!parent) {
+            //     state.dynamic.some((v, k, col) => {
+            //         if (active.parent instanceof RegExp && v.regex && v.regex.source == active.parent.source) {
+            //             // match!
+            //             parent = v;
+            //             //break loop
+            //             return true;
+            //         }
+            //     });
+            // }
+            if (parent) {
+                breadcrumbs.push({
+                    title: parent.title,
+                    link: parent.path
+                });
+            }
+        }
+        // breadcrumbs.push({
+        //     title: active.title
+        // });
+        if(breadcrumbs.length > 0)
+            res.locals.breadcrumbs = breadcrumbs;
     }
 
     setFlashMessages(res, req.flash());
@@ -296,6 +336,10 @@ siteRouter.get('/set/:id', function (req, res, next) {
                 var result = dataset.toObject();
                 result.data = datapoints;
                 res.locals.dataset = result;
+
+                var title = replace_dataset_name(res.locals.active.title, dataset.name);
+                setPageTitle(res, title);
+
                 res.render('dataset');
             });
     });
@@ -317,57 +361,110 @@ siteRouter.get('/set/:id/edit', function (req, res, next) {
         var result = dataset.toObject();
         res.locals.dataset = result;
 
+        var title = replace_dataset_name(res.locals.active.title, dataset.name);
+        setPageTitle(res, title);
+
+        // we need custom breadcrumbs for this one lol, my code can't handle it
+        res.locals.breadcrumbs = [
+            {
+                title: 'Overview',
+                link: '/'
+            },
+            {
+                title: dataset.name,
+                link: '/set/' + req.params.id
+            }
+        ];
+
         res.render('set_form');
     });
 });
 
 // new data point on a dataset
-siteRouter.get('/set/:id/new', function (req, res, next) {
-    console.log('new data point form');
+// deprecated, new datapoint form is now modal
+// siteRouter.get('/set/:id/new', function (req, res, next) {
+//     console.log('new data point form');
 
-    // grab the dataset from the db
-    Dataset.findById(req.params.id, function (err, dataset) {
-        if (err)
-            return next(err);
+//     // grab the dataset from the db
+//     Dataset.findById(req.params.id, function (err, dataset) {
+//         if (err)
+//             return next(err);
 
-        if (!dataset) {
-            console.log('no dataset found');
+//         if (!dataset) {
+//             console.log('no dataset found');
 
-            // dataset not found
-            return next('Dataset not found');
-        }
+//             // dataset not found
+//             return next('Dataset not found');
+//         }
 
-        var result = dataset.toObject();
-        res.locals.dataset = result;
+//         var result = dataset.toObject();
+//         res.locals.dataset = result;
 
-        var active = {
-            title: dataset.name + ': add entry',
-            noscroll: true
-        };
-        res.locals.active = active;
-        setPageTitle(res, active.title);
+//         var active = {
+//             title: dataset.name + ': add entry',
+//             noscroll: true
+//         };
+//         res.locals.active = active;
+//         setPageTitle(res, active.title);
 
-        // today's date
-        res.locals.defaults = {
-            x: moment().format('YYYY-MM-DD')
-        };
+//         // today's date
+//         res.locals.defaults = {
+//             x: moment().format('YYYY-MM-DD')
+//         };
 
-        res.render('point_form');
-    });
-});
+//         res.render('point_form');
+//     });
+// });
 
 // view multiple datasets on the same chart
 siteRouter.get('/multi', function (req, res, next) {
-    Dataset.find()
+    Dataset.find({
+            owner: req.user._id
+        })
         .sort({
-            name: 'asc'
+            name: 'asc',
         })
         .exec(function (err, datasets) {
             //to do: do something useful with error
             if (err)
                 return next(error);
 
+            // compute a list of unique units
+            var uniqueLabels = [];
+            for (let i = 0; i < datasets.length; i++) {
+                if (uniqueLabels.indexOf(datasets[i].yAxisLabel) < 0)
+                    uniqueLabels.push(datasets[i].yAxisLabel);
+            }
+
+            res.locals.labels = uniqueLabels;
+            res.render('multi');
+        });
+});
+siteRouter.get('/multi/:label', function (req, res, next) {
+    Dataset.find({
+            owner: req.user._id,
+            yAxisLabel: req.params.label
+        })
+        .sort({
+            name: 'asc',
+        })
+        .exec(function (err, datasets) {
+            //to do: do something useful with error
+            if (err)
+                return next(error);
+
+            // var filteredSets = [];
+            // for (let i = 0; i < datasets.length; i++) {
+            //     console.log(datasets[i]);
+            //     if (datasets[i].yAxisLabel == '1-10 scale')
+            //         filteredSets.push(datasets[i]);
+            // }
+
             res.locals.datasets = datasets;
+
+            console.log(res.locals.active.title);
+            setPageTitle(res, replace_dataset_unit(res.locals.active.title, req.params.label));
+
             res.render('multi');
         });
 });
@@ -409,6 +506,16 @@ siteRouter.use(function (err, req, res, next) {
 function setPageTitle(res, title) {
     res.locals.pageTitle = title;
     res.locals.siteTitle = state.siteTitle + ' - ' + title;
+}
+
+function replace_dataset_unit(str, label) {
+    str = str.replace('${DATASET_UNIT}', label ? label : '');
+    return str;
+}
+
+function replace_dataset_name(str, name) {
+    str = str.replace('${DATASET_NAME}', name ? name : '');
+    return str;
 }
 
 /**

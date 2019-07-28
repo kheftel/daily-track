@@ -15,27 +15,30 @@ ModuleChartDetail = function (container, createDatapointModal) {
     this._container = container;
     this._containerData = container.dataset;
 
-    this._createDatapointModal = createDatapointModal;
-    this._createDatapointModal.getView().on('saved', (event, setid, datapoint) => {
-        if(!this.datasets) return;
-        if(setid == this.datasets[0]._id)
-        {
-            console.log('saved');
-            console.log(datapoint);
-            this.setDatasetValue(datapoint.x, datapoint.y);
-            this._chart.update();
-        }
-    });
-    this._createDatapointModal.getView().on('deleted', (event, setid, datapoint) => {
-        if(!this.datasets) return;
-        if(setid == this.datasets[0]._id)
-        {
-            console.log('deleted');
-            console.log(datapoint);
-            this.deleteDatasetValue(datapoint.x);
-            this._chart.update();
-        }
-    });
+    if(createDatapointModal) {
+
+        this._createDatapointModal = createDatapointModal;
+        this._createDatapointModal.getView().on('saved', (event, setid, datapoint) => {
+            if(!this.datasets) return;
+            if(setid == this.datasets[0]._id)
+            {
+                console.log('saved');
+                console.log(datapoint);
+                this.setDatasetValue(datapoint.x, datapoint.y);
+                this._chart.update();
+            }
+        });
+        this._createDatapointModal.getView().on('deleted', (event, setid, datapoint) => {
+            if(!this.datasets) return;
+            if(setid == this.datasets[0]._id)
+            {
+                console.log('deleted');
+                console.log(datapoint);
+                this.deleteDatasetValue(datapoint.x);
+                this._chart.update();
+            }
+        });
+    }
 
     this._focus = moment.utc().startOf('day');
 
@@ -59,7 +62,8 @@ ModuleChartDetail = function (container, createDatapointModal) {
     this._setLabel = elem('h5', this._cardHeader, ['align-middle', 'm-0'], null, this._containerData.setname);
 
     this._btnAdd = iconButton(['ml-auto', 'btn-shadow'], this._cardHeader, 'fa-plus', () => {
-        this._createDatapointModal.show(this.datasets[0]);
+        if(this._createDatapointModal)
+            this._createDatapointModal.show(this.datasets[0]);
     });
 
     this._drpHeader = elem('div', this._cardHeader, ['dropdown']);
@@ -237,6 +241,9 @@ ModuleChartDetail = function (container, createDatapointModal) {
     };
     this._config.options.onClick = (e, arr) => {
         if (!Array.isArray(arr) || arr.length == 0 || arr.length > 1) return; // only support single datasets for now
+
+        if(!this._createDatapointModal) return;
+
         var p = arr[0];
         if (p == null || p._datasetIndex == null || p._index == null) return;
         var datapoint = this.datasets[p._datasetIndex].data[p._index];
@@ -448,7 +455,8 @@ p.addDatasetsFromIds = function (ids) {
                 this.addDatasetFromModel(set);
             });
 
-            this.updateChart();
+            this._chart.update();
+            // this.updateChart();
         }
     }.bind(this);
 
@@ -463,7 +471,8 @@ p.addDatasetsFromIds = function (ids) {
 p.addDatasetFromModel = function (dataset, complete) {
     // translate for chart dataset object
     dataset.type = dataset.chartType;
-    dataset.label = dataset.name + ' (' + dataset.yAxisLabel + ')';
+    dataset.label = dataset.name;
+    if(this.datasets >= 1) dataset.label += ' (' + dataset.yAxisLabel + ')';
     dataset.data = dataset.data;
     dataset.fill = false;
     dataset.pointBackgroundColor = this.getColor(this.datasets.length);
@@ -483,11 +492,19 @@ p.addDatasetFromModel = function (dataset, complete) {
     if (this.datasets.length > 1) {
         $(this._btnType).addClass('d-none');
         $(this._btnAdd).addClass('d-none');
+        $(this._drpHeaderBtn).addClass('d-none');
         $(this._row2).removeClass('d-flex').addClass('d-none');
         $(this._deleteButton).addClass('d-none');
         $(this._editButton).addClass('d-none');
 
-        $(this._setLabel).html('Multi' + ' (' + dataset.yAxisLabel + ')');
+        $(this._setLabel).html(dataset.yAxisLabel);
+
+        // turn on legend display
+        this._chart.options.legend.display = true;
+
+        this._chart.options.tooltips.mode = 'x';
+        this._chart.options.tooltips.intersect = true;
+        this._chart.options.elements.point.hoverRadius = 5;
     } else {
         // set the header text
         $(this._setLabel).html(dataset.name + ' (' + dataset.yAxisLabel + ')');
