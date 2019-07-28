@@ -2,7 +2,9 @@
 const express = require('express');
 const path = require('path');
 const cookieParser = require('cookie-parser');
-const session = require('cookie-session');
+const cookieSession = require('cookie-session');
+const session = require('express-session');
+const MongoStore = require('connect-mongo')(session);
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
 const passport = require('passport');
@@ -15,6 +17,18 @@ const webpackAssets = require('express-webpack-assets');
 const flash = require('connect-flash');
 
 var port = process.env.PORT || 8080;
+
+// app config //
+const config = require('./config.json');
+
+// DATABASE ////////////////////////
+var dburl = process.env.MONGODB_URI || config.db.dev;
+mongoose.connect(dburl, {
+    useNewUrlParser: true
+});
+mongoose.set('useCreateIndex', true);
+var db = mongoose.connection;
+db.on('error', console.error.bind(console, 'MongoDB connection error:'));
 
 // APP /////////////
 var app = express();
@@ -29,9 +43,19 @@ app.set('view engine', 'pug');
 
 // other stuff
 app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({extended: false}));
-app.use(cookieParser());
-app.use(session({keys: ['secretkey1', 'secretkey2', '...']}));
+app.use(bodyParser.urlencoded({
+    extended: false
+}));
+app.use(session({
+    secret: process.env.SESSION_SECRET || config.session,
+    saveUninitialized: true,
+    resave: false,
+    store: new MongoStore({
+        mongooseConnection: db
+    })
+}));
+// app.use(cookieParser());
+// app.use(cookieSession({keys: ['secretkey1', 'secretkey2', '...']}));
 app.use(flash());
 
 // allow app to find list of webpack-ified assets
@@ -52,19 +76,6 @@ passport.use(new LocalStrategy(User.authenticate()));
 
 passport.serializeUser(User.serializeUser());
 passport.deserializeUser(User.deserializeUser());
-
-// DATABASE ////////////////////////
-var mongoDB = process.env.MONGODB_URI;
-if (!mongoDB) {
-    var config = require('./config.json');
-    mongoDB = config.db.dev;
-}
-mongoose.connect(mongoDB, {
-    useNewUrlParser: true
-});
-mongoose.set('useCreateIndex', true);
-var db = mongoose.connection;
-db.on('error', console.error.bind(console, 'MongoDB connection error:'));
 
 // ROUTES //////////////////////
 
