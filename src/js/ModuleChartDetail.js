@@ -52,22 +52,23 @@ ModuleChartDetail = function (container, createDatapointModal) {
     //                 span.fas.fa-edit
     //     .card-body(style="position: relative;")
     //         .chartcontainer(id="set-" + i + "-" + set._id data-setid=set._id)
+    
     this._main = elem(
         'div',
         this._container,
         ['card', 'border-light', 'shadow-rb'],
-        'height: 400px; opacity: 0; transition: opacity 0.5s;'
+        'height: 400px;'
     );
     this._cardHeader = elem('div', this._main, ['card-header', 'd-flex', 'align-items-center', 'p-1']);
-    this._setLabel = elem('h5', this._cardHeader, ['align-middle', 'm-0'], null, this._containerData.setname);
+    this._setLabel = elem('h5', this._cardHeader, ['align-middle', 'm-0'], null, this._containerData.setname || '&nbsp;');
 
-    this._btnAdd = iconButton(['ml-auto', 'btn-shadow'], this._cardHeader, 'fa-plus', () => {
+    this._btnAdd = iconButton(['ml-auto', 'btn-shadow', 'd-none'], this._cardHeader, 'fa-plus', () => {
         if(this._createDatapointModal)
             this._createDatapointModal.show(this.datasets[0]);
     });
 
     this._drpHeader = elem('div', this._cardHeader, ['dropdown']);
-    this._drpHeaderBtn = elem('button', this._drpHeader, ['btn', 'btn-primary', 'btn-shadow', 'dropdown-toggle']);
+    this._drpHeaderBtn = elem('button', this._drpHeader, ['btn', 'btn-primary', 'btn-shadow', 'dropdown-toggle', 'd-none']);
     $(this._drpHeaderBtn)
         .attr('type', 'button')
         .attr('id', 'dropdown' + _numControllers)
@@ -108,7 +109,8 @@ ModuleChartDetail = function (container, createDatapointModal) {
     this._deleteButton = iconLink(['d-none', 'dropdown-item'], this._drpHeaderBody, 'fa-trash-alt', 'Delete', '#');
 
     this._cardBody = elem('div', this._main, ['card-body', 'p-1'], 'position: relative;');
-    this._chartContainer = elem('div', this._cardBody, ['chartcontainer', 'p-1', 'text-center']);
+    this._chartContainer = elem('div', this._cardBody, ['chartcontainer', 'p-1', 'text-center'], 'opacity: 0; transition: opacity 0.5s;');
+    this._spinner = elem('span', this._cardBody, ['spinner-border', 'spinner-border-sm']);
     this._rangeLabel = elem('h6', this._chartContainer, ['align-middle', 'text-center']);
 
     // holds the canvas for the chart
@@ -509,6 +511,9 @@ p.addDatasetFromModel = function (dataset, complete) {
         // set the header text
         $(this._setLabel).html(dataset.name + ' (' + dataset.yAxisLabel + ')');
 
+        // show dropdown
+        $(this._drpHeaderBtn).removeClass('d-none');
+
         // show type toggle btn
         // $(this._btnType).removeClass('d-none').html(this._toggleHTML[dataset.type]);
         
@@ -776,7 +781,8 @@ p.addDatasetFromModel = function (dataset, complete) {
     // this.updateChart();
     this._chart.update();
 
-    this._main.style.opacity = 1;
+    this._chartContainer.style.opacity = 1;
+    $(this._spinner).addClass('d-none');
 
     if (complete) complete();
 };
