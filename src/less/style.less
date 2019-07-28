@@ -19,6 +19,7 @@
 @gray-400: #ced4da;
 @gray-500: #adb5bd;
 @gray-600: #999;
+@gray-650: #666;
 @gray-700: #444;
 @gray-800: #303030;
 @gray-900: #222;
@@ -136,7 +137,8 @@
     -webkit-filter: blur(0.5rem);
 }
 
-.blur-none, .blur-md {
+.blur-none,
+.blur-md {
     filter: none;
     -webkit-filter: none;
 }
@@ -146,7 +148,7 @@
         filter: none;
         -webkit-filter: none;
     }
-    
+
     .blur-md {
         filter: blur(0.5rem);
         -webkit-filter: blur(0.5rem);
@@ -207,6 +209,7 @@
 .font-90 {
     font-size: 90%;
 }
+
 .font-80 {
     font-size: 80%;
 }
@@ -241,7 +244,7 @@ html {
 .navbar-brand {
     margin: -0.25rem 0;
     padding: 0;
-    
+
     // background-image: url("../img/dailytracklogolong.png");
     // background-repeat: no-repeat;
     // background-position: left center;
@@ -325,9 +328,64 @@ html {
     padding: 0.125rem 0.5rem !important;
 }
 
+// modals
+
+// outline
+.modal-content {
+    border-color: @gray-650;
+}
+
 // modal backdrop
 .modal-backdrop {
     background-color: #334354;
+}
+
+// mixin to generate all the variants for popover arrow directions
+@directions : top, right, bottom, left;
+.arrow-directions(@directions; @border-color; @bg-color; @index) when (@index < 4) {
+    .arrow-directions(@directions; @border-color; @bg-color; (@index + 1)); // increment
+
+    @direction : extract(@directions, @index);
+
+    .bs-popover-@{direction}>.arrow::before,
+    .bs-popover-auto[x-placement^="@{direction}"]>.arrow::before {
+        border-@{direction}-color: @border-color;
+    }
+
+    .bs-popover-@{direction}>.arrow::after,
+    .bs-popover-auto[x-placement^="@{direction}"]>.arrow::after {
+        border-@{direction}-color: @bg-color;
+    }
+}
+
+// popover styles
+// default
+.popover {
+    border-color: @gray-650; // changed from darkly
+    background-color: @gray-800; // default
+
+    .popover-header {
+        background-color: @gray-700; // default
+    }
+
+    .arrow-directions(@directions, @gray-650, @gray-800, 0);
+}
+
+// confirmation popover styles
+// delete confirmation popup - red and in yo face!
+// used in datapoint-form.pug
+.delete-confirmation {
+    .popover.confirmation {
+        border-color: @danger;
+        background-color: @gray-900;
+    }
+
+    .popover.confirmation .popover-header {
+        background-color: @danger;
+        border-color: @danger;
+    }
+
+    .arrow-directions(@directions, @danger, @gray-900, 0);
 }
 
 // form controls
@@ -350,11 +408,12 @@ html {
     padding: 0.25rem 0.75rem;
     color: @white;
     background-color: @gray-900;
-    border-color: #666;
+    border-color: @gray-650;
 }
 
 // disabled
-.form-control:disabled, .form-control[readonly] {
+.form-control:disabled,
+.form-control[readonly] {
     background-color: @gray-700;
     color: @gray-600;
 }
@@ -393,9 +452,9 @@ html {
 // .input-group:focus,
 // .input-group:focus-within,
 .picker__input.picker__input--active {
-    border-color: @white !important;
-    background-color: @black !important;
-    color: @white !important;
+    border-color: @white  !important;
+    background-color: @black  !important;
+    color: @white  !important;
     -webkit-box-shadow: 0 0 0 0.2rem rgba(255, 255, 255, 0.5) !important;
     box-shadow: 0 0 0 0.2rem rgba(255, 255, 255, 0.5) !important;
 }
@@ -483,7 +542,7 @@ body.sidebar-active {
 
     // scrolling allowed
     body.sidebar-active {
-        overflow: initial;   
+        overflow: initial;
         position: initial;
     }
 }
@@ -512,13 +571,15 @@ body.sidebar-active {
 // individual pages /////////////////////////
 
 // break out of the main content div's padding
-#overview-container, #detail-container {
+#overview-container,
+#detail-container {
     margin-left: -0.25rem;
     margin-right: -0.25rem;
     width: calc(100% + 0.5rem);
 }
 
-.module-chart-overview, .module-chart-detail {
+.module-chart-overview,
+.module-chart-detail {
     width: 100%;
     height: 100%;
 }

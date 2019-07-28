@@ -19,11 +19,11 @@ block content
             //-     .card-body(style="position: relative;")
             //-         .chartcontainer(id="set-0-" + dataset._id data-setid=dataset._id)
 
-    include modals/create-datapoint
+    include modals/datapoint-form
 
 block pagescript
     script.
-        var controller = new ModalControllerCreateDatapoint();
+        var controller = new ModalControllerDatapointForm();
 
         $(".module-chart-detail").each(function(i, container) {
             var detailModule = new ModuleChartDetail(container, controller);
@@ -35,3 +35,7 @@ block pagescript
         //-             =dataset.name
         //-             a(href="#") 
         //-                 span.fas.fa-edit
+
+        $(function () {
+            $('[data-toggle="popover"]').popover()
+        })

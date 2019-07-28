@@ -22,11 +22,11 @@ block content
             //- one extra for creating a new set
             .col-6.col-lg-4.col-xl-3.p-1
                 .module-chart-overview
-    include modals/create-datapoint
+    include modals/datapoint-form
 
 block pagescript
     script.
-        var controller = new ModalControllerCreateDatapoint();
+        var controller = new ModalControllerDatapointForm();
 
         $('.module-chart-overview').each(function(i, container) {
             var module = new ModuleChartOverview(container, controller);

@@ -1,4 +1,4 @@
-#create-datapoint.modal.fade
+#modal-datapoint.modal.fade.delete-confirmation
 	.modal-dialog
 		.modal-content
 			.modal-header
@@ -6,7 +6,7 @@
 				button.close(type='button', data-dismiss='modal', aria-label='Close')
 					span(aria-hidden='true') ×
 			.modal-body
-				form#create-datapoint-form(method='POST' novalidate)
+				form#modal-datapoint-form(method='POST' novalidate)
 					div#date-group.form-group
 						label(for='x') Date:
 						input#x.form-control(type='date', name='x' required)
@@ -32,3 +32,6 @@
 				button#delete.d-none.btn.btn-danger(type='submit')
 					| Delete
 					span.spinner-border.spinner-border-sm.ml-1(role="status" aria-hidden="true")
+				<button type="button" class="btn btn-secondary" data-container="body" data-toggle="popover" title="Popover title" data-placement="top" data-content="Vivamus sagittis lacus vel augue laoreet rutrum faucibus.">
+				Popover on top
+				</button>
