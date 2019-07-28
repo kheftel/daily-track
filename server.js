@@ -18,8 +18,8 @@ const flash = require('connect-flash');
 
 var port = process.env.PORT || 8080;
 
-// app config //
-const config = require('./config.json');
+// app config, which doesn't exist on heroku :P //
+const config = !process.env.MONGODB_URI ? require('./config.json') : {};
 
 // DATABASE ////////////////////////
 var dburl = process.env.MONGODB_URI || config.db.dev;
