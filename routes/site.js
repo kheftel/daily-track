@@ -175,6 +175,10 @@ siteRouter.get('/flash', function (req, res) {
 siteRouter.get('/register', function (req, res) {
     res.render('register');
 });
+siteRouter.get('/register/success', function (req, res) {
+    req.flash('success', 'You have successfully registered, please log in.');
+    res.redirect('/login');
+});
 
 // login
 siteRouter.get('/login', function (req, res) {
