@@ -130,8 +130,26 @@ ModalControllerDatapointForm = function () {
     }).on('click', (e) => {
         submitForm(e, '#delete');
     });
+
+    this.getView('#x').change(() => {
+        this._datapoint = this.getPointFromSet(this.getView('#x').val());
+        this.updateViewForDatapoint(true);
+    });
 };
 var p = ModalControllerDatapointForm.prototype;
+
+p.getPointFromSet = function(val) {
+    if(!this._dataset) return null;
+    let data = this._dataset.data;
+    let newDatapoint = null;
+    for(let i = 0; i < data.length; i++) {
+        if(val == data[i].x) {
+            newDatapoint = data[i];
+            break;
+        }
+    }
+    return newDatapoint;
+};
 
 /**
  * returns the view, wrapped in a jQuery object
@@ -148,17 +166,34 @@ p.getView = function (sub) {
  * show the modal
  * 
  * @param {*} dataset required, the dataset to add a point to
- * @param {*} datapoint optional, if provided, indicates a datapoint to upate
+ * @param {*} datapoint optional, if provided, indicates a datapoint to update in locked-date mode
  */
 p.show = function (dataset, datapoint = null) {
-    // set up modal data
-    this.getView('#title').html((datapoint ? 'Edit entry for: ' : 'Track: ') + dataset.name);
-    this.getView('#x').val(datapoint ? datapoint.x : moment().format('YYYY-MM-DD'));
-    this.getView('#x').prop('disabled', datapoint ? true : false);
-    this.getView('#y').val(datapoint ? datapoint.y : '');
-    this.getView('#y').attr('placeholder', dataset.yAxisLabel);
-    this.getView('-form').attr('action', '/api/sets/' + dataset._id + '/data');
-    this.getView().data('setid', dataset._id);
+    this._dataset = dataset;
+
+    // title
+    this.getView('#title').html(this._dataset.name);
+
+    // y label
+    this.getView('#y-group label').html(this._dataset.yAxisLabel);
+
+    // form
+    this.getView('-form').attr('action', '/api/sets/' + this._dataset._id + '/data');
+    this.getView().data('setid', this._dataset._id);
+    
+    // no datapoint, we're in add mode
+    if(!datapoint) {
+        // see if there's a datapoint for today and edit in non-locked mode if so
+        let today = moment().format('YYYY-MM-DD');
+        this.getView('#x').val(today);
+        datapoint = this.getPointFromSet(today);
+        this._datapoint = datapoint;
+        this.updateViewForDatapoint(true);
+    }
+    else {
+        this._datapoint = datapoint;
+        this.updateViewForDatapoint();
+    }
 
     // reset validation
     this.getView('.form-control').removeClass('is-valid');
@@ -167,17 +202,31 @@ p.show = function (dataset, datapoint = null) {
     // set all the valid feedback messages the same
     this.getView('.valid-feedback').html('OK');
 
+    // show modal
+    this.getView().modal('show');
+};
+
+p.updateViewForDatapoint = function(excludeDate = false) {
+    // x
+    if(!excludeDate) {
+        this.getView('#x').val(this._datapoint ? this._datapoint.x : moment().format('YYYY-MM-DD'));
+        // this.getView('#x').prop('disabled', this._datapoint ? true : false);
+    }
+
+    // y
+    this.getView('#y').val(this._datapoint ? this._datapoint.y : '');
+
+    // save btn label
+    this.getView('#save .label').html(this._datapoint ? 'Update' : 'Add');
+
     // manage button visibility
-    if (datapoint) {
+    if (this._datapoint) {
         this.getView('#save').removeClass('d-none');
         this.getView('#delete').removeClass('d-none');
     } else {
         this.getView('#save').removeClass('d-none');
         this.getView('#delete').addClass('d-none');
     }
-
-    // show modal
-    this.getView().modal('show');
 };
 
 module.exports = ModalControllerDatapointForm;
