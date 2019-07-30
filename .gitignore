@@ -16,6 +16,9 @@ node_modules/
 #mongo dumpfiles
 dump/
 
+# dotenv environment variables file
+.env
+
 
 
 
@@ -76,9 +79,6 @@ typings/
 
 # Yarn Integrity file
 .yarn-integrity
-
-# dotenv environment variables file
-.env
 
 # next.js build output
 .next
