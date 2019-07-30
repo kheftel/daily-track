@@ -16,13 +16,16 @@ const logger = require('morgan');
 const webpackAssets = require('express-webpack-assets');
 const flash = require('connect-flash');
 
+// load .env in non-production environments
+process.env.NODE_ENV = process.env.NODE_ENV || 'development';
+if (process.env.NODE_ENV !== 'production') {
+    require('dotenv').config();
+}
+
 var port = process.env.PORT || 8080;
 
-// app config, which doesn't exist on heroku :P //
-const config = !process.env.MONGODB_URI ? require('./config.json') : {};
-
 // DATABASE ////////////////////////
-var dburl = process.env.MONGODB_URI || config.db.dev;
+var dburl = process.env.MONGODB_URI;
 mongoose.connect(dburl, {
     useNewUrlParser: true
 });
@@ -47,7 +50,7 @@ app.use(bodyParser.urlencoded({
     extended: false
 }));
 app.use(session({
-    secret: process.env.SESSION_SECRET || config.session,
+    secret: process.env.SESSION_SECRET,
     saveUninitialized: true,
     resave: false,
     store: new MongoStore({
