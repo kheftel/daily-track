@@ -1,4 +1,4 @@
-#modal-datapoint.modal.fade.delete-confirmation
+#modal-datapoint.modal.fade.delete-confirmation(data-focus="false")
 	.modal-dialog
 		.modal-content
 			.modal-header
@@ -20,6 +20,7 @@
 					div#tags-group.form-group
 						label(for='tags')= 'Short word or phrase to describe this entry'
 						input#tags.form-control(type='text', name='tags')
+						//- select#tags.form-control(name='tags', multiple='multiple')
 						#tags-invalid.invalid-feedback
 						#tags-valid.valid-feedback
 

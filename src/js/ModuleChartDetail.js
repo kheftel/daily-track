@@ -813,7 +813,7 @@ ModuleChartDetail.prototype.addDatasetFromModel = function (dataset, complete) {
 /**
  *  datasets (readonly) 
  **/
-Object.defineProperty(p, 'datasets', {
+Object.defineProperty(ModuleChartDetail.prototype, 'datasets', {
     get() {
         return this._chart.data.datasets;
     }
@@ -832,21 +832,21 @@ var chartColors = {
 
 ModuleChartDetail.prototype.colorSchemes = {
     vividRainbow: ['#00AAEE', '#A6D608', '#FFE302', '#FF5F00', '#F70D1A', '#9F00FF'],
-    darkly: ["#3498DB", "#00bc8c", "#ffef00", "#F39C12", "#fd7e14", "#E74C3C", "#e83e8c", "#6f42c1", "#6610f2", "#375a7f"],
+    darkly: ["#3498DB", "#00bc8c", "#ffef00", /*"#F39C12",*/ "#fd7e14", "#E74C3C", "#e83e8c", "#6f42c1", "#6610f2", "#375a7f"],
     chartjs: [chartColors.red, chartColors.orange, chartColors.yellow, chartColors.green, chartColors.blue, chartColors.purple, chartColors.grey]
 };
 
 ModuleChartDetail.prototype.defaultColorScheme = 'darkly';
 
 /** color scheme names (readonly) */
-Object.defineProperty(p, 'schemeNames', {
+Object.defineProperty(ModuleChartDetail.prototype, 'schemeNames', {
     get() {
         return Object.keys(ModuleChartDetail.prototype.colorSchemes);
     }
 });
 
 /** get/set color scheme. does NOT update chart, you must do that manually */
-Object.defineProperty(p, 'colorScheme', {
+Object.defineProperty(ModuleChartDetail.prototype, 'colorScheme', {
     get() {
         return this._colorScheme;
     },
@@ -873,7 +873,7 @@ ModuleChartDetail.prototype.refreshColorsFromScheme = function () {
 };
 
 /** get/set colorOffset within the color scheme. does NOT update chart, you must do that manually */
-Object.defineProperty(p, 'colorOffset', {
+Object.defineProperty(ModuleChartDetail.prototype, 'colorOffset', {
     get() {
         return this._colorOffset;
     },
@@ -1003,14 +1003,14 @@ ModuleChartDetail.prototype.timeScales = [{
 ];
 
 /** xAxis config object from chart (readonly) */
-Object.defineProperty(p, 'xAxis', {
+Object.defineProperty(ModuleChartDetail.prototype, 'xAxis', {
     get() {
         return this._chart.options.scales.xAxes[0];
     }
 });
 
 /** xAxisLabel from chart. does NOT update chart, you must do that manually */
-Object.defineProperty(p, 'xAxisLabel', {
+Object.defineProperty(ModuleChartDetail.prototype, 'xAxisLabel', {
     get() {
         return this.xAxis.scaleLabel.labelString;
     },
@@ -1020,14 +1020,14 @@ Object.defineProperty(p, 'xAxisLabel', {
 });
 
 /** yAxis config object from chart (readonly) */
-Object.defineProperty(p, 'yAxis', {
+Object.defineProperty(ModuleChartDetail.prototype, 'yAxis', {
     get() {
         return this._chart.options.scales.yAxes[0];
     }
 });
 
 /** yAxisLabel from chart. does NOT update chart, you must do that manually */
-Object.defineProperty(p, 'yAxisLabel', {
+Object.defineProperty(ModuleChartDetail.prototype, 'yAxisLabel', {
     get() {
         return this.yAxis.scaleLabel.labelString;
     },
@@ -1086,7 +1086,7 @@ ModuleChartDetail.prototype.zoomOut = function (update = true) {
 /** 
  * current timeScale object for this zoom level (readonly) 
  */
-Object.defineProperty(p, 'timeScale', {
+Object.defineProperty(ModuleChartDetail.prototype, 'timeScale', {
     get() {
         return this.timeScales[this._zoomLevel];
     }
@@ -1441,7 +1441,7 @@ ModuleChartDetail.prototype.defaultConfig = {
         },
         tooltips: {
             mode: 'nearest',
-            intersect: false,
+            intersect: true,
         },
         hover: {
             mode: 'nearest',

@@ -31,7 +31,7 @@ ModalControllerDatapointForm = function () {
             formData.delete = 1;
         console.log('formData:');
         console.log(formData);
-    
+
         // send data to server
         $.ajax({
                 type: 'POST',
@@ -138,15 +138,20 @@ ModalControllerDatapointForm = function () {
         this._datapoint = this.getPointFromSet(this.getView('#x').val());
         this.updateViewForDatapoint(true);
     });
+
+    // this.getView('#tags').select2({
+    //     tags: true,
+    //     dropdownParent: this.getView('.modal-content')
+    // });
 };
 var p = ModalControllerDatapointForm.prototype;
 
-p.getPointFromSet = function(val) {
-    if(!this._dataset) return null;
+p.getPointFromSet = function (val) {
+    if (!this._dataset) return null;
     let data = this._dataset.data;
     let newDatapoint = null;
-    for(let i = 0; i < data.length; i++) {
-        if(val == data[i].x) {
+    for (let i = 0; i < data.length; i++) {
+        if (val == data[i].x) {
             newDatapoint = data[i];
             break;
         }
@@ -183,17 +188,16 @@ p.show = function (dataset, datapoint = null) {
     // form
     this.getView('-form').attr('action', '/api/sets/' + this._dataset._id + '/data');
     this.getView().data('setid', this._dataset._id);
-    
+
     // no datapoint, we're in add mode
-    if(!datapoint) {
+    if (!datapoint) {
         // see if there's a datapoint for today and edit in non-locked mode if so
         let today = moment().format('YYYY-MM-DD');
         this.getView('#x').val(today);
         datapoint = this.getPointFromSet(today);
         this._datapoint = datapoint;
         this.updateViewForDatapoint(true);
-    }
-    else {
+    } else {
         this._datapoint = datapoint;
         this.updateViewForDatapoint();
     }
@@ -209,9 +213,9 @@ p.show = function (dataset, datapoint = null) {
     this.getView().modal('show');
 };
 
-p.updateViewForDatapoint = function(excludeDate = false) {
+p.updateViewForDatapoint = function (excludeDate = false) {
     // x
-    if(!excludeDate) {
+    if (!excludeDate) {
         this.getView('#x').val(this._datapoint ? this._datapoint.x : moment().format('YYYY-MM-DD'));
         // this.getView('#x').prop('disabled', this._datapoint ? true : false);
     }
