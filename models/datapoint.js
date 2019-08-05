@@ -14,6 +14,10 @@ var DatapointSchema = new Schema({
     y: {
         type: Number,
         required: true
+    },
+    tags: {
+        type: Array,
+        required: false
     }
 });
 

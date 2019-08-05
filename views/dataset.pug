@@ -1,10 +1,7 @@
 extends layout
 
 block content
-    #detail-container.container-fluid.p-0
-        .row.m-0
-                .col-12.p-0
-                    .module-chart-detail(data-setid=dataset._id data-setname=dataset.name)
+    .module-chart-detail.d-flex.flex-column.flex-expand.p-0(data-setid=dataset._id data-setname=dataset.name)
     //- .row.flex-expand
         //- .col
 
@@ -25,9 +22,7 @@ block pagescript
     script.
         var controller = new ModalControllerDatapointForm();
 
-        $(".module-chart-detail").each(function(i, container) {
-            var detailModule = new ModuleChartDetail(container, controller);
-        });
+        var detailModule = new ModuleChartDetail($(".module-chart-detail")[0], controller);
 
         //- .row
         //-     .col

@@ -8,7 +8,7 @@
 			.modal-body
 				form#modal-datapoint-form(method='POST' novalidate)
 					div#date-group.form-group
-						label(for='x') Date:
+						label(for='x') Date
 						input#x.form-control(type='date', name='x' required)
 						#x-invalid.invalid-feedback
 						#x-valid.valid-feedback
@@ -17,6 +17,11 @@
 						input#y.form-control(type='number', name='y' required)
 						#y-invalid.invalid-feedback
 						#y-valid.valid-feedback
+					div#tags-group.form-group
+						label(for='tags')= 'Short word or phrase to describe this entry'
+						input#tags.form-control(type='text', name='tags')
+						#tags-invalid.invalid-feedback
+						#tags-valid.valid-feedback
 
 				//- form(method="post")#get-credentials-form
 				//- 	.form-group

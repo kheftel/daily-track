@@ -5,10 +5,10 @@ defaults.responsive = true;
 defaults.defaultFontFamily = '"Lato", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol"';
 
 // animation/performance
-defaults.animation.duration = 0;                // general update animation duration
-defaults.hover.animationDuration = 0;           // duration of animations when hovering an item
-defaults.responsiveAnimationDuration = 0;       // animation duration after a resize
-defaults.elements.line.tension = 0;             // disables bezier curves
+defaults.animation.duration = 0; // general update animation duration
+defaults.hover.animationDuration = 0; // duration of animations when hovering an item
+defaults.responsiveAnimationDuration = 0; // animation duration after a resize
+defaults.elements.line.tension = 0; // disables bezier curves
 
 // layout
 defaults.layout.padding = 0;
@@ -27,20 +27,42 @@ defaults.title.fontSize = 16;
 defaults.title.padding = 4;
 
 // point/bar styling
-defaults.elements.point.radius = 5;
-defaults.elements.point.hoverRadius = 10;
-defaults.elements.point.hitRadius = 10;
+defaults.elements.point.radius = function(context) {
+    let point = context.dataset.data[context.dataIndex];
+    if(point && point.tags && Array.isArray(point.tags) && point.tags.length > 0)
+        return 6;
+    return 4;
+};
+defaults.elements.point.hoverRadius = 8;
+// defaults.elements.point.hitRadius = 10;
+defaults.elements.point.pointStyle = function(context) {
+    let point = context.dataset.data[context.dataIndex];
+    if(point && point.tags && Array.isArray(point.tags) && point.tags.length > 0)
+        return 'triangle';
+    return 'circle';
+};
 defaults.elements.rectangle.borderWidth = 2;
+
+// lines
+defaults.elements.line.borderWidth = 2;
+
+// hover
+defaults.hover.mode = 'nearest';
+defaults.hover.intersect = true;
+defaults.tooltips.mode = 'nearest';
+defaults.tooltips.intersect = true;
 
 // time axes (horizontal)
 Chart.scaleService.updateScaleDefaults('time', {
     offset: true,
-    minUnit: 'day',
-    displayFormats: {
-        day: 'M/D',
-        week: 'M/D',
-        month: 'MMM',
-        quarter: 'MMM YYYY'
+    time: {
+        minUnit: 'day',
+        displayFormats: {
+            day: 'ddd',
+            week: 'M/D',
+            month: 'MMM',
+            quarter: 'MMM YYYY'
+        }
     },
     gridLines: {
         color: 'rgba(255, 255, 255, 0.2)',
@@ -94,7 +116,7 @@ Chart.scaleService.updateScaleDefaults('linear', {
 // axes can be customized including ticks here: https://www.chartjs.org/docs/latest/axes/#callbacks
 // chart plugin info: https://www.chartjs.org/docs/latest/developers/plugins.html
 
-ChartConfig = function() {
+ChartConfig = function () {
 
 };
 

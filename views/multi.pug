@@ -10,24 +10,26 @@ block content
         - var ids = [];
         each set, i in datasets
             - ids.push(set._id)
-        #detail-container.container-fluid.p-0
-            .row.m-0
-                    .col-12.p-0
-                        .module-chart-detail(id="multi" data-ids=JSON.stringify(ids))
-                        //- .module-chart-detail(data-setid=dataset._id data-setname=dataset.name)
-                        //- div(class="chartholder" id="multi" data-ids=JSON.stringify(ids) data-setname='Multi')
-    //- .row.flex-expand
-        .col
+        #multi.module-chart-detail.d-flex.flex-column.flex-expand.p-0(data-ids=JSON.stringify(ids))
+
+        //- #detail-container.container-fluid.p-0
+        //-     .row.m-0
+        //-             .col-12.p-0
+        //-                 .module-chart-detail(id="multi" data-ids=JSON.stringify(ids))
+
+    include modals/datapoint-form
 
 block pagescript
     script.
+
+        var controller = new ModalControllerDatapointForm();
 
         var container = $('#multi')[0];
         if(container) {
             var ids = JSON.parse(container.dataset.ids);
             console.log(ids);
 
-            var module = new ModuleChartDetail(container);
+            var module = new ModuleChartDetail(container, controller);
             module.addDatasetsFromIds(ids);
         }
 

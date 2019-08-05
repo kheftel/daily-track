@@ -25,10 +25,13 @@ ModalControllerDatapointForm = function () {
         var formData = {
             'x': this.getView('input[name=x]').val(),
             'y': this.getView('input[name=y]').val(),
+            'tags': this.getView('input[name=tags]').val() ? [this.getView('input[name=tags]').val()] : [],
         };
         if (btn == '#delete')
             formData.delete = 1;
-
+        console.log('formData:');
+        console.log(formData);
+    
         // send data to server
         $.ajax({
                 type: 'POST',
@@ -215,6 +218,9 @@ p.updateViewForDatapoint = function(excludeDate = false) {
 
     // y
     this.getView('#y').val(this._datapoint ? this._datapoint.y : '');
+
+    // tags
+    this.getView('#tags').val(this._datapoint ? this._datapoint.tags[0] : '');
 
     // save btn label
     this.getView('#save .label').html(this._datapoint ? 'Update' : 'Add');

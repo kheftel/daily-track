@@ -28,7 +28,7 @@ var state = {
             title: 'New Dataset',
             icon: 'fa-plus-square',
             path: '/set/new',
-            noscroll: true,
+            // noscroll: true,
             acl: 'loggedIn',
             parent: '/'
         },
@@ -36,7 +36,7 @@ var state = {
             title: 'Multi-View',
             icon: 'fa-chart-pie',
             path: '/multi',
-            noscroll: true,
+            // noscroll: true,
             acl: 'loggedIn'
         },
         {
@@ -62,7 +62,7 @@ var state = {
             regex: /^\/set\/.+\/edit/, //match /set/id/edit
             title: 'Edit ${DATASET_NAME}',
             icon: '',
-            noscroll: true,
+            // noscroll: true,
             acl: 'loggedIn',
             parent: /^\/set\/.+/
         }, {
@@ -70,7 +70,7 @@ var state = {
             title: '${DATASET_NAME}',
             notitle: true,
             icon: '',
-            noscroll: true,
+            // noscroll: true,
             acl: 'loggedIn',
             parent: '/'
         },
@@ -79,7 +79,7 @@ var state = {
             title: '${DATASET_UNIT}',
             notitle: true,
             icon: '',
-            noscroll: true,
+            // noscroll: true,
             acl: 'loggedIn',
             parent: '/multi'
         }
@@ -484,7 +484,7 @@ siteRouter.use(function (err, req, res, next) {
     res.locals.pageTitle = 'Error';
 
     var active = {
-        noscroll: true
+        // noscroll: true
     };
 
     res.locals.active = active;

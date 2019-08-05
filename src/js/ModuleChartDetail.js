@@ -4,7 +4,7 @@
  * @param  {} container the html element (or id of an element) that will contain this module
  */
 var _numControllers = 0;
-ModuleChartDetail = function (container, createDatapointModal) {
+ModuleChartDetail = function (container, datapointModal) {
     if (typeof container == 'string')
         container = document.getElementById(container);
 
@@ -15,27 +15,32 @@ ModuleChartDetail = function (container, createDatapointModal) {
     this._container = container;
     this._containerData = container.dataset;
 
-    if(createDatapointModal) {
-
-        this._createDatapointModal = createDatapointModal;
-        this._createDatapointModal.getView().on('saved', (event, setid, datapoint) => {
-            if(!this.datasets) return;
-            if(setid == this.datasets[0]._id)
-            {
-                console.log('saved');
-                console.log(datapoint);
-                this.setDatasetValue(datapoint.x, datapoint.y);
-                this._chart.update();
+    if (datapointModal) {
+        this._datapointModal = datapointModal;
+        this._datapointModal.getView().on('saved', (event, setid, datapoint) => {
+            if (!this.datasets) return;
+            for (let i = 0; i < this.datasets.length; i++) {
+                if (setid == this.datasets[i]._id) {
+                    console.log('saved');
+                    console.log(datapoint);
+                    this.setDatasetPoint(datapoint.x, datapoint, i);
+                    this.updateTagCloud();
+                    this._chart.update();
+                    break;
+                }
             }
         });
-        this._createDatapointModal.getView().on('deleted', (event, setid, datapoint) => {
-            if(!this.datasets) return;
-            if(setid == this.datasets[0]._id)
-            {
-                console.log('deleted');
-                console.log(datapoint);
-                this.deleteDatasetValue(datapoint.x);
-                this._chart.update();
+        this._datapointModal.getView().on('deleted', (event, setid, datapoint) => {
+            if (!this.datasets) return;
+            for (let i = 0; i < this.datasets.length; i++) {
+                if (setid == this.datasets[i]._id) {
+                    console.log('deleted');
+                    console.log(datapoint);
+                    this.deleteDatasetValue(datapoint.x, i);
+                    this.updateTagCloud();
+                    this._chart.update();
+                    break;
+                }
             }
         });
     }
@@ -52,19 +57,19 @@ ModuleChartDetail = function (container, createDatapointModal) {
     //                 span.fas.fa-edit
     //     .card-body(style="position: relative;")
     //         .chartcontainer(id="set-" + i + "-" + set._id data-setid=set._id)
-    
+
     this._main = elem(
         'div',
         this._container,
-        ['card', 'border-light', 'shadow-rb'],
-        'height: 400px;'
+        ['card', 'border-light', 'shadow-rb', 'd-flex', 'flex-column', 'flex-expand'],
+        ''
     );
     this._cardHeader = elem('div', this._main, ['card-header', 'd-flex', 'align-items-center', 'p-1']);
     this._setLabel = elem('h5', this._cardHeader, ['align-middle', 'm-0'], null, this._containerData.setname || '&nbsp;');
 
     this._btnAdd = iconButton(['ml-auto', 'btn-shadow', 'd-none'], this._cardHeader, 'fa-plus', () => {
-        if(this._createDatapointModal)
-            this._createDatapointModal.show(this.datasets[0]);
+        if (this._datapointModal)
+            this._datapointModal.show(this.datasets[0]);
     });
 
     this._drpHeader = elem('div', this._cardHeader, ['dropdown']);
@@ -108,23 +113,25 @@ ModuleChartDetail = function (container, createDatapointModal) {
     });
     this._deleteButton = iconLink(['d-none', 'dropdown-item'], this._drpHeaderBody, 'fa-trash-alt', 'Delete', '#');
 
-    this._cardBody = elem('div', this._main, ['card-body', 'p-1'], 'position: relative;');
-    this._chartContainer = elem('div', this._cardBody, ['chartcontainer', 'p-1', 'text-center'], 'opacity: 0; transition: opacity 0.5s;');
+    this._cardBody = elem('div', this._main, ['card-body', 'p-1', 'd-flex', 'flex-column', 'flex-expand'], '');
+    this._contentContainer = elem('div', this._cardBody, ['d-none', 'p-0', 'text-center', 'flex-expand', 'align-items-center'], 'position: relative; opacity: 0; transition: opacity 0.5s;');
     this._spinner = elem('span', this._cardBody, ['spinner-border', 'spinner-border-sm']);
-    this._rangeLabel = elem('h6', this._chartContainer, ['align-middle', 'text-center']);
+    this._rangeLabel = elem('h6', this._contentContainer, ['align-middle', 'text-center', 'm-0']);
+
+    var chartHeight = 250;
 
     // holds the canvas for the chart
     this._canvasholder = elem(
         'div',
-        this._chartContainer,
-        null,
-        'height: calc(100% - 96px); width: 100%; width: relative;'
+        this._contentContainer,
+        ['w-100'],
+        'height: ' + chartHeight + 'px; position: relative;'
     );
 
     // canvas the chart is rendered on
     this._canvas = elem('canvas', this._canvasholder);
 
-    this._buttonRow = elem('div', this._chartContainer, ['btn-group', 'mt-2']);
+    this._buttonRow = elem('div', this._contentContainer, ['btn-group', 'm-0']);
     this._buttons = {};
     Object.keys(ChartConfig.zoomData).forEach((k) => {
         var data = ChartConfig.zoomData[k];
@@ -136,8 +143,15 @@ ModuleChartDetail = function (container, createDatapointModal) {
         });
     });
 
+    // tag cloud
+    this._tagCloudHolder = elem('div',
+        this._contentContainer,
+        ['bg-gray-900', 'border', 'border-secondary', 'd-flex', 'flex-expand', 'flex-wrap', 'align-items-center', 'align-content-start', 'p-2', 'rounded-2', 'w-100'],
+        'position: absolute;height: calc(100% - ' + chartHeight + 'px - 42px - .5rem); bottom: 0;');
+    this._tagCloudHolder.id = 'tag-cloud';
+
     // footer with buttons to manipulate chart
-    this._footer = elem('div', this._chartContainer, ['controlbar', 'shadow-rb'], `max-width: 300px; margin: 0 auto; border-radius: 1rem; border: ${this.defaultFocusStyle.borderWidth}px solid ${this.defaultFocusStyle.borderColor}; height: 84px; background: #383838;`);
+    this._footer = elem('div', this._contentContainer, ['controlbar', 'shadow-rb'], `max-width: 300px; margin: 0 auto; border-radius: 1rem; border: ${this.defaultFocusStyle.borderWidth}px solid ${this.defaultFocusStyle.borderColor}; height: 84px; background: #383838;`);
     $(this._footer).addClass('d-none'); // hidden for now
     this._row1 = elem('div', this._footer, ['d-flex', 'justify-content-center', 'align-items-center', 'pt-1']);
     this._row2 = elem('div', this._footer, ['d-flex', 'form-inline', 'justify-content-center', 'align-items-center', 'pt-1']);
@@ -235,22 +249,28 @@ ModuleChartDetail = function (container, createDatapointModal) {
     this._colorScheme = this.defaultColorScheme;
 
     // create chart
-    this._config = JSON.parse(JSON.stringify(p.defaultConfig));
-    this._config.options.plugins.zoom.pan.onPan = ({
+    var config = JSON.parse(JSON.stringify(ModuleChartDetail.prototype.defaultConfig));
+    config.options.plugins.zoom.pan.onPan = ({
         chart
     }) => {
         this.updateRangeLabel();
     };
-    this._config.options.onClick = (e, arr) => {
+    config.options.plugins.zoom.pan.onPanComplete = ({
+        chart
+    }) => {
+        this.updateTagCloud();
+    };
+    config.options.onClick = (e, arr) => {
+        console.log(arr);
         if (!Array.isArray(arr) || arr.length == 0 || arr.length > 1) return; // only support single datasets for now
 
-        if(!this._createDatapointModal) return;
+        if (!this._datapointModal) return;
 
         var p = arr[0];
         if (p == null || p._datasetIndex == null || p._index == null) return;
         var datapoint = this.datasets[p._datasetIndex].data[p._index];
-        
-        this._createDatapointModal.show(this.datasets[0], datapoint);
+
+        this._datapointModal.show(this.datasets[p._datasetIndex], datapoint);
 
         // var newFocus = moment(datapoint.x).utc().startOf('day');
         // console.log('clicked datapoint, focusing on: ' + newFocus.format());
@@ -258,13 +278,13 @@ ModuleChartDetail = function (container, createDatapointModal) {
         // this.updateChart();
     };
 
-    // this._config.options.verticalLine = [{
+    // config.options.verticalLine = [{
     //     x: this._focus.format('YYYY-MM-DD'),
     //     borderColor: this.defaultFocusStyle.borderColor,
     //     borderWidth: this.defaultFocusStyle.borderWidth
     // }];
 
-    this._chart = new Chart(this._canvas, this._config);
+    this._chart = new Chart(this._canvas, config);
     this._datasetIds = [];
 
     // this.setZoomLevel(this.defaultZoomLevel, false);
@@ -280,7 +300,8 @@ ModuleChartDetail = function (container, createDatapointModal) {
 };
 var p = ModuleChartDetail.prototype;
 
-p.newZoom = function (level) {
+ModuleChartDetail.prototype.newZoom = function (level) {
+
     var data = ChartConfig.zoomData[level];
 
     this._chart.options.scales.xAxes[0].time.unit = data.unit;
@@ -291,21 +312,21 @@ p.newZoom = function (level) {
     this._chart.update();
 
     this.updateRangeLabel();
-    this._rangeLabel.innerHTML = this.getRangeString();
+    this.updateTagCloud();
 };
 
-p.updateRangeLabel = function () {
+ModuleChartDetail.prototype.updateRangeLabel = function () {
     this._rangeLabel.innerHTML = this.getRangeString();
 };
 
 // some defaults
-p.dateFormat = 'MM/DD/YYYY';
+ModuleChartDetail.prototype.dateFormat = 'MM/DD/YYYY';
 
-p.defaultZoomLevel = 6;
+ModuleChartDetail.prototype.defaultZoomLevel = 6;
 
-p.defaultButtonClasses = ['btn', 'btn-primary'];
+ModuleChartDetail.prototype.defaultButtonClasses = ['btn', 'btn-primary'];
 
-p.defaultFocusStyle = {
+ModuleChartDetail.prototype.defaultFocusStyle = {
     borderColor: '#00bc8c', //'#375a7f',
     borderWidth: 3
 };
@@ -347,7 +368,7 @@ function elem(type, parent, classList, style, innerHTML) {
  * @param  {} style
  */
 function iconButton(classList, parent, icon, click, style) {
-    var result = elem('button', parent, p.defaultButtonClasses.concat(classList), style, `<span class="fas ${icon}"></i>`);
+    var result = elem('button', parent, ModuleChartDetail.prototype.defaultButtonClasses.concat(classList), style, `<span class="fas ${icon}"></i>`);
     if (click)
         $(result).click(click);
     return result;
@@ -405,7 +426,7 @@ function iconLink(classList, parent, icon, text, href, click, style) {
  * @param  {} id
  * @param  {} complete
  */
-p.addDataset = function (id, complete) {
+ModuleChartDetail.prototype.addDataset = function (id, complete) {
     $.ajax({
         url: '/api/sets/' + id,
         method: 'GET',
@@ -425,7 +446,7 @@ p.addDataset = function (id, complete) {
  * 
  * @param  {} ids array of dataset ids
  */
-p.addDatasetsFromIds = function (ids) {
+ModuleChartDetail.prototype.addDatasetsFromIds = function (ids) {
     var which = 0;
     var datasets = [];
 
@@ -457,8 +478,8 @@ p.addDatasetsFromIds = function (ids) {
                 this.addDatasetFromModel(set);
             });
 
-            this._chart.update();
-            // this.updateChart();
+            // redundant
+            // this._chart.update();
         }
     }.bind(this);
 
@@ -470,11 +491,11 @@ p.addDatasetsFromIds = function (ids) {
  * @param  {} dataset
  * @param  {} complete
  */
-p.addDatasetFromModel = function (dataset, complete) {
+ModuleChartDetail.prototype.addDatasetFromModel = function (dataset, complete) {
     // translate for chart dataset object
     dataset.type = dataset.chartType;
     dataset.label = dataset.name;
-    if(this.datasets >= 1) dataset.label += ' (' + dataset.yAxisLabel + ')';
+    if (this.datasets >= 1) dataset.label += ' (' + dataset.yAxisLabel + ')';
     dataset.data = dataset.data;
     dataset.fill = false;
     dataset.pointBackgroundColor = this.getColor(this.datasets.length);
@@ -504,9 +525,9 @@ p.addDatasetFromModel = function (dataset, complete) {
         // turn on legend display
         this._chart.options.legend.display = true;
 
-        this._chart.options.tooltips.mode = 'x';
-        this._chart.options.tooltips.intersect = true;
-        this._chart.options.elements.point.hoverRadius = 5;
+        // this._chart.options.tooltips.mode = 'x';
+        // this._chart.options.tooltips.intersect = true;
+        // this._chart.options.elements.point.hoverRadius = 5;
     } else {
         // set the header text
         $(this._setLabel).html(dataset.name + ' (' + dataset.yAxisLabel + ')');
@@ -516,7 +537,7 @@ p.addDatasetFromModel = function (dataset, complete) {
 
         // show type toggle btn
         // $(this._btnType).removeClass('d-none').html(this._toggleHTML[dataset.type]);
-        
+
         // $(this._btnAdd).removeClass('d-none').attr('href', '/set/' + dataset._id + '/new');
         $(this._btnAdd).removeClass('d-none');
 
@@ -774,14 +795,16 @@ p.addDatasetFromModel = function (dataset, complete) {
     console.log('dataset added:');
     console.log(dataset);
 
-    console.log('scaleservice time defaults:');
-    console.log(Chart.scaleService.defaults.time);
+    // console.log('scaleservice time defaults:');
+    // console.log(Chart.scaleService.defaults.time);
 
     // update chart
     // this.updateChart();
     this._chart.update();
+    this.updateTagCloud();
 
-    this._chartContainer.style.opacity = 1;
+    $(this._contentContainer).removeClass('d-none');
+    this._contentContainer.style.opacity = 1;
     $(this._spinner).addClass('d-none');
 
     if (complete) complete();
@@ -807,18 +830,18 @@ var chartColors = {
     grey: 'rgb(201, 203, 207)'
 };
 
-p.colorSchemes = {
+ModuleChartDetail.prototype.colorSchemes = {
     vividRainbow: ['#00AAEE', '#A6D608', '#FFE302', '#FF5F00', '#F70D1A', '#9F00FF'],
     darkly: ["#3498DB", "#00bc8c", "#ffef00", "#F39C12", "#fd7e14", "#E74C3C", "#e83e8c", "#6f42c1", "#6610f2", "#375a7f"],
     chartjs: [chartColors.red, chartColors.orange, chartColors.yellow, chartColors.green, chartColors.blue, chartColors.purple, chartColors.grey]
 };
 
-p.defaultColorScheme = 'darkly';
+ModuleChartDetail.prototype.defaultColorScheme = 'darkly';
 
 /** color scheme names (readonly) */
 Object.defineProperty(p, 'schemeNames', {
     get() {
-        return Object.keys(p.colorSchemes);
+        return Object.keys(ModuleChartDetail.prototype.colorSchemes);
     }
 });
 
@@ -828,8 +851,8 @@ Object.defineProperty(p, 'colorScheme', {
         return this._colorScheme;
     },
     set(value) {
-        if (p.schemeNames.indexOf(value) == -1)
-            throw new Error('schemeName must be one of: ' + p.schemeNames.toString());
+        if (ModuleChartDetail.prototype.schemeNames.indexOf(value) == -1)
+            throw new Error('schemeName must be one of: ' + ModuleChartDetail.prototype.schemeNames.toString());
 
         this._colorScheme = value;
         this._colorOffset = 0;
@@ -840,7 +863,7 @@ Object.defineProperty(p, 'colorScheme', {
 /**
  * apply color scheme to chart options.
  */
-p.refreshColorsFromScheme = function () {
+ModuleChartDetail.prototype.refreshColorsFromScheme = function () {
     for (var i = 0; i < this.datasets.length; i++) {
         var set = this.datasets[i];
         set.pointBackgroundColor = this.getColor(i);
@@ -865,12 +888,12 @@ Object.defineProperty(p, 'colorOffset', {
  * 
  * @param  {} i=0
  */
-p.getColor = function (i = 0) {
+ModuleChartDetail.prototype.getColor = function (i = 0) {
     var scheme = this.colorSchemes[this._colorScheme];
     return scheme[(i + this._colorOffset) % scheme.length];
 };
 
-/*p.setColorScheme = function(scheme) {
+/*ModuleChartDetail.prototype.setColorScheme = function(scheme) {
     this._colorScheme = scheme;
 
     this._chart.data.datasets.foreach(function(v, i, a) {
@@ -884,7 +907,7 @@ p.getColor = function (i = 0) {
 }*/
 
 // ZOOMING and PANNING //////////
-p.timeScales = [{
+ModuleChartDetail.prototype.timeScales = [{
         label: '1 year',
         zoom: {
             'years': 1
@@ -1018,7 +1041,7 @@ Object.defineProperty(p, 'yAxisLabel', {
  * @param  {} val zoom level
  * @param  {} update=true whether to update chart
  */
-p.setZoomLevel = function (val, update = true) {
+ModuleChartDetail.prototype.setZoomLevel = function (val, update = true) {
     if (val < 0 || val >= this.timeScales.length) {
         $.toast({
             title: 'Info',
@@ -1039,7 +1062,7 @@ p.setZoomLevel = function (val, update = true) {
 /**
  * current zoom level
  */
-p.getZoomLevel = function () {
+ModuleChartDetail.prototype.getZoomLevel = function () {
     return this._zoomLevel;
 };
 
@@ -1048,7 +1071,7 @@ p.getZoomLevel = function () {
  * 
  * @param  {} update=true
  */
-p.zoomIn = function (update = true) {
+ModuleChartDetail.prototype.zoomIn = function (update = true) {
     this.setZoomLevel(this._zoomLevel + 1, update);
 };
 /**
@@ -1056,7 +1079,7 @@ p.zoomIn = function (update = true) {
  * 
  * @param  {} update=true
  */
-p.zoomOut = function (update = true) {
+ModuleChartDetail.prototype.zoomOut = function (update = true) {
     this.setZoomLevel(this._zoomLevel - 1, update);
 };
 
@@ -1072,7 +1095,7 @@ Object.defineProperty(p, 'timeScale', {
 /**
  * where the chart is centered, formatted string
  */
-p.getFocus = function () {
+ModuleChartDetail.prototype.getFocus = function () {
     return this._focus.format('YYYY-MM-DD');
 };
 
@@ -1081,7 +1104,7 @@ p.getFocus = function () {
  * 
  * @param  {} update=true
  */
-p.panRight = function (update = true) {
+ModuleChartDetail.prototype.panRight = function (update = true) {
     // this._focus.add(this.pans[this._zoomLevel]);
     this._focus.add(this.timeScale.pan);
     if (update)
@@ -1093,7 +1116,7 @@ p.panRight = function (update = true) {
  * 
  * @param  {} update=true
  */
-p.panLeft = function (update = true) {
+ModuleChartDetail.prototype.panLeft = function (update = true) {
     // this._focus.subtract(this.pans[this._zoomLevel]);
     this._focus.subtract(this.timeScale.pan);
     if (update)
@@ -1105,7 +1128,7 @@ p.panLeft = function (update = true) {
  * 
  * @param  {} update=true
  */
-p.showAll = function (update = true) {
+ModuleChartDetail.prototype.showAll = function (update = true) {
     var data = this._chart.data.datasets[0].data;
     var first = data[0].x;
     var last = data[data.length - 1].x;
@@ -1120,7 +1143,7 @@ p.showAll = function (update = true) {
  * 
  * @param {*} scaleid which scale to use, defaults to the first horizontal one
  */
-p.getRangeString = function (scaleid = 'x-axis-0') {
+ModuleChartDetail.prototype.getRangeString = function (scaleid = 'x-axis-0') {
     var min = moment(this._chart.scales[scaleid].min);
     var max = moment(this._chart.scales[scaleid].max);
     var minYear = min.format('YYYY');
@@ -1150,7 +1173,7 @@ p.getRangeString = function (scaleid = 'x-axis-0') {
 
 // CHART MANIPULATION /////////
 
-// p.getHalfWidth = function() {
+// ModuleChartDetail.prototype.getHalfWidth = function() {
 //     var halfWidth = {};
 //     for (var k in this.timeScale.zoom) {
 //         halfWidth[k] = this.timeScale.zoom[k] / 2;
@@ -1163,7 +1186,7 @@ p.getRangeString = function (scaleid = 'x-axis-0') {
  * 
  * @param  {} t optional, passed to chart.update
  */
-p.updateChart = function (t) {
+ModuleChartDetail.prototype.updateChart = function (t) {
     // set viewport on chart
     if (!this._chart) return;
 
@@ -1218,8 +1241,8 @@ p.updateChart = function (t) {
  * 
  * @param  {} x date in 'YYYY-MM-DD' format
  */
-p.getDatasetValue = function (x) {
-    var data = this.datasets[0].data;
+ModuleChartDetail.prototype.getDatasetValue = function (x, setIndex) {
+    var data = this.datasets[setIndex].data;
     for (var i = 0; i < data.length; i++) {
         if (data[i].x == x) {
             return data[i].y;
@@ -1233,8 +1256,8 @@ p.getDatasetValue = function (x) {
  * 
  * @param  {} x date in 'YYYY-MM-DD' format
  */
-p.getDatasetValueExists = function (x) {
-    var data = this.datasets[0].data;
+ModuleChartDetail.prototype.getDatasetValueExists = function (x, setIndex = 0) {
+    var data = this.datasets[setIndex].data;
     for (var i = 0; i < data.length; i++) {
         if (data[i].x == x) {
             return true;
@@ -1249,8 +1272,8 @@ p.getDatasetValueExists = function (x) {
  * @param  {} x date in 'YYYY-MM-DD' format
  * @param  {} y value
  */
-p.setDatasetValue = function (x, y) {
-    var data = this.datasets[0].data;
+ModuleChartDetail.prototype.setDatasetValue = function (x, y, setIndex = 0) {
+    var data = this.datasets[setIndex].data;
 
     var newPoint = {
         x: x,
@@ -1280,12 +1303,121 @@ p.setDatasetValue = function (x, y) {
 };
 
 /**
+ * set datapoint at date x. does NOT update chart
+ * 
+ * @param  {} x date in 'YYYY-MM-DD' format
+ * @param  {} datapoint point
+ * @param  {} setIndex which dataset
+ */
+ModuleChartDetail.prototype.setDatasetPoint = function (x, datapoint, setIndex = 0) {
+    var data = this.datasets[setIndex].data;
+
+    // var newPoint = {
+    //     x: x,
+    //     y: y
+    // };
+
+    for (var i = 0; i < data.length; i++) {
+        // is it equal to this date?
+        if (data[i].x == datapoint.x) {
+            // update existing value
+            // data[i].y = y;
+            data[i] = datapoint;
+            return;
+        }
+
+        // is it before this one?
+        if (moment(datapoint.x).isBefore(moment(data[i].x))) {
+            if (i == 0)
+                data.unshift(datapoint);
+            else
+                data.splice(i, 0, datapoint);
+            return;
+        }
+    }
+
+    // is data off the end? add at end
+    data.push(datapoint);
+};
+
+/**
+ * get a new array of all the datapoints between two dates, inclusive
+ * 
+ * @param {string} start 'YYYY-MM-DD' format
+ * @param {string} end 'YYYY-MM-DD' format
+ * @param {number} setIndex which dataset
+ */
+function getRange(start, end, setIndex = 0) {
+    let retval = [];
+    if (this.datasets.length <= setIndex) return retval;
+
+    var data = this.datasets[setIndex].data;
+
+    let mStart = moment(start);
+    let mEnd = moment(end);
+
+    for (let i = 0; i < data.length; i++) {
+        let mDate = moment(data[i].x);
+        if (mStart.isSameOrBefore(mDate) &&
+            mEnd.isSameOrAfter(mDate)) {
+            retval.push(data[i]);
+        }
+    }
+    return retval;
+}
+ModuleChartDetail.prototype.getRange = getRange;
+
+function getTagCloud(start, end, setIndex = 0) {
+    let data = this.getRange(start, end, setIndex);
+    let retval = {};
+    for (let i in data) {
+        let tags = data[i].tags;
+        if (tags && Array.isArray(tags)) {
+            for (let j in tags) {
+                let tag = tags[j];
+
+                let existing = retval[tag];
+                if (!existing) {
+                    retval[tag] = {
+                        number: 1,
+                        // color: this.getColor(setIndex)
+                    };
+                } else {
+                    retval[tag].number++;
+                }
+            }
+        }
+    }
+    return retval;
+}
+ModuleChartDetail.prototype.getTagCloud = getTagCloud;
+
+function updateTagCloud() {
+    let min = this._chart.options.scales.xAxes[0].time.min;
+    let max = this._chart.options.scales.xAxes[0].time.max;
+    let output = '';
+    this.datasets.forEach((dataset, i) => {
+        let tagData = this.getTagCloud(min, max, i);
+        let color = this.getColor(i);
+        // console.log(i, this.getColor(i));
+        for (let key in tagData) {
+            let tag = tagData[key];
+            let textsize = (0.75 + tag.number * 0.25) + 'rem';
+            output += `<span class="m-1" style="color: ${color}; font-size: ${textsize}">${key}</span>`;
+        }
+    });
+
+    this._tagCloudHolder.innerHTML = output;
+}
+ModuleChartDetail.prototype.updateTagCloud = updateTagCloud;
+
+/**
  * delete dataset value at date x. does NOT update chart
  * 
  * @param  {} x date in 'YYYY-MM-DD' format
  */
-p.deleteDatasetValue = function (x) {
-    var data = this.datasets[0].data;
+ModuleChartDetail.prototype.deleteDatasetValue = function (x, setIndex = 0) {
+    var data = this.datasets[setIndex].data;
 
     for (var i = 0; i < data.length; i++) {
         // is it equal to this date?
@@ -1297,35 +1429,23 @@ p.deleteDatasetValue = function (x) {
     }
 };
 
-// p.normalizeDates = function (data) {
-//     for (var i = 0; i < data.length; i++) {
-//         var datum = data[i];
-//         datum.x = moment(datum.x).utc().format('YYYY-MM-DD');
-//     }
-//     return data;
-// };
-
 // INTERNALS
-p.defaultXAxis = {
-    type: 'time',
-    time: {
-        displayFormats: {
-            day: 'M/D',
-            week: 'M/D',
-            month: 'MMM',
-            quarter: 'MMM YYYY'
-        }
-    }
-};
-
-p.defaultYAxis = {};
-
-p.defaultConfig = {
+ModuleChartDetail.prototype.defaultConfig = {
     type: "line",
     options: {
         scales: {
-            xAxes: [p.defaultXAxis],
-            yAxes: [p.defaultYAxis]
+            xAxes: [{
+                type: 'time',
+            }],
+            yAxes: [{}]
+        },
+        tooltips: {
+            mode: 'nearest',
+            intersect: false,
+        },
+        hover: {
+            mode: 'nearest',
+            intersect: true
         },
         plugins: {
             zoom: {

@@ -57,26 +57,25 @@ html(lang='en')
                                         a.nav-link.p-2.text-shadow.transition-animate(href=item.path)
                                             span(class="fas fa-fw mr-1 " + item.icon)
                                             =item.title
-                //- #content.w-100.py-2.transition-animate.d-flex.align-items-stretch
-                #content.w-100.py-2.d-flex.align-items-stretch
-                    //- #sidebar-shade.d-block.d-md-none.modal-backdrop.fade
-                    div(class="w-100 px-2" + ((active && active.noscroll) ? " d-flex flex-column" : ''))
-                        //- message output
-                        if messages
-                            each arr, msgtype in messages
-                                each msg in arr
-                                    div(class="m-1 p-1 alert alert-" + msgtype)= msg
-                                        button.close(type="button" data-dismiss="alert") ×
-                        if breadcrumbs
-                            nav(aria-label="breadcrumb")
-                                ol.breadcrumb.p-1.mb-2
-                                    each breadcrumb, i in breadcrumbs
-                                        li.breadcrumb-item
-                                            a(href=breadcrumb.link)= breadcrumb.title
-                                    li.breadcrumb-item.active(aria-current="page")= pageTitle
-                        if pageTitle && !(active && active.notitle)
-                            h4.text-shadow= pageTitle
-                        block content
+                //- #content.w-100.py-2.d-flex.align-items-stretch
+                #content.w-100.p-2.d-flex.flex-column
+                    //- div(class="w-100 px-2" + ((active && active.noscroll) ? " d-flex flex-column" : ''))
+                    //- message output
+                    if messages
+                        each arr, msgtype in messages
+                            each msg in arr
+                                div(class="m-1 p-1 alert alert-" + msgtype)= msg
+                                    button.close(type="button" data-dismiss="alert") ×
+                    if breadcrumbs
+                        nav(aria-label="breadcrumb")
+                            ol.breadcrumb.p-1.mb-2
+                                each breadcrumb, i in breadcrumbs
+                                    li.breadcrumb-item
+                                        a(href=breadcrumb.link)= breadcrumb.title
+                                li.breadcrumb-item.active(aria-current="page")= pageTitle
+                    if pageTitle && !(active && active.notitle)
+                        h4.text-shadow= pageTitle
+                    block content
 
         //- jquery
         //- script(src="https://code.jquery.com/jquery-3.2.1.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous")

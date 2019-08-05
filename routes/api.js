@@ -13,7 +13,8 @@ const {
     validationResult
 } = require('express-validator/check');
 const {
-    sanitizeBody
+    sanitizeBody,
+    Sanitizers
 } = require('express-validator/filter');
 
 require('moment-round');
@@ -344,12 +345,26 @@ apiRouter.post('/sets/:id/data', [
             console.log(e);
             throw new Error('Invalid date format (should be YYYY-MM-DD)');
         }
-        console.log('date after validation: ' + result);
+        // console.log('date after validation: ' + result);
         req.body.x = result;
         return true;
     }),
     // validate / sanitize value
     body('y', 'Value should be a number, yo.').isNumeric().toInt(),
+    body('tags')
+    .custom((value, {
+        req,
+        location,
+        path
+    }) => {
+        // TO DO: validate / escape / sanitize here
+        // if(Array.isArray(value)) {
+        //     for(let i in value) {
+        //         value[i] = escape(value[i]);
+        //     }
+        // }
+        return true;
+    }),
     // Process request after validation and sanitization.
     (req, res, next) => {
 
@@ -395,6 +410,7 @@ apiRouter.post('/sets/:id/data', [
                     } else {
                         // update datapoint
                         datapoint.y = req.body.y;
+                        datapoint.tags = req.body.tags;
                         datapoint.save((err) => {
                             if (err)
                                 return res.send(err);
@@ -423,6 +439,7 @@ apiRouter.post('/sets/:id/data', [
                     var newpoint = new Datapoint();
                     newpoint.x = req.body.x;
                     newpoint.y = req.body.y;
+                    newpoint.tags = req.body.tags;
                     newpoint.dataset = req.params.id;
 
                     // save the datapoint and check for errors
