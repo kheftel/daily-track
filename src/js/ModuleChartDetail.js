@@ -146,8 +146,8 @@ ModuleChartDetail = function (container, datapointModal) {
     // tag cloud
     this._tagCloudHolder = elem('div',
         this._contentContainer,
-        ['bg-gray-900', 'border', 'border-secondary', 'd-flex', 'flex-expand', 'flex-wrap', 'align-items-center', 'align-content-start', 'p-2', 'rounded-2', 'w-100'],
-        'position: absolute;height: calc(100% - ' + chartHeight + 'px - 42px - .5rem); bottom: 0; overflow: auto;');
+        ['bg-gray-900', 'border', 'border-secondary', 'd-flex', 'flex-expand', 'flex-wrap', 'align-items-center', 'align-content-start', 'p-1', 'rounded-2', 'w-100'],
+        'position: absolute;height: calc(100% - ' + chartHeight + 'px - 42px - .5rem); bottom: 0; overflow: auto; line-height: 1.2;');
     this._tagCloudHolder.id = 'tag-cloud';
 
     // footer with buttons to manipulate chart
@@ -1439,7 +1439,7 @@ function updateTagCloud() {
         for (let key in tagData) {
             let tag = tagData[key];
             let textsize = (1 + (tag.number-1) * 0.5) + 'rem';
-            output += `<span class="m-1" style="color: ${color}; font-size: ${textsize}">${key}</span>`;
+            output += `<span class="mx-1" style="color: ${color}; font-size: ${textsize}">${key}</span>`;
         }
     });
 

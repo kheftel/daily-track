@@ -32,7 +32,7 @@ function hasTags(point) {
 
 function pointContextHasTags(context) {
     if(!context || !context.dataset || context.dataIndex == null) {
-        throw new Error('malformed context');
+        throw new Error('pointContextHasTags: malformed context');
     }
 
     let point = context.dataset.data[context.dataIndex];
