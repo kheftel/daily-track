@@ -23,9 +23,9 @@ ModalControllerDatapointForm = function () {
         // get the form data
         // there are many ways to get this data using jQuery (you can use the class or id also)
         var formData = {
-            'x': this.getView('input[name=x]').val(),
-            'y': this.getView('input[name=y]').val(),
-            'tags': this.getView('input[name=tags]').val() ? [this.getView('input[name=tags]').val()] : [],
+            'x': this.getView('#x').val(),
+            'y': this.getView('#y').val(),
+            'tags': this.getView('#tags').val(),
         };
         if (btn == '#delete')
             formData.delete = 1;
@@ -138,14 +138,12 @@ ModalControllerDatapointForm = function () {
         this._datapoint = this.getPointFromSet(this.getView('#x').val());
         this.updateViewForDatapoint(true);
     });
-
-    // this.getView('#tags').select2({
-    //     tags: true,
-    //     dropdownParent: this.getView('.modal-content')
-    // });
 };
 var p = ModalControllerDatapointForm.prototype;
 
+/**
+ * grab a datapoint for a certain date
+ */
 p.getPointFromSet = function (val) {
     if (!this._dataset) return null;
     let data = this._dataset.data;
@@ -157,6 +155,41 @@ p.getPointFromSet = function (val) {
         }
     }
     return newDatapoint;
+};
+
+/**
+ * get a list of all tags in the dataset
+ */
+p.getTaglist = function () {
+    if (!this._dataset) return [];
+    let data = this._dataset.data;
+    let retval = [];
+
+    for (let i in data) {
+        let tags = data[i].tags;
+        if (tags && Array.isArray(tags)) {
+            for (let j in tags) {
+                let tag = tags[j];
+
+                if (retval.indexOf(tag) < 0) {
+                    retval.push(tag);
+                }
+            }
+        }
+    }
+    return retval;
+};
+
+p.tagsForSelect2 = function () {
+    var retval = this.getTaglist();
+    for (let i in retval) {
+        var tag = retval[i];
+        retval[i] = {
+            id: tag,
+            text: tag
+        };
+    }
+    return retval;
 };
 
 /**
@@ -224,7 +257,49 @@ p.updateViewForDatapoint = function (excludeDate = false) {
     this.getView('#y').val(this._datapoint ? this._datapoint.y : '');
 
     // tags
-    this.getView('#tags').val(this._datapoint ? this._datapoint.tags[0] : '');
+    // this.getView('#tags').val(this._datapoint ? this._datapoint.tags[0] : '');    
+    // need to transform the data from an array to the format select expects
+    this.getView('#tags').val(null).empty().trigger('change');
+    if (this._datapoint && Array.isArray(this._datapoint.tags)) {
+        var tags = this._datapoint.tags;
+        var select2Data = this.tagsForSelect2();
+        console.log(select2Data);
+        for (var i = 0; i < tags.length; i++) {
+            // is tag already in data list? select it
+            var preexisting = false;
+            for (var j = 0; j < select2Data.length; j++) {
+                if (select2Data[j].id == tags[i]) {
+                    preexisting = true;
+                    select2Data[j].selected = true;
+                    break;
+                }
+            }
+            // if not, add it
+            if (!preexisting) {
+                select2Data.push({
+                    id: tags[i],
+                    text: tags[i],
+                    selected: true
+                });
+            }
+        }
+        // sort array
+        select2Data.sort(function(a, b) {
+            return a.id < b.id;
+        });
+        console.log(select2Data);
+        this.getView('#tags').select2({
+            tags: true,
+            dropdownParent: this.getView('.modal-content'),
+            data: select2Data
+        }).trigger('change');
+    } else if (!this._datapoint) {
+        this.getView('#tags').select2({
+            tags: true,
+            dropdownParent: this.getView('.modal-content'),
+            data: this.tagsForSelect2()
+        });
+    }
 
     // save btn label
     this.getView('#save .label').html(this._datapoint ? 'Update' : 'Add');

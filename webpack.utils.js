@@ -44,7 +44,17 @@ exports.inlineCSS = ({
             include,
             exclude,
 
-            use: ["style-loader", "css-loader"],
+            use: [{
+                loader: "style-loader",
+                options: {
+                    sourceMap: true
+                }
+            }, {
+                loader: "css-loader",
+                options: {
+                    sourceMap: true
+                }
+            }],
         }, ],
     },
 });
@@ -80,7 +90,6 @@ exports.inlineLESS = ({
         }]
     }
 });
-
 
 exports.extractCSS = ({
     include,

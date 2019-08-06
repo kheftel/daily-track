@@ -34,8 +34,8 @@ import './css/pickadate/default.css';
 import './css/pickadate/default.date.css';
 // import './css/fontawesome-v5.8.1-solid.css';
 // import './css/fontawesome-v5.8.1-fontawesome.css';
-import '../node_modules/select2/dist/css/select2.css';
-import '../node_modules/@ttskch/select2-bootstrap4-theme/dist/select2-bootstrap4.css';
+import './css/select2.css';
+import './css/select2-bootstrap4.css';
 
 // assets
 import './favicon.ico';
