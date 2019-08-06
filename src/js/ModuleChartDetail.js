@@ -147,7 +147,7 @@ ModuleChartDetail = function (container, datapointModal) {
     this._tagCloudHolder = elem('div',
         this._contentContainer,
         ['bg-gray-900', 'border', 'border-secondary', 'd-flex', 'flex-expand', 'flex-wrap', 'align-items-center', 'align-content-start', 'p-2', 'rounded-2', 'w-100'],
-        'position: absolute;height: calc(100% - ' + chartHeight + 'px - 42px - .5rem); bottom: 0;');
+        'position: absolute;height: calc(100% - ' + chartHeight + 'px - 42px - .5rem); bottom: 0; overflow: auto;');
     this._tagCloudHolder.id = 'tag-cloud';
 
     // footer with buttons to manipulate chart
@@ -255,11 +255,13 @@ ModuleChartDetail = function (container, datapointModal) {
     }) => {
         this.updateRangeLabel();
     };
+    
     config.options.plugins.zoom.pan.onPanComplete = ({
         chart
     }) => {
         this.updateTagCloud();
     };
+    
     config.options.onClick = (e, arr) => {
         console.log(arr);
         if (!Array.isArray(arr) || arr.length == 0 || arr.length > 1) return; // only support single datasets for now
@@ -276,6 +278,23 @@ ModuleChartDetail = function (container, datapointModal) {
         // console.log('clicked datapoint, focusing on: ' + newFocus.format());
         // this._focus = newFocus;
         // this.updateChart();
+    };
+    
+    config.options.legend.onClick = (e, legendItem) => {
+        var index = legendItem.datasetIndex;
+        var ci = this._chart;
+        var meta = ci.getDatasetMeta(index);
+    
+        // See controller.isDatasetVisible comment
+        meta.hidden = meta.hidden === null ? !ci.data.datasets[index].hidden : null;
+
+        console.log(meta);
+    
+        // We hid a dataset ... rerender the chart
+        ci.update();
+
+        // custom addition
+        this.updateTagCloud();
     };
 
     // config.options.verticalLine = [{
@@ -1367,9 +1386,23 @@ function getRange(start, end, setIndex = 0) {
 }
 ModuleChartDetail.prototype.getRange = getRange;
 
+/**
+ * get tag cloud data for a particular dataset
+ * 
+ * @param {*} start 
+ * @param {*} end 
+ * @param {*} setIndex 
+ */
 function getTagCloud(start, end, setIndex = 0) {
     let data = this.getRange(start, end, setIndex);
     let retval = {};
+
+    let meta = this.getDatasetMeta(setIndex);
+    if(meta.hidden) {
+        // dataset is hidden, bail!
+        return retval;
+    }
+
     for (let i in data) {
         let tags = data[i].tags;
         if (tags && Array.isArray(tags)) {
@@ -1392,6 +1425,9 @@ function getTagCloud(start, end, setIndex = 0) {
 }
 ModuleChartDetail.prototype.getTagCloud = getTagCloud;
 
+/**
+ * update the module's tag cloud view
+ */
 function updateTagCloud() {
     let min = this._chart.options.scales.xAxes[0].time.min;
     let max = this._chart.options.scales.xAxes[0].time.max;
@@ -1402,7 +1438,7 @@ function updateTagCloud() {
         // console.log(i, this.getColor(i));
         for (let key in tagData) {
             let tag = tagData[key];
-            let textsize = (0.75 + tag.number * 0.25) + 'rem';
+            let textsize = (1 + (tag.number-1) * 0.5) + 'rem';
             output += `<span class="m-1" style="color: ${color}; font-size: ${textsize}">${key}</span>`;
         }
     });
@@ -1410,6 +1446,18 @@ function updateTagCloud() {
     this._tagCloudHolder.innerHTML = output;
 }
 ModuleChartDetail.prototype.updateTagCloud = updateTagCloud;
+
+/**
+ * grab the ChartJS-exposed metadata for a dataset
+ * 
+ * @param {*} setIndex 
+ */
+function getDatasetMeta(setIndex) {
+    var ci = this._chart;
+    var meta = ci.getDatasetMeta(setIndex);
+    return meta;
+}
+ModuleChartDetail.prototype.getDatasetMeta = getDatasetMeta;
 
 /**
  * delete dataset value at date x. does NOT update chart
@@ -1433,6 +1481,9 @@ ModuleChartDetail.prototype.deleteDatasetValue = function (x, setIndex = 0) {
 ModuleChartDetail.prototype.defaultConfig = {
     type: "line",
     options: {
+        legend: {
+            display: true
+        },
         scales: {
             xAxes: [{
                 type: 'time',
