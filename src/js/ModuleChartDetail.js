@@ -249,7 +249,7 @@ ModuleChartDetail = function (container, datapointModal) {
     this._colorScheme = this.defaultColorScheme;
 
     // create chart
-    var config = JSON.parse(JSON.stringify(ModuleChartDetail.prototype.defaultConfig));
+    var config = JSON.parse(JSON.stringify(ModuleChartDetail.defaultConfig));
     config.options.plugins.zoom.pan.onPan = ({
         chart
     }) => {
@@ -1478,7 +1478,7 @@ ModuleChartDetail.prototype.deleteDatasetValue = function (x, setIndex = 0) {
 };
 
 // INTERNALS
-ModuleChartDetail.prototype.defaultConfig = {
+ModuleChartDetail.defaultConfig = {
     type: "line",
     options: {
         legend: {

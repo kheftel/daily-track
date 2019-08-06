@@ -26,27 +26,35 @@ defaults.title.fontColor = 'white';
 defaults.title.fontSize = 16;
 defaults.title.padding = 4;
 
-// point/bar styling
-defaults.elements.point.radius = function(context) {
+function hasTags(point) {
+    return (point && point.tags && Array.isArray(point.tags) && point.tags.length > 0);
+}
+
+function pointContextHasTags(context) {
+    if(!context || !context.dataset || context.dataIndex == null) {
+        throw new Error('malformed context');
+    }
+
     let point = context.dataset.data[context.dataIndex];
-    if(point && point.tags && Array.isArray(point.tags) && point.tags.length > 0)
-        return 6;
-    return 4;
-};
-defaults.elements.point.hoverRadius = 8;
-// defaults.elements.point.hitRadius = 10;
-defaults.elements.point.pointStyle = function(context) {
-    let point = context.dataset.data[context.dataIndex];
-    if(point && point.tags && Array.isArray(point.tags) && point.tags.length > 0)
-        return 'triangle';
-    return 'circle';
-};
-defaults.elements.rectangle.borderWidth = 2;
+    return hasTags(point);
+}
+
+// point/bar styling /////////////////
+// point radius - larger if it has tags
+defaults.elements.point.radius = (context) => pointContextHasTags(context) ? 6 : 4;
+defaults.elements.point.hoverRadius = (context) => pointContextHasTags(context) ? 10 : 8;
+defaults.elements.point.hitRadius = (context) => pointContextHasTags(context) ? 10 : 8;
+
+// point style/shape - tags = triangle, no tags = circle
+defaults.elements.point.pointStyle = (context) => pointContextHasTags(context) ? 'triangle' : 'circle';
 
 // lines
 defaults.elements.line.borderWidth = 2;
 
-// hover
+// bars
+defaults.elements.rectangle.borderWidth = 2;
+
+// hover / tooltips
 defaults.hover.mode = 'nearest';
 defaults.hover.intersect = true;
 defaults.tooltips.mode = 'nearest';
