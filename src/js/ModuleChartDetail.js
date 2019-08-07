@@ -3,11 +3,14 @@
 /**
  * Dataset detail view, wraps a ChartJS chart
  * 
+ * the parent container can pass data through html5 dataset properties
+ * 
  * @param {*} container the html element (or id of an element) that will contain this module
  * @param {ModalControllerDatapointForm} datapointModal 
+ * @param {array} ids optional array of dataset ids. if set, will put the chart into multi mode and override data from parent container
  */
 var _numControllers = 0;
-ModuleChartDetail = function (container, datapointModal) {
+ModuleChartDetail = function (container, datapointModal, ids = null) {
     if (typeof container == 'string')
         container = document.getElementById(container);
 
@@ -18,6 +21,7 @@ ModuleChartDetail = function (container, datapointModal) {
     this._container = container;
     this._containerData = container.dataset;
 
+    // listen to modal controller events
     if (datapointModal) {
         this._datapointModal = datapointModal;
         this._datapointModal.getView().on('saved', (event, setid, datapoint) => {
@@ -50,80 +54,60 @@ ModuleChartDetail = function (container, datapointModal) {
 
     this._focus = moment.utc().startOf('day');
 
-    // create html
-    // .card.border-light.shadow-rb(style="height: " + style.chartRowHeight)
-    //     .card-header.p-2
-    //         .card-title.m-0.d-flex.content-justify-between
-    //             h4.m-0.text-shadow
-    //                 a.align-middle(href="/set/" + set._id)= set.name
-    //             button.ml-auto.btn.btn-primary.btn-shadow
-    //                 span.fas.fa-edit
-    //     .card-body(style="position: relative;")
-    //         .chartcontainer(id="set-" + i + "-" + set._id data-setid=set._id)
-
+    // create html view
     this._main = elem(
         'div',
         this._container,
         ['card', 'border-light', 'shadow-rb', 'd-flex', 'flex-column', 'flex-expand'],
         ''
     );
+    // card header
     this._cardHeader = elem('div', this._main, ['card-header', 'd-flex', 'align-items-center', 'p-1']);
     this._setLabel = elem('h5', this._cardHeader, ['align-middle', 'm-0'], null, this._containerData.setname || '&nbsp;');
-
-    this._btnAdd = iconButton(['ml-auto', 'btn-shadow', 'd-none'], this._cardHeader, 'fa-plus', () => {
+    this._btnAddPoint = iconButton(['ml-auto', 'btn-shadow', 'd-none'], this._cardHeader, 'fa-plus', () => {
         if (this._datapointModal)
             this._datapointModal.show(this.datasets[0]);
     });
 
+    // dropdown
     this._drpHeader = elem('div', this._cardHeader, ['dropdown']);
-    this._drpHeaderBtn = elem('button', this._drpHeader, ['btn', 'btn-primary', 'btn-shadow', 'dropdown-toggle', 'd-none']);
-    $(this._drpHeaderBtn)
+    this._btnDrpShow = elem('button', this._drpHeader, ['btn', 'btn-primary', 'btn-shadow', 'dropdown-toggle', 'd-none']);
+    $(this._btnDrpShow)
         .attr('type', 'button')
         .attr('id', 'dropdown' + _numControllers)
         .attr('data-toggle', 'dropdown');
     this._drpHeaderBody = elem('div', this._drpHeader, ['dropdown-menu', 'dropdown-menu-right']);
-    /* <div class="dropdown">
-      <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-        Dropdown button
-      </button>
-      <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-        <a class="dropdown-item" href="#">Action</a>
-        <a class="dropdown-item" href="#">Another action</a>
-        <a class="dropdown-item" href="#">Something else here</a>
-      </div>
-    </div> */
-
-    this._editButton = iconLink(['d-none', 'dropdown-item'], this._drpHeaderBody, 'fa-edit', 'Edit');
-    //iconButton(['ml-auto', 'dropdown-item'], this._drpHeaderBody, 'fa-edit');
+    this._btnDrpEditSet = iconLink(['d-none', 'dropdown-item'], this._drpHeaderBody, 'fa-edit', 'Edit');
     this._toggleHTML = {
         'bar': '<span class="fas fa-chart-line"></span><span class="ml-2">Switch to line Chart</span>',
         'line': '<span class="fas fa-chart-bar"></span><span class="ml-2">Switch to bar Chart</span>'
     };
-    this._btnType = iconLink(['d-none', 'dropdown-item'], this._drpHeaderBody, '', '', '#', (e) => {
+    this._btnDrpChartType = iconLink(['d-none', 'dropdown-item'], this._drpHeaderBody, '', '', '#', (e) => {
         e.preventDefault();
         if (this.datasets.length == 1) {
             var set = this.datasets[0];
             if (set.type == 'line') {
                 set.type = 'bar';
-                this._btnType.innerHTML = this._toggleHTML.bar;
+                this._btnDrpChartType.innerHTML = this._toggleHTML.bar;
             } else {
                 set.type = 'line';
-                this._btnType.innerHTML = this._toggleHTML.line;
+                this._btnDrpChartType.innerHTML = this._toggleHTML.line;
             }
 
             this.updateChart();
         }
     });
-    this._deleteButton = iconLink(['d-none', 'dropdown-item'], this._drpHeaderBody, 'fa-trash-alt', 'Delete', '#');
+    this._btnDrpDeleteSet = iconLink(['d-none', 'dropdown-item'], this._drpHeaderBody, 'fa-trash-alt', 'Delete', '#');
 
+    // card body
     this._cardBody = elem('div', this._main, ['card-body', 'p-1', 'd-flex', 'flex-column', 'flex-expand'], '');
-    this._contentContainer = elem('div', this._cardBody, ['d-none', 'p-0', 'text-center', 'flex-expand', 'align-items-center'], 'position: relative; opacity: 0; transition: opacity 0.5s;');
+    this._contentContainer = elem('div', this._cardBody, ['d-none', 'p-0', 'text-center', 'flex-expand', 'align-items-center'], 'position: relative; opacity: 0; -webkit-transition: opacity 0.5s; -o-transition: opacity 0.5s; transition: opacity 0.5s;');
     this._spinner = elem('span', this._cardBody, ['spinner-border', 'spinner-border-sm']);
     this._rangeLabel = elem('h6', this._contentContainer, ['align-middle', 'text-center', 'm-0']);
 
     var chartHeight = 250;
 
-    // holds the canvas for the chart
+    // chart container, contains only the canvas the chart is rendered on
     this._canvasholder = elem(
         'div',
         this._contentContainer,
@@ -134,6 +118,7 @@ ModuleChartDetail = function (container, datapointModal) {
     // canvas the chart is rendered on
     this._canvas = elem('canvas', this._canvasholder);
 
+    // zoom buttons below chart
     this._buttonRow = elem('div', this._contentContainer, ['btn-group', 'm-0']);
     this._buttons = {};
     Object.keys(ChartConfig.zoomData).forEach((k) => {
@@ -153,76 +138,11 @@ ModuleChartDetail = function (container, datapointModal) {
         'position: absolute;height: calc(100% - ' + chartHeight + 'px - 42px - .5rem); bottom: 0; overflow: auto; line-height: 1.2;');
     this._tagCloudHolder.id = 'tag-cloud';
 
-    // footer with buttons to manipulate chart
-    this._footer = elem('div', this._contentContainer, ['controlbar', 'shadow-rb'], `max-width: 300px; margin: 0 auto; border-radius: 1rem; border: 3px solid #00bc8c; height: 84px; background: #383838;`);
-    $(this._footer).addClass('d-none'); // hidden for now
-    this._row1 = elem('div', this._footer, ['d-flex', 'justify-content-center', 'align-items-center', 'pt-1']);
-    this._row2 = elem('div', this._footer, ['d-flex', 'form-inline', 'justify-content-center', 'align-items-center', 'pt-1']);
+    // old footer bar with chart manipulation stuff - deprecated
+    this._footer = createFooter.bind(this)();
+    $(this._footer).addClass('d-none'); // hidden cuz deprecated
 
-    this._btnZoomOut = iconButton([], this._row1, 'fa-search-minus', (e) => {
-        e.preventDefault();
-        this.zoomOut();
-    });
-
-    this._btnLeft = iconButton([], this._row1, 'fa-angle-double-left', () => {
-        this.panLeft();
-    });
-
-    var datefocusid = 'focusdatepicker' + _numControllers;
-
-    // create datepicker component
-    this._dateDisplay = elem('input', this._row1, ['form-control'], 'max-width: 8rem;');
-    $(this._dateDisplay).attr('data-value', this._focus.format('YYYY-MM-DD'));
-    $(this._dateDisplay).attr('value', this._focus.format('YYYY-MM-DD'));
-    this._dateDisplay.id = datefocusid;
-
-    this._pickadate = $(this._dateDisplay).pickadate({
-        formatSubmit: 'YYYY-MM-DD',
-        format: 'yyyy-mm-dd'
-    }).pickadate('picker');
-    this._pickadate.on({
-        set: (value) => {
-            var newFocus = moment(value.select);
-            if (this._focus.format('YYYY-MM-DD') == newFocus.format('YYYY-MM-DD')) {
-                return;
-            }
-            console.log('pickadate set value: ', newFocus.format());
-            this._focus = newFocus;
-            this.updateChart();
-        }
-    });
-
-    this._btnRight = iconButton([], this._row1, 'fa-angle-double-right', () => {
-        this.panRight();
-    });
-    this._btnZoomIn = iconButton([], this._row1, 'fa-search-plus', (e) => {
-        e.preventDefault();
-        this.zoomIn();
-    });
-
-    this._formgroupValue = elem('div', this._row2, ['input-group']);
-    var inputId = 'focusinputvalue' + _numControllers;
-    this._inputValue = elem('input', this._formgroupValue, ['form-control'], 'max-width: 6rem;');
-    this._inputValue.id = inputId;
-    this._inputValue.type = 'number';
-
-    // save when user presses enter
-    $(this._inputValue).on("keyup", (event) => {
-        if (event.keyCode === 13) {
-            event.preventDefault();
-            this._btnSaveValue.click();
-        }
-    });
-
-    // input addon
-    this._addonValue = elem('div', this._formgroupValue, ['input-group-append']);
-    this._addonValueLabel = elem('span', this._addonValue, ['input-group-text'], null);
-
-    this._btnSaveValue = iconButton([], this._row2, 'fa-save'); // elem('button', this._row2, [], null, 'Save');
-    var btnSaveValueSpinner = elem('span', this._btnSaveValue, ['spinner-border', 'spinner-border-sm', 'ml-1']);
-    this._btnDeleteValue = iconButton([], this._row2, 'fa-trash-alt');
-    var btnDeleteValueSpinner = elem('span', this._btnDeleteValue, ['spinner-border', 'spinner-border-sm', 'ml-1']);
-
+    // color schemes
     this._colorOffset = 0;
     this.defaultColorScheme = 'darkly';
     this._colorScheme = this.defaultColorScheme;
@@ -275,16 +195,12 @@ ModuleChartDetail = function (container, datapointModal) {
 
     // create chart
     this._chart = new Chart(this._canvas, config);
-    this._datasetIds = [];
 
+    // set default zoom level
     this.newZoom('week');
 
     this._id = _numControllers;
     _numControllers++;
-
-    // set dataset
-    if (this._containerData.setid)
-        this.addDataset(this._containerData.setid);
 
     // extra instance vars
     var chartColors = {
@@ -390,6 +306,25 @@ ModuleChartDetail = function (container, datapointModal) {
             return this.timeScales[this._zoomLevel];
         }
     });
+
+    var complete = function() {
+        console.log(this);
+        // update chart
+        this._chart.update();
+        this.updateTagCloud();
+    
+        // fade in the main content container
+        $(this._contentContainer).removeClass('d-none');
+        this._contentContainer.style.opacity = 1;
+        $(this._spinner).addClass('d-none');
+    }.bind(this);
+
+    // load dataset(s)
+    if (ids && Array.isArray(ids)) {
+        this.addDatasetsFromIds(ids, complete);
+    } else if (this._containerData.setid) {
+        this.addDataset(this._containerData.setid, complete);
+    }
 };
 
 // INSTANCE METHODS ////////////////////////////////////////////////////////////
@@ -476,8 +411,9 @@ ModuleChartDetail.prototype.addDataset = addDataset;
  * add several datsets at once
  * 
  * @param  {} ids array of dataset ids
+ * @param  {} complete oncomplete function
  */
-function addDatasetsFromIds(ids) {
+function addDatasetsFromIds(ids, complete) {
     var which = 0;
     var datasets = [];
 
@@ -508,6 +444,8 @@ function addDatasetsFromIds(ids) {
                 console.log('adding set ' + i + ', id=' + set._id);
                 this.addDatasetFromModel(set);
             });
+
+            if(complete) complete();
         }
     }.bind(this);
 
@@ -539,56 +477,58 @@ function addDatasetFromModel(dataset, complete) {
     this.yAxis.scaleLabel.labelString = dataset.yAxisLabel;
 
     this.datasets.push(dataset);
+    if (!this._datasetIds)
+        this._datasetIds = [];
     this._datasetIds.push(dataset._id);
 
-    // hide some buttons if in multi-mode
+    // set up single mode or multi mode
     if (this.datasets.length > 1) {
-        $(this._btnType).addClass('d-none');
-        $(this._btnAdd).addClass('d-none');
-        $(this._drpHeaderBtn).addClass('d-none');
-        $(this._row2).removeClass('d-flex').addClass('d-none');
-        $(this._deleteButton).addClass('d-none');
-        $(this._editButton).addClass('d-none');
-
+        // remove unit from header text
         $(this._setLabel).html(dataset.yAxisLabel);
+
+        // hide dropdown
+        $(this._btnDrpShow).addClass('d-none');
+
+        // hide all dropdown buttons
+        $(this._btnDrpChartType).addClass('d-none');
+        $(this._btnDrpDeleteSet).addClass('d-none');
+        $(this._btnDrpEditSet).addClass('d-none');
+
+        // hide header add point butn
+        $(this._btnAddPoint).addClass('d-none');
+
+        // hide old footer row 2
+        $(this._ftrRow2).removeClass('d-flex').addClass('d-none'); // footer row 2
 
         // turn on legend display
         this._chart.options.legend.display = true;
-
-        // this._chart.options.tooltips.mode = 'x';
-        // this._chart.options.tooltips.intersect = true;
-        // this._chart.options.elements.point.hoverRadius = 5;
     } else {
-        // set the header text
+        // add unit to header text
         $(this._setLabel).html(dataset.name + ' (' + dataset.yAxisLabel + ')');
 
         // show dropdown
-        $(this._drpHeaderBtn).removeClass('d-none');
+        $(this._btnDrpShow).removeClass('d-none');
 
-        // show type toggle btn
-        // $(this._btnType).removeClass('d-none').html(this._toggleHTML[dataset.type]);
+        // show some dropdown buttons
+        // show type toggle btn - deprecated
+        // $(this._btnDrpChartType).removeClass('d-none').html(this._toggleHTML[dataset.type]);
+        $(this._btnAddPoint).removeClass('d-none');
+        $(this._btnDrpEditSet).removeClass('d-none').attr('href', '/set/' + dataset._id + '/edit');
 
-        // $(this._btnAdd).removeClass('d-none').attr('href', '/set/' + dataset._id + '/new');
-        $(this._btnAdd).removeClass('d-none');
+        // show footer row 2 - deprecated
+        $(this._ftrRow2).addClass('d-flex').removeClass('d-none');
 
-        // show / activate edit button
-        $(this._editButton).removeClass('d-none').attr('href', '/set/' + dataset._id + '/edit');
-
-        // show row 2
-        $(this._row2).addClass('d-flex').removeClass('d-none');
-
-        // activate save button
-        // $(this._inputValueLabel).html(dataset.yAxisLabel + ':');
-        $(this._addonValueLabel).html(dataset.yAxisLabel);
-        $(this._btnSaveValue).on('click', () => {
+        // activate save value button
+        $(this._ftrAddonValueLabel).html(dataset.yAxisLabel);
+        $(this._btnFtrSaveValue).on('click', () => {
 
             // disable btn
-            $(this._btnSaveValue).prop('disabled', true);
+            $(this._btnFtrSaveValue).prop('disabled', true);
 
             // get the form data
             var formData = {
                 'x': this._focus.format('YYYY-MM-DD'),
-                'y': $(this._inputValue).val()
+                'y': $(this._ftrInputValue).val()
             };
 
             // send data to server
@@ -604,7 +544,7 @@ function addDatasetFromModel(dataset, complete) {
                     console.log(data);
 
                     // enable btn
-                    $(this._btnSaveValue).prop('disabled', false);
+                    $(this._btnFtrSaveValue).prop('disabled', false);
 
                     if (!data.success) {
                         // validation error
@@ -642,7 +582,7 @@ function addDatasetFromModel(dataset, complete) {
                 })
                 .fail((data) => {
                     // enable btn
-                    $(this._btnSaveValue).prop('disabled', false);
+                    $(this._btnFtrSaveValue).prop('disabled', false);
 
                     $.toast({
                         title: 'Error!',
@@ -658,22 +598,22 @@ function addDatasetFromModel(dataset, complete) {
         });
 
         // activate delete value button
-        $(this._btnDeleteValue)
+        $(this._btnFtrDeleteValue)
             .confirmation({
-                rootSelector: this._btnDeleteValue,
+                rootSelector: this._btnFtrDeleteValue,
                 popout: true,
                 container: 'body',
                 title: 'Are you sure you want to delete this value?'
             }).on('click', () => {
 
                 // disable btn
-                $(this._btnDeleteValue).prop('disabled', true);
+                $(this._btnFtrDeleteValue).prop('disabled', true);
 
                 // get the form data
                 // TO DO: y should be not required if delete is passed
                 var formData = {
                     'x': this._focus.format('YYYY-MM-DD'),
-                    'y': $(this._inputValue).val(),
+                    'y': $(this._ftrInputValue).val(),
                     'delete': '1'
                 };
 
@@ -693,7 +633,7 @@ function addDatasetFromModel(dataset, complete) {
                         console.log(data);
 
                         // enable btn
-                        $(this._btnDeleteValue).prop('disabled', false);
+                        $(this._btnFtrDeleteValue).prop('disabled', false);
 
                         if (!data.success) {
                             // error in deletion
@@ -724,7 +664,7 @@ function addDatasetFromModel(dataset, complete) {
                     })
                     .fail((data) => {
                         // enable btn
-                        $(this._btnDeleteValue).prop('disabled', false);
+                        $(this._btnFtrDeleteValue).prop('disabled', false);
 
                         $.toast({
                             title: 'Error!',
@@ -739,9 +679,9 @@ function addDatasetFromModel(dataset, complete) {
 
             });
 
-        // show and activate delete button
-        $(this._deleteButton).removeClass('d-none').confirmation({
-            rootSelector: this._deleteButton,
+        // show and activate delete dataset button
+        $(this._btnDrpDeleteSet).removeClass('d-none').confirmation({
+            rootSelector: this._btnDrpDeleteSet,
             popout: true,
             container: 'body',
             title: 'Are you sure you want to delete ' + dataset.name + '?'
@@ -767,7 +707,7 @@ function addDatasetFromModel(dataset, complete) {
                     console.log(data);
 
                     // enable btn
-                    $(this._deleteButton).prop('disabled', false);
+                    $(this._btnDrpDeleteSet).prop('disabled', false);
 
                     if (!data.success) {
                         // error in deletion
@@ -808,7 +748,7 @@ function addDatasetFromModel(dataset, complete) {
                 })
                 .fail((data) => {
                     // enable btn
-                    $(this._deleteButton).prop('disabled', false);
+                    $(this._btnDrpDeleteSet).prop('disabled', false);
 
                     $.toast({
                         title: 'Error!',
@@ -827,15 +767,6 @@ function addDatasetFromModel(dataset, complete) {
 
     // console.log('scaleservice time defaults:');
     // console.log(Chart.scaleService.defaults.time);
-
-    // update chart
-    // this.updateChart();
-    this._chart.update();
-    this.updateTagCloud();
-
-    $(this._contentContainer).removeClass('d-none');
-    this._contentContainer.style.opacity = 1;
-    $(this._spinner).addClass('d-none');
 
     if (complete) complete();
 }
@@ -1038,13 +969,13 @@ function updateChart(t) {
     this._chart.options.title.text = this.getRangeString();
 
     // set datepicker date to focus
-    this._pickadate.set('select', this._focus.format('YYYY-MM-DD'), {
+    this._ftrPickadate.set('select', this._focus.format('YYYY-MM-DD'), {
         muted: true
     });
-    //$(this._dateDisplay).datetimepicker('date', this._focus);
+    //$(this._ftrDateDisplay).datetimepicker('date', this._focus);
 
     // set input value to focus
-    this._inputValue.value = this.getDatasetValue(this._focus.format('YYYY-MM-DD'));
+    this._ftrInputValue.value = this.getDatasetValue(this._focus.format('YYYY-MM-DD'));
 
     // update chart
     this._chart.update(t);
@@ -1226,7 +1157,7 @@ ModuleChartDetail.prototype.getTagCloud = getTagCloud;
  * update the module's tag cloud view
  */
 function updateTagCloud() {
-    if(!this.datasets) return;
+    if (!this.datasets) return;
 
     let min = this._chart.options.scales.xAxes[0].time.min;
     let max = this._chart.options.scales.xAxes[0].time.max;
@@ -1475,6 +1406,82 @@ function iconLink(classList, parent, icon, text, href, click, style) {
     if (click)
         $(result).click(click);
     return result;
+}
+
+/**
+ * old chart manipulation bar
+ * 
+ * @deprecated
+ */
+function createFooter() {
+    // old chart manipulation bar
+    var footer = elem('div', this._contentContainer, ['controlbar', 'shadow-rb'], `max-width: 300px; margin: 0 auto; border-radius: 1rem; border: 3px solid #00bc8c; height: 84px; background: #383838;`);
+    this._ftrRow1 = elem('div', footer, ['d-flex', 'justify-content-center', 'align-items-center', 'pt-1']);
+    this._ftrRow2 = elem('div', footer, ['d-flex', 'form-inline', 'justify-content-center', 'align-items-center', 'pt-1']);
+
+    // row 1 - zoom, pan, datepicker
+    this._btnFtrZoomOut = iconButton([], this._ftrRow1, 'fa-search-minus', (e) => {
+        e.preventDefault();
+        this.zoomOut();
+    });
+    this._btnFtrLeft = iconButton([], this._ftrRow1, 'fa-angle-double-left', () => {
+        this.panLeft();
+    });
+
+    var datefocusid = 'focusdatepicker' + _numControllers;
+
+    // create datepicker component
+    this._ftrDateDisplay = elem('input', this._ftrRow1, ['form-control'], 'max-width: 8rem;');
+    $(this._ftrDateDisplay).attr('data-value', this._focus.format('YYYY-MM-DD'));
+    $(this._ftrDateDisplay).attr('value', this._focus.format('YYYY-MM-DD'));
+    this._ftrDateDisplay.id = datefocusid;
+
+    this._ftrPickadate = $(this._ftrDateDisplay).pickadate({
+        formatSubmit: 'YYYY-MM-DD',
+        format: 'yyyy-mm-dd'
+    }).pickadate('picker');
+    this._ftrPickadate.on({
+        set: (value) => {
+            var newFocus = moment(value.select);
+            if (this._focus.format('YYYY-MM-DD') == newFocus.format('YYYY-MM-DD')) {
+                return;
+            }
+            console.log('pickadate set value: ', newFocus.format());
+            this._focus = newFocus;
+            this.updateChart();
+        }
+    });
+
+    this._btnFtrRight = iconButton([], this._ftrRow1, 'fa-angle-double-right', () => {
+        this.panRight();
+    });
+    this._btnFtrZoomIn = iconButton([], this._ftrRow1, 'fa-search-plus', (e) => {
+        e.preventDefault();
+        this.zoomIn();
+    });
+
+    // row 2 - value, save, delete
+    this._ftrFormgroupValue = elem('div', this._ftrRow2, ['input-group']);
+    var inputId = 'focusinputvalue' + _numControllers;
+    this._ftrInputValue = elem('input', this._ftrFormgroupValue, ['form-control'], 'max-width: 6rem;');
+    this._ftrInputValue.id = inputId;
+    this._ftrInputValue.type = 'number';
+    // save when user presses enter
+    $(this._ftrInputValue).on("keyup", (event) => {
+        if (event.keyCode === 13) {
+            event.preventDefault();
+            this._btnFtrSaveValue.click();
+        }
+    });
+    this._ftrAddonValue = elem('div', this._ftrFormgroupValue, ['input-group-append']);
+    this._ftrAddonValueLabel = elem('span', this._ftrAddonValue, ['input-group-text'], null);
+
+    this._btnFtrSaveValue = iconButton([], this._ftrRow2, 'fa-save'); // elem('button', this._ftrRow2, [], null, 'Save');
+    var btnSaveValueSpinner = elem('span', this._btnFtrSaveValue, ['spinner-border', 'spinner-border-sm', 'ml-1']);
+    this._btnFtrDeleteValue = iconButton([], this._ftrRow2, 'fa-trash-alt');
+    var btnDeleteValueSpinner = elem('span', this._btnFtrDeleteValue, ['spinner-border', 'spinner-border-sm', 'ml-1']);
+
+    return footer;
 }
 
 module.exports = ModuleChartDetail;

@@ -29,8 +29,7 @@ block pagescript
             var ids = JSON.parse(container.dataset.ids);
             console.log(ids);
 
-            var module = new ModuleChartDetail(container, controller);
-            module.addDatasetsFromIds(ids);
+            var module = new ModuleChartDetail(container, controller, ids);
         }
 
         // controller for chart
