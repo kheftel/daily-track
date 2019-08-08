@@ -4,6 +4,9 @@ config.json
 # webpack generated file
 webpack-assets.json
 
+# webpack stats
+stats.json
+
 # output dir and files
 dist/
 
