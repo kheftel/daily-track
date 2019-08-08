@@ -1,6 +1,0 @@
-{
-    "db": {
-        "dev": "YOUR_DEV_URL",
-        "prod": "YOUR_PROD_URL"
-    }
-}
