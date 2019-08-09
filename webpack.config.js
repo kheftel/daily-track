@@ -3,10 +3,11 @@ const webpack = require('webpack');
 const CleanWebpackPlugin = require('clean-webpack-plugin');
 const utils = require("./webpack.utils");
 const merge = require('webpack-merge');
-var AssetsPlugin = require('assets-webpack-plugin');
-var ManifestPlugin = require('webpack-manifest-plugin');
-var Visualizer = require('webpack-visualizer-plugin');
+const AssetsPlugin = require('assets-webpack-plugin');
+const ManifestPlugin = require('webpack-manifest-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
+const Visualizer = require('webpack-visualizer-plugin');
+const DuplicateChecker = require('duplicate-package-checker-webpack-plugin');
 
 const PATHS = {
     app: path.join(__dirname, "src"),
@@ -32,9 +33,7 @@ var baseConfig = merge([{
         plugins: [
             new CleanWebpackPlugin(),
             new webpack.ProvidePlugin({
-                Chart: 'chart.js'
-            }),
-            new webpack.ProvidePlugin({
+                Chart: 'chart.js',
                 moment: 'moment'
             }),
             new AssetsPlugin({
@@ -43,6 +42,7 @@ var baseConfig = merge([{
             }),
             new ManifestPlugin({}),
             new Visualizer(),
+            new DuplicateChecker(),
             new HtmlWebpackPlugin({
                 title: 'generated index',
                 filename: 'generated.html'
@@ -123,7 +123,18 @@ var prodConfig = merge([{
 
 module.exports = mode => {
     const config = mode === "production" ? prodConfig : devConfig;
-    return merge([baseConfig, {
+    const retval = merge([baseConfig, {
         mode
     }, config]);
+
+    // console.log('final webpack config:');
+    // console.log(JSON.stringify(retval, function(key, value) {
+    //     if(value instanceof RegExp)
+    //         return value.toString();
+    //     if(value instanceof Function)
+    //         return 'function';
+    //     return value;
+    // }, 2));
+    
+    return retval;
 };
