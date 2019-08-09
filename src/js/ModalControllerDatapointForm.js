@@ -1,3 +1,5 @@
+require('select2');
+
 /**
  * handles behavior for create datapoint modal. expects /views/modals/datapoint-form to exist in page.
  */

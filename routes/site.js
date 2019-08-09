@@ -22,7 +22,8 @@ var state = {
             title: 'Overview',
             icon: 'fa-list',
             path: '/',
-            acl: 'loggedIn'
+            acl: 'loggedIn',
+            nochart: true,
         },
         {
             title: 'New Dataset',
@@ -30,32 +31,37 @@ var state = {
             path: '/set/new',
             // noscroll: true,
             acl: 'loggedIn',
-            parent: '/'
+            parent: '/',
+            nochart: true,
         },
         {
             title: 'Multi-View',
             icon: 'fa-chart-pie',
             path: '/multi',
             // noscroll: true,
-            acl: 'loggedIn'
+            acl: 'loggedIn',
+            nochart: true,
         },
         {
             title: 'Log Out ${USERNAME}',
             path: '/logout',
             icon: 'fa-sign-out-alt',
-            acl: 'loggedIn'
+            acl: 'loggedIn',
+            nochart: true,
         },
         {
             title: 'Sign Up',
             path: '/register',
             // nolink: true,
-            acl: 'loggedOut'
+            acl: 'loggedOut',
+            nochart: true,
         },
         {
             title: 'Log In',
             path: '/login',
             // nolink: true,
-            acl: 'loggedOut'
+            acl: 'loggedOut',
+            nochart: true,
         }
     ],
     dynamic: [{
@@ -64,7 +70,8 @@ var state = {
             icon: '',
             // noscroll: true,
             acl: 'loggedIn',
-            parent: /^\/set\/.+/
+            parent: /^\/set\/.+/,
+            nochart: true,
         }, {
             regex: /^\/set\/.+/, //match /set/id
             title: '${DATASET_NAME}',
@@ -82,7 +89,7 @@ var state = {
             // noscroll: true,
             acl: 'loggedIn',
             parent: '/multi'
-        }
+        },
     ],
     style: {
         chartRowHeight: '320px'

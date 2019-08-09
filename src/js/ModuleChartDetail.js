@@ -1,3 +1,7 @@
+const ChartConfig = require('./ChartConfig');
+const moment = require('moment');
+const ModalControllerDatapointForm = require('./ModalControllerDatapointForm');
+
 // CONSTRUCTOR /////////////////////////////////////////////////////////////////
 
 /**

@@ -14,14 +14,17 @@ const PATHS = {
 };
 
 var baseConfig = merge([{
-        entry: './src/index.js',
+        entry: {
+            base: './src/base.js',
+            charting: './src/charting.js'
+        },
         output: {
             path: path.resolve(__dirname, 'dist'),
             publicPath: "/"
         },
         module: {
             rules: [{
-                test: /\.(woff|woff2|eot|ttf|otf)$/,
+                test: /\.(woff|woff2|eot|ttf|otf|svg)$/,
                 use: [{
                     loader: 'file-loader',
                     options: {
@@ -34,7 +37,9 @@ var baseConfig = merge([{
             new CleanWebpackPlugin(),
             new webpack.ProvidePlugin({
                 Chart: 'chart.js',
-                moment: 'moment'
+                moment: 'moment',
+                $: 'jquery',
+                jQuery: 'jquery'
             }),
             new AssetsPlugin({
                 prettyPrint: true,
@@ -44,8 +49,14 @@ var baseConfig = merge([{
             new Visualizer(),
             new DuplicateChecker(),
             new HtmlWebpackPlugin({
-                title: 'generated index',
-                filename: 'generated.html'
+                title: 'base',
+                filename: 'base.html',
+                chunks: 'base, vendors'
+            }),
+            new HtmlWebpackPlugin({
+                title: 'charting',
+                filename: 'charting.html',
+                chunks: 'all'
             }),
             new webpack.NamedModulesPlugin(),
             new webpack.IgnorePlugin(/^\.\/locale$/, /moment$/)
@@ -58,7 +69,18 @@ var baseConfig = merge([{
     })
 ]);
 
-var devConfig = merge([
+var devConfig = merge([{
+        optimization: {
+            splitChunks: {
+                chunks: "all",
+            },
+            runtimeChunk: {
+                name: 'runtime'
+            },
+            namedModules: true,
+            namedChunks: true
+        }
+    },
     utils.inlineCSS(),
     utils.inlineLESS(),
     utils.loadImages({
@@ -80,7 +102,9 @@ var prodConfig = merge([{
             splitChunks: {
                 chunks: "all",
             },
-            runtimeChunk: true,
+            runtimeChunk: {
+                name: 'runtime'
+            },
             namedModules: true,
             namedChunks: true
         }
@@ -110,7 +134,7 @@ var prodConfig = merge([{
     }),
     utils.loadImages({
         options: {
-            limit: 100,     // don't embed images that are referenced from outside stylesheets! doh
+            limit: 100, // don't embed images that are referenced from outside stylesheets! doh
             include: "./img",
             name: "img/[name].[ext]",
         },
@@ -135,6 +159,6 @@ module.exports = mode => {
     //         return 'function';
     //     return value;
     // }, 2));
-    
+
     return retval;
 };

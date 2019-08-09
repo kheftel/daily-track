@@ -1,10 +1,12 @@
+const moment = require('moment');
+const ModalControllerDatapointForm = require('./ModalControllerDatapointForm');
+
 /**
  * overview chart module
  * 
- * @param  {} container the html element where we put our markup
+ * @param {*} container the html element (or id of an element) that will contain this module
+ * @param {ModalControllerDatapointForm} datapointModal 
  */
-
-const moment = require('moment');
 
 ModuleChartOverview = function (container, createDatapointModal) {
     // parent container can be id or html elem

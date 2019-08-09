@@ -1,3 +1,9 @@
+// require all chart stuff here
+var moment = require('moment');
+require('hammerjs');
+require('./lib/chartjs-plugin-zoom.js');
+var Chart = require('chart.js');
+
 // update a bunch of ChartJS global defaults
 var defaults = Chart.defaults.global;
 defaults.maintainAspectRatio = false;
@@ -217,3 +223,5 @@ for (var k in ChartConfig.zoomData) {
         label.add(data.labelIncrement);
     }
 }
+
+module.exports = ChartConfig;
