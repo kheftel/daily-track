@@ -20,42 +20,5 @@ block content
     include modals/datapoint-form
 
 block pagescript
-    script.
-
-        var controller = new ModalControllerDatapointForm();
-
-        var container = $('#multi')[0];
-        if(container) {
-            var ids = JSON.parse(container.dataset.ids);
-            console.log(ids);
-
-            var module = new ModuleChartDetail(container, controller, ids);
-        }
-
-        // controller for chart
-        //- var controller = new ChartController($('#multi')[0]);
-        //- controller.addDatasetsFromIds(ids);
-
-        //- $(".chartcontainer").each(function(i, container) {
-        //-     var setid = container.dataset.setid;
-        //-     var controller = new ChartController(container);
-        //-     controller.colorOffset = 0;
-        //-     controller.addDataset(setid);
-        //- });
-
-
-//-     div.container-fluid.h-100
-//-         div#main.row
-//-             div.col.h-100
-//-                 div#mainChart.fill-all
-//- block pagescript
-//-     script.
-//-         jQuery(function() {
-//-             console.log('main onload');
-//-             // controller for chart
-//-             var controller = new ChartController('mainChart');
-//-             controller.addDataset('5ca00f23f968e4b0a2f36e0e', function() {
-//-                 controller.addDataset('5ca4dc5a85df2293711ef8a8');
-//-             });
-//-             window.controller = controller;
-//-         })
+    script(src=webpack_asset('vendors-chart', 'js'))
+    script(src=webpack_asset('multi', 'js'))

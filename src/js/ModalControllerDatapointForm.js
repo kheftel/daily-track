@@ -3,7 +3,7 @@ require('select2');
 /**
  * handles behavior for create datapoint modal. expects /views/modals/datapoint-form to exist in page.
  */
-ModalControllerDatapointForm = function () {
+function ModalControllerDatapointForm() {
     this._selector = '#modal-datapoint';
 
     /**
@@ -140,7 +140,7 @@ ModalControllerDatapointForm = function () {
         this._datapoint = this.getPointFromSet(this.getView('#x').val());
         this.updateViewForDatapoint(true);
     });
-};
+}
 var p = ModalControllerDatapointForm.prototype;
 
 /**
@@ -316,4 +316,5 @@ p.updateViewForDatapoint = function (excludeDate = false) {
     }
 };
 
-module.exports = ModalControllerDatapointForm;
+export default ModalControllerDatapointForm;
+// module.exports = ModalControllerDatapointForm;

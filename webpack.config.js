@@ -15,12 +15,49 @@ const PATHS = {
 
 var baseConfig = merge([{
         entry: {
-            base: './src/base.js',
-            charting: './src/charting.js'
+            // base: './src/base.js',
+            // charting: './src/charting.js',
+            overview: './src/js/pages/overview.js',
+            dataset: './src/js/pages/dataset.js',
+            register: './src/js/pages/register.js',
+            "set-form": './src/js/pages/set-form.js',
+            multi: './src/js/pages/multi.js',
+            styles: './src/js/styles.js',
         },
         output: {
             path: path.resolve(__dirname, 'dist'),
             publicPath: "/"
+        },
+        optimization: {
+            splitChunks: {
+                chunks: "initial",
+                cacheGroups: {
+                    "vendors-chart": {
+                        name: "vendors-chart",
+                        test: /ChartConfig|chart\.js|hammerjs|chartjs-plugin-zoom\.js/,
+                        enforce: true,
+                        priority: 30,
+                    },
+                    vendors: {
+                        name: "vendors",
+                        test: /node_modules/,
+                        enforce: true,
+                        priority: 20,
+                    },
+                    common: {
+                        name: 'common',
+                        minChunks: 2,
+                        priority: 10,
+                        reuseExistingChunk: true,
+                        enforce: true
+                    },
+                },
+            },
+            runtimeChunk: {
+                name: 'runtime',
+            },
+            namedModules: true,
+            namedChunks: true,
         },
         module: {
             rules: [{
@@ -49,14 +86,29 @@ var baseConfig = merge([{
             new Visualizer(),
             new DuplicateChecker(),
             new HtmlWebpackPlugin({
-                title: 'base',
-                filename: 'base.html',
-                chunks: 'base, vendors'
+                title: 'overview',
+                filename: 'overview.html',
+                chunks: ['runtime', 'styles', 'vendors', 'common', 'overview'],
             }),
             new HtmlWebpackPlugin({
-                title: 'charting',
-                filename: 'charting.html',
-                chunks: 'all'
+                title: 'dataset',
+                filename: 'dataset.html',
+                chunks: ['runtime', 'styles', 'vendors', 'vendors-chart', 'common', 'dataset'],
+            }),
+            new HtmlWebpackPlugin({
+                title: 'register',
+                filename: 'register.html',
+                chunks: ['runtime', 'styles', 'vendors', 'common', 'register'],
+            }),
+            new HtmlWebpackPlugin({
+                title: 'set-form',
+                filename: 'set-form.html',
+                chunks: ['runtime', 'styles', 'vendors', 'common', 'set-form'],
+            }),
+            new HtmlWebpackPlugin({
+                title: 'multi',
+                filename: 'multi.html',
+                chunks: ['runtime', 'styles', 'vendors', 'vendors-chart', 'common', 'multi'],
             }),
             new webpack.NamedModulesPlugin(),
             new webpack.IgnorePlugin(/^\.\/locale$/, /moment$/)
@@ -69,18 +121,7 @@ var baseConfig = merge([{
     })
 ]);
 
-var devConfig = merge([{
-        optimization: {
-            splitChunks: {
-                chunks: "all",
-            },
-            runtimeChunk: {
-                name: 'runtime'
-            },
-            namedModules: true,
-            namedChunks: true
-        }
-    },
+var devConfig = merge([
     utils.inlineCSS(),
     utils.inlineLESS(),
     utils.loadImages({
@@ -96,25 +137,19 @@ var prodConfig = merge([{
         output: {
             filename: '[name].[contenthash].js',
             path: path.resolve(__dirname, 'dist'),
-            publicPath: "/"
+            publicPath: "/",
         },
-        optimization: {
-            splitChunks: {
-                chunks: "all",
-            },
-            runtimeChunk: {
-                name: 'runtime'
-            },
-            namedModules: true,
-            namedChunks: true
-        }
+        stats: {
+            maxModules: Infinity,
+            optimizationBailout: true,
+        },
     },
     utils.minifyJS(),
     utils.extractCSS({
         use: [{
             loader: "css-loader",
             options: {
-                sourceMap: true
+                sourceMap: true,
             }
         }]
     }),

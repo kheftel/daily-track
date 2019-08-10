@@ -1,6 +1,8 @@
+const Chart = require('chart.js');
 const ChartConfig = require('./ChartConfig');
 const moment = require('moment');
-const ModalControllerDatapointForm = require('./ModalControllerDatapointForm');
+// const ModalControllerDatapointForm = require('./ModalControllerDatapointForm');
+import ModalControllerDatapointForm from './ModalControllerDatapointForm';
 
 // CONSTRUCTOR /////////////////////////////////////////////////////////////////
 
@@ -14,7 +16,7 @@ const ModalControllerDatapointForm = require('./ModalControllerDatapointForm');
  * @param {array} ids optional array of dataset ids. if set, will put the chart into multi mode and override data from parent container
  */
 var _numControllers = 0;
-ModuleChartDetail = function (container, datapointModal, ids = null) {
+var ModuleChartDetail = function (container, datapointModal, ids = null) {
     if (typeof container == 'string')
         container = document.getElementById(container);
 
@@ -969,4 +971,5 @@ function iconLink(classList, parent, icon, text, href, click, style) {
     return result;
 }
 
-module.exports = ModuleChartDetail;
+// module.exports = ModuleChartDetail;
+export default ModuleChartDetail;

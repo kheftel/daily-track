@@ -34,6 +34,32 @@ exports.favicon = () => ({
     }
 });
 
+exports.emitCSS = ({
+    include,
+    exclude
+} = {}) => ({
+    module: {
+        rules: [{
+            test: /\.css$/,
+            include,
+            exclude,
+
+            use: [{
+                loader: 'file-loader',
+                options: {
+                    name: '[name].[ext]',
+                    sourceMap: true,
+                },
+            }, {
+                loader: "css-loader",
+                options: {
+                    sourceMap: true
+                }
+            }],
+        }, ],
+    },
+});
+
 exports.inlineCSS = ({
     include,
     exclude

@@ -25,39 +25,12 @@ block content
     include modals/datapoint-form
 
 block pagescript
-    script.
-        var controller = new ModalControllerDatapointForm();
+    script(src=webpack_asset('overview', 'js'))
 
-        $('.module-chart-overview').each(function(i, container) {
-            var module = new ModuleChartOverview(container, controller);
-            //- controller.colorOffset = i;
-        });
+    //- script.
+    //-     var controller = new ModalControllerDatapointForm();
 
-        //- $(".chartholder").each(function(i, container) {
-        //-     var setid = container.dataset.setid;
-        //-     console.log(setid);
-        //-     var controller = new ChartController(container);
-        //-     controller.colorOffset = i;
-        //-     controller.addDataset(setid);
-        //- });
-
-        //- $.ajax({
-        //-     url: '/api/sets',
-        //-     method: 'GET',
-        //-     success: (datasets) => {
-        //-         console.log(datasets);
-        //-         for(var i = 0; i < datasets.length; i++) {
-        //-             var set = datasets[i];
-        //-             var containerid = "set-" + i + "-" + set._id;
-        //-             console.log(containerid)
-        //-             var controller = new ChartController($("#" + containerid)[0]);
-        //-             controller.colorOffset = i;
-        //-             controller.addDataset(set._id);
-        //-         }
-        //-     },
-        //-     error: (err) => {
-        //-         console.log(err);
-
-        //-         if (complete) complete();
-        //-     }
-        //- });
+    //-     $('.module-chart-overview').each(function(i, container) {
+    //-         var module = new ModuleChartOverview(container, controller);
+    //-         //- controller.colorOffset = i;
+    //-     });

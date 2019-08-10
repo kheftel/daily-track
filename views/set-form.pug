@@ -1,0 +1,37 @@
+extends layout
+
+block content
+    form#set-form(method='POST' action='/api/sets' novalidate data-setid=(undefined===dataset ? false : dataset._id))
+        div#name-group.form-group
+            label(for='name') Name:
+            input#name.form-control(type='text', placeholder='Meditation, sleep, mood, etc' name='name' value=(undefined===dataset ? '' : dataset.name) required)
+            #name-invalid.invalid-feedback
+            #name-valid.valid-feedback
+        div#yAxisLabel-group.form-group
+            label(for='yAxisLabel') Unit:
+            input#yAxisLabel.form-control(type='text', placeholder='Minutes, hours, pounds, etc' name='yAxisLabel' value=(undefined===dataset ? '' : dataset.yAxisLabel) required)
+            #yAxisLabel-invalid.invalid-feedback
+            #yAxisLabel-valid.valid-feedback
+        //- div#chartType-group.form-group
+        //-     label(for='chartType') Chart Type:
+        //-     select#chartType.form-control(name='chartType' required)
+        //-         if(undefined!==dataset && dataset.chartType == 'line')
+        //-             option(selected)
+        //-                 | line
+        //-         else
+        //-             option
+        //-                 | line
+        //-         if(undefined!==dataset && dataset.chartType == 'bar')
+        //-             option(selected)
+        //-                 | bar
+        //-         else
+        //-             option
+        //-                 | bar
+        //-     #chartType-invalid.invalid-feedback
+        //-     #chartType-valid.valid-feedback
+        input#owner(type='hidden' name='owner' value=(undefined===user ? '' : user._id))
+        button#save.btn.btn-success(type='submit')
+            | Save
+            span.spinner-border.spinner-border-sm.ml-1(role="status" aria-hidden="true")
+block pagescript
+    script(src=webpack_asset('set-form', 'js'))

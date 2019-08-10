@@ -11,8 +11,6 @@ const createError = require('http-errors');
 const ensureLoggedIn = require('connect-ensure-login').ensureLoggedIn;
 const ensureLoggedOut = require('connect-ensure-login').ensureLoggedOut;
 
-const set_controller = require('../controllers/datasetController');
-
 const siteRouter = express.Router();
 
 // template data
@@ -311,7 +309,7 @@ siteRouter.get('/datasets', function (req, res, next) {
 
 // new dataset
 siteRouter.get('/set/new', function (req, res, next) {
-    res.render('set_form');
+    res.render('set-form');
 });
 
 // view dataset
@@ -383,7 +381,7 @@ siteRouter.get('/set/:id/edit', function (req, res, next) {
             }
         ];
 
-        res.render('set_form');
+        res.render('set-form');
     });
 });
 
@@ -560,13 +558,5 @@ function preProcessNav(req) {
 
     return retval;
 }
-
-// router.post('/set/create', set_controller.create_post);
-// router.get('/set/:id/delete', set_controller.delete_get);
-// router.post('/set/:id/delete', set_controller.delete_post);
-// router.get('/set/:id/update', set_controller.update_get);
-// router.post('/set/:id/update', set_controller.update_post);
-// router.get('/set/:id', set_controller.detail);
-// router.get('/sets', set_controller.list);
 
 module.exports = siteRouter;

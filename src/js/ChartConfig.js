@@ -37,7 +37,7 @@ function hasTags(point) {
 }
 
 function pointContextHasTags(context) {
-    if(!context || !context.dataset || context.dataIndex == null) {
+    if (!context || !context.dataset || context.dataIndex == null) {
         throw new Error('pointContextHasTags: malformed context');
     }
 
@@ -130,88 +130,87 @@ Chart.scaleService.updateScaleDefaults('linear', {
 // axes can be customized including ticks here: https://www.chartjs.org/docs/latest/axes/#callbacks
 // chart plugin info: https://www.chartjs.org/docs/latest/developers/plugins.html
 
-ChartConfig = function () {
+var ChartConfig = {
 
-};
+    today: moment().startOf('day'),
 
-ChartConfig.today = moment().startOf('day');
-
-ChartConfig.zoomData = {
-    "week": {
-        label: 'Week',
-        unit: 'day',
-        viewport: {
-            'days': -7
+    zoomData: {
+        "week": {
+            label: 'Week',
+            unit: 'day',
+            viewport: {
+                'days': -7
+            },
+            labelStart: {
+                'days': -180
+            },
+            labelIncrement: {
+                'days': 1
+            },
+            numLabels: 360,
+            labels: []
         },
-        labelStart: {
-            'days': -180
+        "month": {
+            label: 'Month',
+            unit: 'week',
+            viewport: {
+                'months': -1
+            },
+            labelStart: {
+                'weeks': -52
+            },
+            labelIncrement: {
+                'weeks': 1
+            },
+            numLabels: 104,
+            labels: []
         },
-        labelIncrement: {
-            'days': 1
+        "3month": {
+            label: '3 Months',
+            unit: 'month',
+            viewport: {
+                'months': -3
+            },
+            labelStart: {
+                'months': -24
+            },
+            labelIncrement: {
+                'months': 1
+            },
+            numLabels: 48,
+            labels: []
         },
-        numLabels: 360,
-        labels: []
+        "6month": {
+            label: '6 Month',
+            unit: 'month',
+            viewport: {
+                'months': -6
+            },
+            labelStart: {
+                'months': -24
+            },
+            labelIncrement: {
+                'months': 1
+            },
+            numLabels: 48,
+            labels: []
+        },
+        "year": {
+            label: 'Year',
+            unit: 'quarter',
+            viewport: {
+                'years': -1
+            },
+            labelStart: {
+                'quarters': -12
+            },
+            labelIncrement: {
+                'quarters': 1
+            },
+            numLabels: 24,
+            labels: []
+        }
     },
-    "month": {
-        label: 'Month',
-        unit: 'week',
-        viewport: {
-            'months': -1
-        },
-        labelStart: {
-            'weeks': -52
-        },
-        labelIncrement: {
-            'weeks': 1
-        },
-        numLabels: 104,
-        labels: []
-    },
-    "3month": {
-        label: '3 Months',
-        unit: 'month',
-        viewport: {
-            'months': -3
-        },
-        labelStart: {
-            'months': -24
-        },
-        labelIncrement: {
-            'months': 1
-        },
-        numLabels: 48,
-        labels: []
-    },
-    "6month": {
-        label: '6 Month',
-        unit: 'month',
-        viewport: {
-            'months': -6
-        },
-        labelStart: {
-            'months': -24
-        },
-        labelIncrement: {
-            'months': 1
-        },
-        numLabels: 48,
-        labels: []
-    },
-    "year": {
-        label: 'Year',
-        unit: 'quarter',
-        viewport: {
-            'years': -1
-        },
-        labelStart: {
-            'quarters': -12
-        },
-        labelIncrement: {
-            'quarters': 1
-        },
-        numLabels: 24,
-        labels: []
-    }
 };
 
 var i, k;

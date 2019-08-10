@@ -19,10 +19,12 @@ block content
     include modals/datapoint-form
 
 block pagescript
-    script.
-        var controller = new ModalControllerDatapointForm();
+    script(src=webpack_asset('vendors-chart', 'js'))
+    script(src=webpack_asset('dataset', 'js'))
+    //- script.
+    //-     var controller = new ModalControllerDatapointForm();
 
-        var detailModule = new ModuleChartDetail($(".module-chart-detail")[0], controller);
+    //-     var detailModule = new ModuleChartDetail($(".module-chart-detail")[0], controller);
 
         //- .row
         //-     .col

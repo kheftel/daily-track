@@ -1,5 +1,6 @@
 const moment = require('moment');
-const ModalControllerDatapointForm = require('./ModalControllerDatapointForm');
+// const ModalControllerDatapointForm = require('./ModalControllerDatapointForm');
+import ModalControllerDatapointForm from './ModalControllerDatapointForm';
 
 /**
  * overview chart module
@@ -8,7 +9,7 @@ const ModalControllerDatapointForm = require('./ModalControllerDatapointForm');
  * @param {ModalControllerDatapointForm} datapointModal 
  */
 
-ModuleChartOverview = function (container, createDatapointModal) {
+var ModuleChartOverview = function (container, createDatapointModal) {
     // parent container can be id or html elem
     if (typeof container == 'string')
         container = document.getElementById(container);
@@ -340,4 +341,5 @@ p.updateStats = function() {
     this._detailLink.innerHTML = `${this._dataset.name} (${unit})`;
 };
 
-module.exports = ModuleChartOverview;
+// module.exports = ModuleChartOverview;
+export default ModuleChartOverview;
