@@ -1,5 +1,6 @@
 const webpack = require('webpack');
 const UglifyWebpackPlugin = require("uglifyjs-webpack-plugin");
+const TerserPlugin = require('terser-webpack-plugin');
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const OptimizeCSSAssetsPlugin = require("optimize-css-assets-webpack-plugin");
 const cssnano = require("cssnano");
@@ -232,9 +233,17 @@ exports.loadJS = ({
 
 exports.minifyJS = () => ({
     optimization: {
-        minimizer: [new UglifyWebpackPlugin({
-            sourceMap: true
+        minimizer: [new TerserPlugin({
+            cache: true,
+            parallel: true,
+            sourceMap: true, // Must be set to true if using source-maps in production
+            terserOptions: {
+                // https://github.com/webpack-contrib/terser-webpack-plugin#terseroptions
+            }
         })],
+        // minimizer: [new UglifyWebpackPlugin({
+        //     sourceMap: true
+        // })],
     },
 });
 
@@ -253,13 +262,14 @@ exports.attachRevision = () => ({
 });
 
 exports.packtrackerUpload = function () {
-    return process.env.PT_PROJECT_TOKEN ? {
+    // upload to packtracker from travis
+    return (process.env.CI && process.env.PT_PROJECT_TOKEN) ? {
         plugins: [new PacktrackerPlugin({
-        project_token: process.env.PT_PROJECT_TOKEN,
-        upload: true,
+            project_token: process.env.PT_PROJECT_TOKEN,
+            upload: true,
             branch: process.env.TRAVIS_BRANCH,
-            
-        // fail_build: true,
+
+            // fail_build: true,
         })]
     } : [];
 };

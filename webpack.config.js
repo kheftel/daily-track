@@ -123,7 +123,7 @@ var baseConfig = merge([{
     utils.exposeJQuery(),
     utils.favicon(),
     utils.loadJS({
-        include: PATHS.app
+        include: PATHS.app,
     })
 ]);
 
