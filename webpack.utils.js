@@ -259,5 +259,5 @@ exports.packtrackerUpload = function () {
         upload: true,
         // fail_build: true,
         })]
-    } : []
+    } : [];
 };
