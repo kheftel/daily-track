@@ -252,10 +252,12 @@ exports.attachRevision = () => ({
     ],
 });
 
-exports.packtrackerUpload = () => ({
-    plugins: process.env.PT_PROJECT_TOKEN ? [new PacktrackerPlugin({
+exports.packtrackerUpload = function () {
+    return process.env.PT_PROJECT_TOKEN ? {
+        plugins: [new PacktrackerPlugin({
         project_token: process.env.PT_PROJECT_TOKEN,
         upload: true,
         // fail_build: true,
-    })] : []
-});
+        })]
+    } : []
+};

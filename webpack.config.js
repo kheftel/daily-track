@@ -9,6 +9,12 @@ const HtmlWebpackPlugin = require('html-webpack-plugin');
 const Visualizer = require('webpack-visualizer-plugin');
 const DuplicateChecker = require('duplicate-package-checker-webpack-plugin');
 const PacktrackerPlugin = require('@packtracker/webpack-plugin');
+const fs = require('fs');
+
+// hack to be able run production builds on local machine w/o env vars actually in environment
+if (fs.existsSync('.env')) {
+    require('dotenv').config();
+}
 
 const PATHS = {
     app: path.join(__dirname, "src"),
