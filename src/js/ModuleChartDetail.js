@@ -295,7 +295,6 @@ var ModuleChartDetail = function (container, datapointModal, ids = null) {
     // });
 
     var complete = function () {
-        console.log(this);
         // update chart
         this._chart.update();
         this.updateTagCloud();
@@ -404,39 +403,63 @@ function addDatasetsFromIds(ids, complete) {
     var which = 0;
     var datasets = [];
 
-    function load(id) {
-        console.log('loading set ' + id);
-        $.ajax({
-            url: '/api/sets/' + id,
-            method: 'GET',
-            success: (dataset) => {
-                datasets.push(dataset);
-                next();
-            },
-            error: (err) => {
+    var deferreds = [];
+    $.each(ids, (i, id) => {
+        deferreds.push(
+            $.ajax({
+                url: '/api/sets/' + id,
+                method: 'GET',
+            }).done((data) => {
+                this.addDatasetFromModel(data);
+                console.log(data);
+            }).fail((err) => {
                 console.log(err);
-                next();
-            }
-        });
-    }
+            })
+        );
+    });
+    // Can't pass a literal array, so use apply.
+    $.when.apply($, deferreds).then(() => {
+        if (complete) complete();
+    }).fail((err) => {
+        console.log(err);
+    }).always(() => {
+        // Or use always if you want to do the same thing
+        // whether the call succeeds or fails
+    });
 
-    var next = function () {
-        console.log(which + '/' + ids.length);
-        if (which < ids.length) {
-            load(ids[which]);
-            which++;
-        } else if (which == ids.length) {
-            // all done
-            datasets.forEach((set, i) => {
-                console.log('adding set ' + i + ', id=' + set._id);
-                this.addDatasetFromModel(set);
-            });
+    // function load(id) {
+    //     console.log('loading set ' + id);
+    //     $.ajax({
+    //         url: '/api/sets/' + id,
+    //         method: 'GET',
+    //         success: (dataset) => {
+    //             datasets.push(dataset);
+    //             next();
+    //         },
+    //         error: (err) => {
+    //             console.log(err);
+    //             next();
+    //         }
+    //     });
+    // }
 
-            if (complete) complete();
-        }
-    }.bind(this);
+    // var next = function () {
+    //     console.log(which + '/' + ids.length);
+    //     if (which < ids.length) {
+    //         load(ids[which]);
+    //         which++;
+    //     } else if (which == ids.length) {
+    //         // all done
+    //         datasets.forEach((set, i) => {
+    //             console.log('adding set ' + i + ', id=' + set._id);
+    //             this.addDatasetFromModel(set);
+    //         });
 
-    next();
+    //         if (complete) complete();
+    //     }
+    // }.bind(this);
+
+    // next();
 }
 ModuleChartDetail.prototype.addDatasetsFromIds = addDatasetsFromIds;
 
