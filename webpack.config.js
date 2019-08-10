@@ -8,13 +8,12 @@ const ManifestPlugin = require('webpack-manifest-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const Visualizer = require('webpack-visualizer-plugin');
 const DuplicateChecker = require('duplicate-package-checker-webpack-plugin');
-const PacktrackerPlugin = require('@packtracker/webpack-plugin');
 const fs = require('fs');
 
 // hack to be able run production builds on local machine w/o env vars actually in environment
-if (fs.existsSync('.env')) {
-    require('dotenv').config();
-}
+// if (fs.existsSync('.env')) {
+//     require('dotenv').config();
+// }
 
 const PATHS = {
     app: path.join(__dirname, "src"),
@@ -184,10 +183,16 @@ var prodConfig = merge([{
     utils.generateSourceMaps({
         type: "source-map"
     }),
-    utils.attachRevision()
+    utils.attachRevision(),
+    utils.packtrackerUpload(),
 ]);
 
 module.exports = mode => {
+    console.log('mode: ' + mode);
+    if(process.env.PT_PROJECT_TOKEN) {
+        console.log('packtracker token exists');
+    }
+
     const config = mode === "production" ? prodConfig : devConfig;
     const retval = merge([baseConfig, {
         mode
