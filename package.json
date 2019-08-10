@@ -13,7 +13,7 @@
     "lint": "clear && jshint .",
     "test": "npm run lint && mocha test -u bdd -R spec",
     "build": "npm run build:prod",
-    "build:prod": "webpack --env production --colors --display-error-details",
+    "build:prod": "webpack --env production --colors --display-error-details --display-used-exports --display-modules",
     "build:dev": "webpack --env development --colors --display-error-details",
     "build:stats": "webpack --env production --profile --json > stats.json",
     "server:dev": "npm run test && npm run build:dev && node server.js",

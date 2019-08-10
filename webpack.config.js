@@ -147,6 +147,7 @@ var prodConfig = merge([{
         },
         stats: {
             maxModules: Infinity,
+            exclude: undefined,
             optimizationBailout: true,
         },
     },
