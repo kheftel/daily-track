@@ -1,12 +1,20 @@
 // jquery/bootstrap/ui stuff
-require('jquery');
-require('popper.js');
-require('bootstrap');
-require('bootstrap-confirmation2');
-require('./js/lib/toast');
+import 'jquery';
+import 'popper.js';
+
+// import 'bootstrap';
+import 'bootstrap/js/src/alert';
+import 'bootstrap/js/src/dropdown';
+import 'bootstrap/js/src/modal';
+import 'bootstrap/js/src/popover';
+import 'bootstrap/js/src/tooltip';
+import 'bootstrap/js/src/toast';
+
+import 'bootstrap-confirmation2/src/confirmation';
+import './js/lib/toast.js';
 
 // custom code
-require('./js/pageinit');
+import './js/pageinit';
 
 // assets
 import './favicon.ico';

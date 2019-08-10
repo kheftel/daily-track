@@ -15,6 +15,7 @@ const siteRouter = require('./routes/site');
 const logger = require('morgan');
 const webpackAssets = require('express-webpack-assets');
 const flash = require('connect-flash');
+const compression = require('compression');
 
 // load .env in non-production environments
 process.env.NODE_ENV = process.env.NODE_ENV || 'development';
@@ -35,9 +36,14 @@ db.on('error', console.error.bind(console, 'MongoDB connection error:'));
 
 // APP /////////////
 var app = express();
+// logging
 app.use(logger('dev'));
 if (app.get('env') === 'development') {
     app.locals.pretty = true;
+}
+// gzip responses in production
+if(process.env.NODE_ENV === 'production') {
+    app.use(compression());
 }
 
 // VIEWS //////////
