@@ -1,6 +1,8 @@
 # daily-track
 
-track daily stuff
+track stuff daily
+
+[![Build Status](https://travis-ci.org/kheftel-lkw/daily-track.svg?branch=master)](https://travis-ci.org/kheftel-lkw/daily-track)
 
 ## structure
 
