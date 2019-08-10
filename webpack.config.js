@@ -8,6 +8,7 @@ const ManifestPlugin = require('webpack-manifest-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const Visualizer = require('webpack-visualizer-plugin');
 const DuplicateChecker = require('duplicate-package-checker-webpack-plugin');
+const PacktrackerPlugin = require('@packtracker/webpack-plugin');
 
 const PATHS = {
     app: path.join(__dirname, "src"),

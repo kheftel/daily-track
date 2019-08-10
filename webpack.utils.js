@@ -4,6 +4,7 @@ const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const OptimizeCSSAssetsPlugin = require("optimize-css-assets-webpack-plugin");
 const cssnano = require("cssnano");
 const GitRevisionPlugin = require("git-revision-webpack-plugin");
+const PacktrackerPlugin = require('@packtracker/webpack-plugin');
 
 exports.exposeJQuery = () => ({
     module: {
@@ -249,4 +250,12 @@ exports.attachRevision = () => ({
         //     banner: new GitRevisionPlugin().version(),
         // }),
     ],
+});
+
+exports.packtrackerUpload = () => ({
+    plugins: process.env.PT_PROJECT_TOKEN ? [new PacktrackerPlugin({
+        project_token: process.env.PT_PROJECT_TOKEN,
+        upload: true,
+        // fail_build: true,
+    })] : []
 });
