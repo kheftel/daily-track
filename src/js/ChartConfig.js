@@ -1,8 +1,8 @@
 // require all chart stuff here
-var moment = require('moment');
-require('hammerjs');
-require('./lib/chartjs-plugin-zoom.js');
-var Chart = require('chart.js');
+import moment from 'moment';
+import Hammer from 'hammerjs';
+import './lib/chartjs-plugin-zoom.js';
+import Chart from 'chart.js';
 
 // update a bunch of ChartJS global defaults
 var defaults = Chart.defaults.global;
@@ -223,4 +223,4 @@ for (var k in ChartConfig.zoomData) {
     }
 }
 
-module.exports = ChartConfig;
+export default ChartConfig;

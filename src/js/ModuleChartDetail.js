@@ -1,6 +1,6 @@
-const Chart = require('chart.js');
-const ChartConfig = require('./ChartConfig');
-const moment = require('moment');
+import Chart from 'chart.js';
+import ChartConfig from './ChartConfig';
+import moment from 'moment';
 // const ModalControllerDatapointForm = require('./ModalControllerDatapointForm');
 import ModalControllerDatapointForm from './ModalControllerDatapointForm';
 

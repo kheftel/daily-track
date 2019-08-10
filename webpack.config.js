@@ -189,10 +189,10 @@ var prodConfig = merge([{
 ]);
 
 module.exports = mode => {
-    console.log('mode: ' + mode);
-    if(process.env.PT_PROJECT_TOKEN) {
-        console.log('packtracker token exists');
-    }
+    // console.log('mode: ' + mode);
+    // if(process.env.PT_PROJECT_TOKEN) {
+    //     console.log('packtracker token exists');
+    // }
 
     const config = mode === "production" ? prodConfig : devConfig;
     const retval = merge([baseConfig, {
