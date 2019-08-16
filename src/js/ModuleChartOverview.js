@@ -9,7 +9,7 @@ import ModalControllerDatapointForm from './ModalControllerDatapointForm';
  * @param {ModalControllerDatapointForm} datapointModal 
  */
 
-var ModuleChartOverview = function (container, createDatapointModal) {
+var ModuleChartOverview = function (container, datapointModal) {
     // parent container can be id or html elem
     if (typeof container == 'string')
         container = document.getElementById(container);
@@ -22,8 +22,17 @@ var ModuleChartOverview = function (container, createDatapointModal) {
     var setid = this._containerData.setid;
     var setname = this._containerData.setname;
 
-    this._createDatapointModal = createDatapointModal;
-    this._createDatapointModal.getView().on('saved', (event, id) => {
+    this._datapointModal = datapointModal;
+    this._datapointModal.getView().on('saved', (event, id, datapoint) => {
+        if(!this._dataset) return;
+        console.log(id + ' vs ' + this._dataset._id);
+        if(id == this._dataset._id)
+        {
+            console.log('refresh');
+            this.refresh();
+        }
+    });
+    this._datapointModal.getView().on('deleted', (event, id, datapoint) => {
         if(!this._dataset) return;
         console.log(id + ' vs ' + this._dataset._id);
         if(id == this._dataset._id)
@@ -100,7 +109,7 @@ var ModuleChartOverview = function (container, createDatapointModal) {
     
     // track button
     this._btnTrack = largeIconButton(['w-100'], col1, 'fa-plus-square fa-2x', 'Track', () => {
-        this._createDatapointModal.show(this._dataset);
+        this._datapointModal.show(this._dataset);
     }, '');
 
     var col2 = elem('div', row2, ['col-6', 'p-1']);
@@ -252,10 +261,21 @@ p.setDataset = function (id, complete) {
     $.ajax({
         url: '/api/sets/' + id,
         method: 'GET',
-        success: (dataset) => {
-            this.setVisualState(this._content);
-            
-            this.setDatasetFromModel(dataset, complete);
+        success: (data) => {
+            if(!data.success) {
+                $.toast({
+                    title: 'Error',
+                    content: data.message || (data.error && data.error.message) || 'Unable to load, try again later',
+                    type: 'error',
+                    delay: 5000
+                });
+                this.setVisualState(this._content);
+                this._content.innerHTML = 'loading error';
+            }
+            else {
+                this.setVisualState(this._content);
+                this.setDatasetFromModel(data.data, complete);
+            }
         },
         error: (err) => {
             this.setVisualState(this._content);

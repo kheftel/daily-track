@@ -1,3 +1,9 @@
+// load .env in non-production environments
+process.env.NODE_ENV = process.env.NODE_ENV || 'development';
+if (process.env.NODE_ENV !== 'production') {
+    require('dotenv').config();
+}
+
 // REQUIRES /////////////////////////////
 const express = require('express');
 const path = require('path');
@@ -16,28 +22,28 @@ const logger = require('morgan');
 const webpackAssets = require('express-webpack-assets');
 const flash = require('connect-flash');
 const compression = require('compression');
-
-// load .env in non-production environments
-process.env.NODE_ENV = process.env.NODE_ENV || 'development';
-if (process.env.NODE_ENV !== 'production') {
-    require('dotenv').config();
-}
-
-var port = process.env.PORT || 8080;
+const VError = require('verror');
+const common = require('./server/common');
+const log = common.log.extend('server');
 
 // DATABASE ////////////////////////
 var dburl = process.env.MONGODB_URI;
 mongoose.connect(dburl, {
     useNewUrlParser: true
+})
+.then(() => {
+    log('connected to mongoose');
 });
-mongoose.set('useCreateIndex', true);
 var db = mongoose.connection;
-db.on('error', console.error.bind(console, 'MongoDB connection error:'));
+mongoose.set('useCreateIndex', true);
+db.on('error', (err) => {
+    common.logError(err, 'mongoose error');
+});
 
 // APP /////////////
 var app = express();
 // logging
-app.use(logger('dev'));
+app.use(logger('combined'));
 if (app.get('env') === 'development') {
     app.locals.pretty = true;
 }
@@ -63,8 +69,6 @@ app.use(session({
         mongooseConnection: db
     })
 }));
-// app.use(cookieParser());
-// app.use(cookieSession({keys: ['secretkey1', 'secretkey2', '...']}));
 app.use(flash());
 
 // allow app to find list of webpack-ified assets
@@ -95,8 +99,8 @@ app.use('/api', apiRouter);
 app.use('/', siteRouter);
 
 // START SERVER ////////////////////////////
+var port = process.env.PORT || 8080;
 app.set('port', port);
-
 app.listen(port, () => {
-    console.log('Dailytrack listening on port ' + port);
+    log('DailyTrackr listening on port ' + port);
 });

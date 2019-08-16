@@ -53,7 +53,7 @@ $('#set-form').submit(function (event) {
             $('#save').prop('disabled', false);
 
             if (!data.success) {
-                //- $('#set-form').addClass('was-validated');
+                // validation errors
                 if (data.errors) {
                     data.errors.forEach(function (error) {
                         // add the error message
@@ -69,6 +69,15 @@ $('#set-form').submit(function (event) {
                                 delay: 5000
                             });
                         }
+                    });
+                }
+                // db saving error
+                if (data.error) {
+                    $.toast({
+                        title: 'Error!',
+                        content: data.error.message || 'Unable to save, please try again later',
+                        type: 'error',
+                        delay: 5000
                     });
                 }
             } else {

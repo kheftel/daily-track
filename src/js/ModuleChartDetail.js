@@ -381,8 +381,17 @@ function addDataset(id, complete) {
     $.ajax({
         url: '/api/sets/' + id,
         method: 'GET',
-        success: (dataset) => {
-            this.addDatasetFromModel(dataset, complete);
+        success: (data) => {
+            if (!data.success) {
+                $.toast({
+                    title: 'Error',
+                    content: data.message || (data.error && data.error.message) || 'Unable to load, try again later',
+                    type: 'error',
+                    delay: 5000
+                });
+                if (complete) complete();
+            } else
+                this.addDatasetFromModel(data.data, complete);
         },
         error: (err) => {
             console.log(err);
@@ -410,7 +419,15 @@ function addDatasetsFromIds(ids, complete) {
                 url: '/api/sets/' + id,
                 method: 'GET',
             }).done((data) => {
-                this.addDatasetFromModel(data);
+                if (!data.success) {
+                    $.toast({
+                        title: 'Error',
+                        content: data.message || (data.error && data.error.message) || 'Unable to load, try again later',
+                        type: 'error',
+                        delay: 5000
+                    });
+                } else
+                    this.addDatasetFromModel(data.data);
                 console.log(data);
             }).fail((err) => {
                 console.log(err);

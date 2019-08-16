@@ -68,6 +68,15 @@ function ModalControllerDatapointForm() {
                             }
                         });
                     }
+                    // db saving error
+                    if (data.error) {
+                        $.toast({
+                            title: 'Error!',
+                            content: data.error.message || 'Unable to save, please try again later',
+                            type: 'error',
+                            delay: 5000
+                        });
+                    }
                 } else {
                     // success
                     $.toast({

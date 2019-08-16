@@ -6,6 +6,8 @@ const Dataset = require('../models/dataset');
 const Datapoint = require('../models/datapoint');
 const User = require('../models/user');
 const createError = require('http-errors');
+const common = require('../server/common');
+const log = common.log.extend('api');
 
 const {
     body,
@@ -30,7 +32,7 @@ var apiRouter = express.Router();
 
 // test route to make sure everything is working (accessed at GET http://localhost:8080/api)
 apiRouter.get('/', authorize, function (req, res) {
-    return res.json({
+    return respond(res, true, {
         message: 'hooray! welcome to our api!'
     });
 });
@@ -47,33 +49,30 @@ apiRouter.post('/register', [
         // handle validation errors
         const errors = validationResult(req);
 
-        var data = {};
-
         if (!errors.isEmpty()) {
-            console.log('validation errors:');
             var arr = errors.array();
-            console.log(arr);
+            log('registration validation errors: %j', arr);
 
-            data.success = false;
-            data.errors = arr;
-
-            return res.json(data);
+            return respond(res, false, {
+                errors: arr
+            });
         }
 
         // Create user with validated / sanitized data
-        console.log('registering user');
+        log('registering user %s', req.body.username);
         User.register(new User({
             username: req.body.username
         }), req.body.password, function (err) {
             if (err) {
-                data.success = false;
-                data.error = err;
-                return res.json(data);
+                common.logError(err, 'Error registering user');
+                return respond(res, false, {
+                    error: err
+                });
             }
 
-            data.success = true;
-            data.message = 'User registered!';
-            return res.json(data);
+            return respond(res, true, {
+                message: 'User registered!'
+            });
         });
     }
 ]);
@@ -99,20 +98,17 @@ apiRouter.post('/sets', [
         // handle validation errors
         const errors = validationResult(req);
 
-        var data = {};
-
         if (!errors.isEmpty()) {
-            console.log('validation errors:');
             var arr = errors.array();
-            console.log(arr);
+            log('validation errors: %j', arr);
 
-            data.success = false;
-            data.errors = arr;
-
-            return res.json(data);
+            return respond(res, false, {
+                errors: arr
+            });
         }
 
         // Create dataset with validated / sanitized data
+        log('creating dataset %s', req.body.name);
         var dataset = new Dataset();
         dataset.name = req.body.name;
         dataset.yAxisLabel = req.body.yAxisLabel;
@@ -123,12 +119,16 @@ apiRouter.post('/sets', [
 
         // save the dataset and check for errors
         dataset.save(function (err) {
-            if (err)
-                return res.send(err);
+            if (err) {
+                common.logError(err, 'Error saving dataset');
+                return response(res, false, {
+                    error: err
+                });
+            }
 
-            data.success = true;
-            data.message = 'Dataset ' + dataset.name + ' created!';
-            return res.json(data);
+            return respond(res, false, {
+                message: 'Dataset ' + dataset.name + ' created!'
+            });
         });
     }
 ]);
@@ -147,10 +147,16 @@ apiRouter.get('/sets',
                 name: 'asc'
             })
             .exec(function (err, datasets) {
-                if (err)
-                    return res.send(err);
+                if (err) {
+                    common.logError(err, 'Error getting datasets');
+                    return respond(res, false, {
+                        error: err
+                    });
+                }
 
-                return res.json(datasets);
+                return respond(res, true, {
+                    data: datasets
+                });
             });
     });
 
@@ -163,14 +169,18 @@ apiRouter.get('/sets/:id',
     function (req, res, next) {
         // grab the dataset from the db
         Dataset.findById(req.params.id, function (err, dataset) {
-            if (err)
-                return res.send(err);
+            if (err) {
+                common.logError(err, 'Database error finding dataset %s', req.params.id);
+                return respond(res, false, {
+                    error: err
+                });
+            }
 
             // bad id? no dataset found?
             if (!dataset) {
-                return res.json({
-                    success: false,
-                    message: "no dataset found for id " + req.params.id
+                log("No dataset found for id %s", req.params.id);
+                return respond(res, false, {
+                    message: "No dataset found for id " + req.params.id
                 });
             }
 
@@ -182,8 +192,12 @@ apiRouter.get('/sets/:id',
                     x: 'asc'
                 })
                 .exec(function (err, datapoints) {
-                    if (err)
-                        return res.send(err);
+                    if (err) {
+                        common.logError(err, 'Database error finding points');
+                        return respond(res, false, {
+                            error: err
+                        });
+                    }
 
                     var result = dataset.toObject();
 
@@ -196,7 +210,9 @@ apiRouter.get('/sets/:id',
 
                     result.data = datapoints;
 
-                    return res.json(result);
+                    return respond(res, true, {
+                        data: result
+                    });
                 });
         });
     });
@@ -219,26 +235,27 @@ apiRouter.post('/sets/:id', [
     function (req, res, next) {
         // handle validation errors
         const errors = validationResult(req);
-        var data = {};
         if (!errors.isEmpty()) {
-            console.log('validation errors:');
             var arr = errors.array();
-            console.log(arr);
-            data.success = false;
-            data.errors = arr;
-            return res.json(data);
+            log('validation errors: %j', arr);
+            return respond(res, false, {
+                errors: arr
+            });
         }
 
         Dataset.findById(req.params.id, function (err, dataset) {
-            if (err)
-                return res.send(err);
+            if (err) {
+                common.logError(err, 'Database error while finding dataset %s', req.params.id);
+                return respond(res, false, {
+                    error: err
+                });
+            }
 
             if (dataset) {
                 // does the current user own this dataset?
                 if (!dataset.owner.equals(req.user._id)) {
-                    console.log(dataset.owner, req.user._id);
-                    return res.json({
-                        success: false,
+                    log('permission denied, %s does not own dataset %s', req.user._id, dataset.owner);
+                    return respond(res, false, {
                         errors: [{
                             msg: 'Permission denied, you do not own this dataset'
                         }]
@@ -252,13 +269,16 @@ apiRouter.post('/sets/:id', [
                             dataset: req.params.id
                         })
                         .exec((err, datapoint) => {
-                            if (err)
-                                return res.send(err);
+                            if (err) {
+                                common.logError('Error while finding datapoints for dataset %s', req.params.id);
+                                return respond(res, false, {
+                                    error: err
+                                });
+                            }
 
                             if (datapoint) {
                                 // cannot delete
-                                return res.json({
-                                    success: false,
+                                return respond(res, false, {
                                     errors: [{
                                         msg: 'Cannot delete non-empty dataset. Please delete all points first.'
                                     }]
@@ -266,11 +286,14 @@ apiRouter.post('/sets/:id', [
                             } else {
                                 //empty, can delete
                                 dataset.delete((err) => {
-                                    if (err)
-                                        return res.send(err);
+                                    if (err) {
+                                        common.logError('Database error while deleting dataset %s', req.params.id);
+                                        return respond(res, false, {
+                                            error: err
+                                        });
+                                    }
 
-                                    return res.json({
-                                        success: 'true',
+                                    return respond(res, true, {
                                         message: 'Dataset deleted'
                                     });
                                 });
@@ -289,18 +312,21 @@ apiRouter.post('/sets/:id', [
 
                     // save the dataset
                     dataset.save(function (err) {
-                        if (err)
-                            return res.send(err);
+                        if (err) {
+                            common.logError(err, 'Error while saving dataset %s', dataset._id);
+                            return respond(res, false, {
+                                error: err
+                            });
+                        }
 
-                        data.success = true;
-                        data.message = 'Dataset ' + dataset.name + ' updated!';
-                        return res.json(data);
+                        return respond(res, true, {
+                            message: 'Dataset ' + dataset.name + ' updated!'
+                        });
                     });
                 }
             } else {
                 // dataset not found
-                return res.json({
-                    success: false,
+                return respond(res, false, {
                     errors: [{
                         msg: "No dataset found"
                     }]
@@ -309,19 +335,6 @@ apiRouter.post('/sets/:id', [
         });
     }
 ]);
-
-// delete a dataset
-// TO DO: what to do about the points?
-// apiRouter.delete('/sets/:id', function (req, res) {
-//     Dataset.findByIdAndDelete(req.params.id, function (err, dataset) {
-//         if (err)
-//             res.send(err);
-
-//         res.json({
-//             message: 'Successfully deleted ' + (dataset ? dataset.name : '')
-//         });
-//     });
-// });
 
 // create OR update OR delete a datapoint
 apiRouter.post('/sets/:id/data', [
@@ -342,10 +355,9 @@ apiRouter.post('/sets/:id/data', [
         try {
             result = moment(new Date(value).toISOString()).utc().format('YYYY-MM-DD');
         } catch (e) {
-            console.log(e);
+            common.logError(e, 'Invalid date format (should be YYYY-MM-DD)');
             throw new Error('Invalid date format (should be YYYY-MM-DD)');
         }
-        // console.log('date after validation: ' + result);
         req.body.x = result;
         return true;
     }),
@@ -370,17 +382,14 @@ apiRouter.post('/sets/:id/data', [
 
         // send the validation errors, if any
         const errors = validationResult(req);
-        var data = {};
 
         if (!errors.isEmpty()) {
-            console.log('validation errors:');
             var arr = errors.array();
-            console.log(arr);
+            log('validation errors: %j', arr);
 
-            data.success = false;
-            data.errors = arr;
-
-            return res.json(data);
+            respond(res, false, {
+                errors: arr
+            });
         }
 
         // Create/update/delete datapoint with validated / sanitized data
@@ -389,8 +398,12 @@ apiRouter.post('/sets/:id/data', [
                 x: req.body.x
             })
             .exec((err, datapoint) => {
-                if (err)
-                    return res.send(err);
+                if (err) {
+                    common.logError(err, 'error while finding datapoint %s in dataset %s', req.body.x, req.params.id);
+                    return respond(res, false, {
+                        error: err
+                    });
+                }
 
                 if (datapoint) {
                     if (req.body.delete == "1") {
@@ -398,11 +411,14 @@ apiRouter.post('/sets/:id/data', [
                         var deletedPoint = datapoint.toObject();
                         deletedPoint.x = truncateTime(deletedPoint.x);
                         datapoint.delete((err) => {
-                            if (err)
-                                return res.send(err);
+                            if (err) {
+                                common.logError(err, 'error while deleting datapoint');
+                                return respond(res, false, {
+                                    error: err
+                                });
+                            }
 
-                            return res.json({
-                                success: 'true',
+                            return respond(res, true, {
                                 message: 'Datapoint deleted',
                                 datapoint: deletedPoint
                             });
@@ -412,13 +428,16 @@ apiRouter.post('/sets/:id/data', [
                         datapoint.y = req.body.y;
                         datapoint.tags = req.body.tags;
                         datapoint.save((err) => {
-                            if (err)
-                                return res.send(err);
-                            
+                            if (err) {
+                                common.logError(err, 'Error while updating datapoint');
+                                return respond(res, false, {
+                                    error: err
+                                });
+                            }
+
                             var point = datapoint.toObject();
                             point.x = truncateTime(point.x);
-                            return res.json({
-                                success: 'true',
+                            return respond(res, true, {
                                 message: 'Datapoint updated',
                                 datapoint: point
                             });
@@ -427,8 +446,7 @@ apiRouter.post('/sets/:id/data', [
                 } else {
                     // delete error
                     if (req.body.delete == "1") {
-                        return res.json({
-                            success: false,
+                        return respond(res, false, {
                             errors: [{
                                 msg: "No datapoint to delete"
                             }]
@@ -444,99 +462,95 @@ apiRouter.post('/sets/:id/data', [
 
                     // save the datapoint and check for errors
                     newpoint.save(function (err) {
-                        if (err)
-                            return res.send(err);
-                        
-                        data.success = true;
-                        data.message = 'Datapoint created for ' + req.body.x;
+                        if (err) {
+                            common.logError(err, 'Error while saving datapoint');
+                            return respond(res, false, {
+                                error: err
+                            });
+                        }
 
                         var point = newpoint.toObject();
                         point.x = truncateTime(point.x);
-                        data.datapoint = point;
-                        return res.json(data);
+                        return respond(res, true, {
+                            message: 'Datapoint created for ' + req.body.x,
+                            datapoint: point
+                        });
                     });
                 }
             });
     }
 ]);
 
-// get all the datapoints for this set (obsolete)
-// apiRouter.get('/sets/:id/data', function (req, res) {
+// get a range of datapoints for a dataset
+// apiRouter.get('/sets/:id/range/:start/:end', function (req, res) {
 //     Datapoint.find({
 //             'dataset': req.params.id,
 //         })
+//         .where('x').gte(req.params.start).lte(req.params.end)
 //         .sort({
 //             x: 'asc'
 //         })
 //         .exec(function (err, datapoints) {
-//             if (err)
-//                 return res.send(err);
+//             if (err) {
+//                 common.logError(err, 'Error while getting range of datapoints');
+//                 return respond(res, false, {
+//                     error: err
+//                 });
+//             }
 //             return res.json(datapoints);
 //         });
 // });
 
-// get a range of datapoints for a dataset
-apiRouter.get('/sets/:id/range/:start/:end', function (req, res) {
-    Datapoint.find({
-            'dataset': req.params.id,
-        })
-        .where('x').gte(req.params.start).lte(req.params.end)
-        .sort({
-            x: 'asc'
-        })
-        .exec(function (err, datapoints) {
-            if (err)
-                return res.send(err);
-            return res.json(datapoints);
-        });
-});
+// // get a single datapoint - kinda redundant
+// apiRouter.get('/points/:id',
 
-// get a single datapoint - kinda redundant
-apiRouter.get('/points/:id',
+//     // authenticate
+//     authorize,
 
-    // authenticate
-    authorize,
+//     function (req, res) {
+//         // grab the dataset from the db
+//         Datapoint.findById(req.params.id, function (err, datapoint) {
+//             if (err) {
+//                 common.logError(err, 'Error while getting datapoint');
+//                 return respond(res, false, {
+//                     error: err
+//                 });
+//             }
 
-    function (req, res) {
-        // grab the dataset from the db
-        Datapoint.findById(req.params.id, function (err, datapoint) {
-            if (err)
-                return res.send(err);
+//             return res.json(datapoint);
+//         });
+//     });
 
-            return res.json(datapoint);
-        });
-    });
+// // PUT = update the datapoint
+// apiRouter.put('/points/:id',
 
-// PUT = update the datapoint
-apiRouter.put('/points/:id',
+//     // authenticate
+//     authorize,
 
-    // authenticate
-    authorize,
+//     function (req, res) {
 
-    function (req, res) {
+//         Datapoint.findById(req.params.id, function (err, datapoint) {
+//             if (err)
+//                 return res.send(err);
 
-        Datapoint.findById(req.params.id, function (err, datapoint) {
-            if (err)
-                return res.send(err);
+//             // update the datapoint's info - for now, only y supported
+//             // TO DO: update datapoint's x value, but test for dups
+//             ['y'].forEach(function (element) {
+//                 if (req.body[element] !== undefined)
+//                     datapoint[element] = req.body[element];
+//             });
 
-            // update the datapoint's info - for now, only y supported
-            // TO DO: update datapoint's x value, but test for dups
-            ['y'].forEach(function (element) {
-                if (req.body[element] !== undefined)
-                    datapoint[element] = req.body[element];
-            });
+//             // save the datapoint
+//             datapoint.save(function (err) {
+//                 if (err)
+//                     return res.send(err);
 
-            // save the datapoint
-            datapoint.save(function (err) {
-                if (err)
-                    return res.send(err);
-
-                return res.json({
-                    message: 'Datapoint updated!'
-                });
-            });
-        });
-    });
+//                 return res.json({
+//                     message: 'Datapoint updated!'
+//                 });
+//             });
+//         });
+//     });
 
 // sample data
 apiRouter.get('/sampledata', (request, response) => {
@@ -562,24 +576,29 @@ apiRouter.use(handleError);
 function authorize(req, res, next) {
     // ensure they're logged in
     if (!req.isAuthenticated()) {
-        var data = {
-            success: false,
+        return respond(res, false, {
             message: 'Unauthorized'
-        };
-        return res.json(data);
+        });
     }
     next();
 }
 
 function handleError(err, req, res, next) {
-    console.log('api errror handler');
-    var data = {
+    common.logError(err, 'API Error Handler');
+    var statusCode = err.status || 500;
+    return res.status(statusCode).json({
         success: false,
         message: err.message,
         text: err.toString()
+    });
+}
+
+function respond(res, success, data) {
+    var response = {
+        success: success,
+        ...data
     };
-    var statusCode = err.status || 500;
-    return res.status(statusCode).json(data);
+    return res.json(response);
 }
 
 // helper function to truncate time values from date objects

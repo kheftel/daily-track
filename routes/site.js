@@ -10,6 +10,8 @@ const moment = require('moment');
 const createError = require('http-errors');
 const ensureLoggedIn = require('connect-ensure-login').ensureLoggedIn;
 const ensureLoggedOut = require('connect-ensure-login').ensureLoggedOut;
+const common = require('../server/common');
+const log = common.log.extend('siterouter');
 
 const siteRouter = express.Router();
 
@@ -96,7 +98,7 @@ var state = {
 
 // prep state
 siteRouter.use(function (req, res, next) {
-    console.log('initialization: ' + req.path);
+    log('initialization: ' + req.path);
 
     // configure template locals
     // site title
@@ -119,10 +121,10 @@ siteRouter.use(function (req, res, next) {
     if (!active) {
         // match dynamic pages
         state.dynamic.some((v, k, col) => {
-            console.log(`testing ${req.path} vs ${v.regex}`);
+            log(`testing ${req.path} vs ${v.regex}`);
             if (v.regex && v.regex.test(req.path)) {
                 // match!
-                console.log('matched!');
+                log('matched!');
                 active = v;
                 //break loop
                 return true;
@@ -178,8 +180,7 @@ siteRouter.use(function (req, res, next) {
 
     setFlashMessages(res, req.flash());
 
-    // console.log('locals:');
-    // console.log(res.locals);
+    // log('locals: %o', res.locals);
 
     // pass some node module utility stuff along too!
     res.locals.moment = moment;
@@ -248,12 +249,12 @@ siteRouter.post('/login',
     },
     function (err, req, res, next) {
         // handle error
-        console.log('auth error');
+        common.logError(err, 'auth error');
 
         if (req.xhr) {
             // only call req.flash() here, because it consumes the messages
             var errorMessages = req.flash('error');
-            console.log(errorMessages.join());
+            log(errorMessages.join());
             return res.json({
                 success: false,
                 message: errorMessages.join(), // not sure if comma is correct
@@ -317,36 +318,47 @@ siteRouter.get('/set/:id', function (req, res, next) {
 
     // grab the dataset from the db
     Dataset.findById(req.params.id, function (err, dataset) {
-        if (err)
+        if (err) {
+            common.logError(err, 'Database error loading dataset %s', req.params.id);
             return next(err);
-
-        if (!dataset) {
-            console.log('no dataset found');
-
-            // dataset not found
-            return next(new Error('Dataset not found'));
         }
 
+        if (!dataset) {
+            log('No dataset found for id %s', req.params.id);
+
+            // dataset not found
+            // return next(new Error('Dataset not found'));
+            res.locals.dataset = {_id: req.params.id, name: 'asdf'};
+            let title = replace_dataset_name(res.locals.active.title, res.locals.dataset.name);
+            setPageTitle(res, title);
+            return res.render('dataset');
+        }
+
+        res.locals.dataset = dataset.toObject();
+        var title = replace_dataset_name(res.locals.active.title, dataset.name);
+        setPageTitle(res, title);
+        return res.render('dataset');
+
         // populate chart's datapoints
-        Datapoint.find({
-                'dataset': req.params.id,
-            })
-            .sort({
-                x: 'asc'
-            })
-            .exec(function (err, datapoints) {
-                if (err)
-                    return next(err);
+        // Datapoint.find({
+        //         'dataset': req.params.id,
+        //     })
+        //     .sort({
+        //         x: 'asc'
+        //     })
+        //     .exec(function (err, datapoints) {
+        //         if (err)
+        //             return next(err);
 
-                var result = dataset.toObject();
-                result.data = datapoints;
-                res.locals.dataset = result;
+        //         var result = dataset.toObject();
+        //         result.data = datapoints;
+        //         res.locals.dataset = result;
 
-                var title = replace_dataset_name(res.locals.active.title, dataset.name);
-                setPageTitle(res, title);
+        //         var title = replace_dataset_name(res.locals.active.title, dataset.name);
+        //         setPageTitle(res, title);
 
-                res.render('dataset');
-            });
+        //         res.render('dataset');
+        //     });
     });
 });
 
@@ -354,11 +366,13 @@ siteRouter.get('/set/:id', function (req, res, next) {
 siteRouter.get('/set/:id/edit', function (req, res, next) {
     // grab the dataset from the db
     Dataset.findById(req.params.id, function (err, dataset) {
-        if (err)
+        if (err) {
+            common.logError(err, 'Dataset not found for id %s', req.params.id);
             return next(err);
+        }
 
         if (!dataset) {
-            console.log('no dataset found');
+            log('no dataset found for id %s', req.params.id);
 
             // dataset not found
             return next(new Error('Dataset not found'));
@@ -384,42 +398,6 @@ siteRouter.get('/set/:id/edit', function (req, res, next) {
         res.render('set-form');
     });
 });
-
-// new data point on a dataset
-// deprecated, new datapoint form is now modal
-// siteRouter.get('/set/:id/new', function (req, res, next) {
-//     console.log('new data point form');
-
-//     // grab the dataset from the db
-//     Dataset.findById(req.params.id, function (err, dataset) {
-//         if (err)
-//             return next(err);
-
-//         if (!dataset) {
-//             console.log('no dataset found');
-
-//             // dataset not found
-//             return next('Dataset not found');
-//         }
-
-//         var result = dataset.toObject();
-//         res.locals.dataset = result;
-
-//         var active = {
-//             title: dataset.name + ': add entry',
-//             noscroll: true
-//         };
-//         res.locals.active = active;
-//         setPageTitle(res, active.title);
-
-//         // today's date
-//         res.locals.defaults = {
-//             x: moment().format('YYYY-MM-DD')
-//         };
-
-//         res.render('point_form');
-//     });
-// });
 
 // view multiple datasets on the same chart
 siteRouter.get('/multi', function (req, res, next) {
@@ -455,21 +433,13 @@ siteRouter.get('/multi/:label', function (req, res, next) {
         })
         .exec(function (err, datasets) {
             //to do: do something useful with error
-            if (err)
+            if (err) {
+                common.logError(err, 'Database error getting datasets for user %s', req.user._id);
                 return next(error);
-
-            // var filteredSets = [];
-            // for (let i = 0; i < datasets.length; i++) {
-            //     console.log(datasets[i]);
-            //     if (datasets[i].yAxisLabel == '1-10 scale')
-            //         filteredSets.push(datasets[i]);
-            // }
+            }
 
             res.locals.datasets = datasets;
-
-            console.log(res.locals.active.title);
             setPageTitle(res, replace_dataset_unit(res.locals.active.title, req.params.label));
-
             res.render('multi');
         });
 });
@@ -485,7 +455,7 @@ siteRouter.use(function (err, req, res, next) {
     res.locals.message = err.message;
     res.locals.error = req.app.get('env') === 'development' ? err : {};
 
-    res.locals.siteTitle = 'DailyTrack - Error';
+    res.locals.siteTitle = 'DailyTrackr - Error';
     res.locals.pageTitle = 'Error';
 
     var active = {
@@ -533,7 +503,7 @@ function setFlashMessages(res, messages) {
         res.locals.messages[k == 'error' ? 'danger' : k] = messages[k];
     }
     if (!_.isEmpty(res.locals.messages))
-        console.log(res.locals.messages);
+        log('res.locals.messages: %j', res.locals.messages);
 }
 
 /**
