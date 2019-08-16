@@ -10,7 +10,7 @@ const moment = require('moment');
 const createError = require('http-errors');
 const ensureLoggedIn = require('connect-ensure-login').ensureLoggedIn;
 const ensureLoggedOut = require('connect-ensure-login').ensureLoggedOut;
-const common = require('../server/common');
+const common = require('../common');
 const log = common.log.extend('siterouter');
 
 const siteRouter = express.Router();

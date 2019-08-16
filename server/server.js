@@ -23,7 +23,7 @@ const webpackAssets = require('express-webpack-assets');
 const flash = require('connect-flash');
 const compression = require('compression');
 const VError = require('verror');
-const common = require('./server/common');
+const common = require('./common');
 const log = common.log.extend('server');
 
 // DATABASE ////////////////////////
@@ -77,7 +77,7 @@ app.use(webpackAssets('./webpack-assets.json', {
 }));
 
 // serve static files
-app.use(express.static(path.join(__dirname, 'dist')));
+app.use(express.static(path.join(__dirname, '../dist')));
 
 // Configure passport middleware
 app.use(passport.initialize());

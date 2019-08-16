@@ -6,7 +6,7 @@ const Dataset = require('../models/dataset');
 const Datapoint = require('../models/datapoint');
 const User = require('../models/user');
 const createError = require('http-errors');
-const common = require('../server/common');
+const common = require('../common');
 const log = common.log.extend('api');
 
 const {

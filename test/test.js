@@ -5,8 +5,8 @@ const debug = require('debug');
 debug.enable('dailytrackr*');
 
 const common = require('../server/common');
-const siteRouter = require('../routes/site');
-const apiRouter = require('../routes/api');
+const siteRouter = require('../server/routes/site');
+const apiRouter = require('../server/routes/api');
 
 describe('common module', function () {
     var logs = [];
