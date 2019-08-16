@@ -446,7 +446,7 @@ siteRouter.get('/multi/:label', function (req, res, next) {
 
 // catch 404 and forward to error handler
 siteRouter.use(function (req, res, next) {
-    next(createError(404));
+    next(createError(404, 'Page not found: ' + req.url));
 });
 
 // error handler
