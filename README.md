@@ -3,6 +3,7 @@
 track stuff daily
 
 [![Build Status](https://travis-ci.org/kheftel-lkw/daily-track.svg?branch=master)](https://travis-ci.org/kheftel-lkw/daily-track)
+[![Coverage Status](https://coveralls.io/repos/github/kheftel-lkw/daily-track/badge.svg?branch=master)](https://coveralls.io/github/kheftel-lkw/daily-track?branch=master)
 
 ## structure
 
