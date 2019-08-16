@@ -6,8 +6,7 @@ const debugError = debugDefault.extend('error');
 const VError = require('verror');
 
 function verror() {
-    var curError = new VError(...arguments);
-    return curError;
+    return new VError(...arguments);
 }
 
 function logError() {
