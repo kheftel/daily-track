@@ -5,8 +5,13 @@ const debugDefault = debug('dailytrackr');
 const debugError = debugDefault.extend('error');
 const VError = require('verror');
 
-function logError() {
+function verror() {
     var curError = new VError(...arguments);
+    return curError;
+}
+
+function logError() {
+    var curError = verror(...arguments);
     debugError(curError.message);
     debugError(VError.fullStack(curError));
 }
@@ -14,5 +19,6 @@ function logError() {
 module.exports = {
     log: debugDefault,
     error: debugError,
+    verror: verror,
     logError: logError,
 };
