@@ -1,6 +1,9 @@
-var should = require('should');
-describe('my first test', function() { 
-    it('is running', function() {
-        true.should.equal(true);
+const assert = require('assert');
+const should = require('should');
+const common = require('../server/common');
+
+describe('common module', function() { 
+    it('log exists', function() {
+        should.exist(common.log);
     });
 });
