@@ -21,18 +21,4 @@ var DatapointSchema = new Schema({
     }
 });
 
-/*
-{
-    "type": "line",
-    "label": "Meditation",
-    "data": [{
-        "x": "2019-03-01",
-        "y": 0
-    }, {
-        "x": "2019-03-02",
-        "y": 22
-    }
-}
-*/
-
 module.exports = mongoose.model('Datapoint', DatapointSchema);

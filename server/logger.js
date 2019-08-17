@@ -1,4 +1,4 @@
-// common modules needed throughout the server
+// logger used throughout the server
 
 const debug = require('debug');
 const debugDefault = debug('dailytrackr');

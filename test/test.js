@@ -4,7 +4,7 @@ const VError = require('verror');
 const debug = require('debug');
 debug.enable('dailytrackr*');
 
-const common = require('../server/common');
+const logger = require('../server/logger');
 const siteRouter = require('../server/routes/site');
 const apiRouter = require('../server/routes/api');
 
@@ -26,39 +26,39 @@ describe('common module', function () {
     }
 
     it('default log exists', function () {
-        should.exist(common.log);
+        should.exist(logger.log);
     });
     it('default log outputs messages', function () {
-        stubLog(common.log, 'default');
-        common.log('test message');
+        stubLog(logger.log, 'default');
+        logger.log('test message');
         assert(getStubbedMessages('default').length == 1);
-        unStubLog(common.log);
+        unStubLog(logger.log);
     });
 
     it('error log exists', function () {
-        should.exist(common.error);
+        should.exist(logger.error);
     });
     it('error log outputs messages', function () {
-        stubLog(common.error, 'error');
-        common.error('test message');
+        stubLog(logger.error, 'error');
+        logger.error('test message');
         assert(getStubbedMessages('error').length == 1);
-        unStubLog(common.error);
+        unStubLog(logger.error);
     });
 
     it('verror() creates verror object correctly', function () {
-        let ve = common.verror('error message');
+        let ve = logger.verror('error message');
         assert(ve instanceof VError);
         ve.message.should.equal('error message');
     });
 
     it('logError() exists', function () {
-        should.exist(common.logError);
+        should.exist(logger.logError);
     });
     it('logError() outputs messages', function () {
-        stubLog(common.error, 'error');
-        common.logError('test message');
+        stubLog(logger.error, 'error');
+        logger.logError('test message');
         assert(getStubbedMessages('error').length >= 1);
-        unStubLog(common.error);
+        unStubLog(logger.error);
     });
 });
 
