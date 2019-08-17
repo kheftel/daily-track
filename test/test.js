@@ -2,29 +2,34 @@ const assert = require('assert');
 const should = require('should');
 const VError = require('verror');
 const debug = require('debug');
-debug.enable('dailytrackr*');
-
 const logger = require('../server/logger');
-const siteRouter = require('../server/routes/site');
-const apiRouter = require('../server/routes/api');
+const createSiteRouter = require('../server/routes/site');
+const createAPIRouter = require('../server/routes/api');
+const BackendService = require('../server/BackendService');
+const EventEmitter = require('events');
+
+var logs = [];
+
+function stubLog(log, name) {
+    log.enabled = true;
+    logs[name] = [];
+    log._oldLogFunction = log.log;
+    log.log = function (msg) {
+        logs[name].push(msg);
+    };
+}
+
+function unStubLog(log) {
+    log.enabled = false;
+    log.log = log._oldLogFunction;
+    delete log._oldLogFunction;
+}
+
+function getStubbedMessages(name) {
+    return logs[name];
+}
 
 describe('common module', function () {
-    var logs = [];
-    function stubLog(log, name) {
-        logs[name] = [];
-        log._oldLogFunction = log.log;
-        log.log = function (msg) {
-            logs[name].push(msg);
-        };
-    }
-    function unStubLog(log) {
-        log.log = log._oldLogFunction;
-        delete log._oldLogFunction;
-    }
-    function getStubbedMessages(name) {
-        return logs[name];
-    }
-
     it('default log exists', function () {
         should.exist(logger.log);
     });
@@ -62,14 +67,73 @@ describe('common module', function () {
     });
 });
 
+describe('BackendService', function () {
+    var emitter = new EventEmitter();
+    var service = new BackendService({
+        backend: {
+            connection: emitter,
+            createSession(options) {
+                return options.secret;
+            },
+            initAuthentication(options) {
+                return 'success';
+            },
+            connect(url) {
+                return (new Promise((resolve, reject) => {
+                    setTimeout(function () {
+                        resolve();
+                    }, 100);
+                }));
+            }
+        }
+    });
+    it('should be non-null', function () {
+        assert(service != null);
+    });
+    it('should log an error', function () {
+        stubLog(logger.error, 'error');
+        emitter.emit('error', 'message');
+        assert(getStubbedMessages('error').length >= 1);
+        unStubLog(logger.error);
+    });
+    it('should create a backend session', function () {
+        assert(service.createSession({
+            secret: 'keyboard cat'
+        }) == 'keyboard cat');
+        assert(service.createSession({
+            type: 'backend',
+            secret: 'keyboard cat'
+        }) == 'keyboard cat');
+        assert(service.createSession() == null);
+    });
+    it('should create a cookie session', function () {
+        assert(service.createSession({
+            type: 'cookie',
+            secret: 'keyboard cat',
+            maxAge: 1000 * 60 * 60
+        }) != null);
+    });
+    it('should initialize authentication', function () {
+        assert(service.initAuthentication({
+            option: 'someoption'
+        }) == 'success');
+    });
+    it('should connect to backend', function (done) {
+        service.connect('http://example.com')
+            .then(function() {
+                done();
+            });
+    });
+});
+
 describe('site router', function () {
     it('should be non-null', function () {
-        assert(siteRouter != null);
+        assert(createSiteRouter != null);
     });
 });
 
 describe('api router', function () {
     it('should be non-null', function () {
-        assert(apiRouter != null);
+        assert(createAPIRouter != null);
     });
 });
