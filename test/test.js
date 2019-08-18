@@ -42,17 +42,65 @@ function stubUserModel(options) {
         this.username = options.username;
         this.password = options.password;
     }
-    
+
     // convenience departure from spec
-    FakeUser.users = options.users || []; 
+    FakeUser.users = options.users || [];
 
     FakeUser.register = function (user, password, cb) {
         user.password = password;
+        
+        // only supports 1!
         user._id = 1;
+        
         FakeUser.users.push(user);
-        if(cb) cb();
+        if (cb) cb();
     };
     return FakeUser;
+}
+
+// Dataset model helpers
+function stubDatasetModel(options) {
+    options = options || {};
+
+    function FakeDataset(options) {
+        options = options || {};
+    }
+
+    FakeDataset.prototype.save = function (cb) {
+        if(this._id == null) this._id = 1;
+        
+        // doesn't work on update!
+        FakeDataset.sets.push(this);
+        
+        cb();
+    };
+
+    // convenience departure from spec
+    FakeDataset.sets = options.sets || [];
+
+    FakeDataset.find = function (filter) {
+        this.filter = filter;
+        return this;
+    };
+    FakeDataset.sort = function () {
+        return this;
+    };
+    FakeDataset.exec = function (cb) {
+        var result = [];
+        for (var i = 0; i < FakeDataset.sets.length; i++) {
+            var set = FakeDataset.sets[i];
+            if (!this.filter) {
+                result.push(set);
+                continue;
+            }
+            if (this.filter.owner != null && set.owner == this.filter.owner) {
+                result.push(set);
+            }
+        }
+        this.filter = null;
+        cb(null, result);
+    };
+    return FakeDataset;
 }
 
 // server helpers //////////
@@ -60,7 +108,7 @@ function stubServer(options) {
     options = options || {};
     var backend = {
         User: stubUserModel(options.userOptions),
-        Dataset: {},
+        Dataset: stubDatasetModel(options.datasetOptions),
         Datapoint: {}
     };
     router = createAPIRouter({
@@ -70,7 +118,7 @@ function stubServer(options) {
     if (options.stubAuth) {
         app.use((req, res, next) => {
             req.user = options.user;
-            req.isAuthenticated = function() {
+            req.isAuthenticated = function () {
                 return req.user != null;
             };
             next();
@@ -254,6 +302,38 @@ describe('api router', function () {
                 done();
             });
     });
+    it('creates a dataset', function (done) {
+        var server = stubServer({
+            stubAuth: true,
+            userOptions: {
+                users: [{
+                    username: 'test',
+                    password: 'password',
+                    _id: 1
+                }]
+            },
+            user: {
+                username: 'test',
+                password: 'password',
+                _id: 1
+            },
+        });
+        request(server)
+            .post('/sets')
+            .send({
+                name: 'dataset 1',
+                yAxisLabel: 'hours',
+                owner: 1,
+                chartType: 'line'
+            })
+            .end(function (err, res) {
+                // console.dir(res.body);
+                if (err) return done(err);
+                assert(res.body.success);
+                assert(server.backend.Dataset.sets.length == 1);
+                done();
+            });
+    });
     it('gets datasets', function (done) {
         var server = stubServer({
             stubAuth: true,
@@ -268,12 +348,32 @@ describe('api router', function () {
                 username: 'test',
                 password: 'password',
                 _id: 1
-            }
+            },
+            datasetOptions: {
+                sets: [{
+                        _id: 1,
+                        owner: 1,
+                        name: 'dataset 1'
+                    },
+                    {
+                        _id: 2,
+                        owner: 1,
+                        name: 'dataset 2'
+                    },
+                    {
+                        _id: 3,
+                        owner: 2,
+                        name: 'dataset 3'
+                    }
+                ]
+            },
         });
         request(server)
             .get('/sets')
             .end(function (err, res) {
-                // console.dir(res);
+                // console.dir(res.body);
+                assert(res.body.success);
+                assert(res.body.data.length == 2);
                 if (err) return done(err);
                 done();
             });

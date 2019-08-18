@@ -129,7 +129,7 @@ function createAPIRouter({
                     });
                 }
 
-                return respond(res, false, {
+                return respond(res, true, {
                     message: 'Dataset ' + dataset.name + ' created!'
                 });
             });
