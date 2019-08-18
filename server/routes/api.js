@@ -1,7 +1,7 @@
 // REQUIRES /////////////////////////////
 const express = require('express');
 const moment = require('moment');
-// const bodyParser = require('body-parser');
+const bodyParser = require('body-parser');
 const createError = require('http-errors');
 const logger = require('../logger');
 const log = logger.log.extend('api');
@@ -19,18 +19,19 @@ const {
 require('moment-round');
 
 // API /////////////////////////////
-function createAPIRouter(app) {
-
-    const User = app.backend.User;
-    const Dataset = app.backend.Dataset;
-    const Datapoint = app.backend.Datapoint;
+function createAPIRouter({
+    backend
+}) {
+    const User = backend.User;
+    const Dataset = backend.Dataset;
+    const Datapoint = backend.Datapoint;
 
     var apiRouter = express.Router();
-    // use bodyparser on apiRouter to get POST vars - app now uses bodyparser
-    // apiRouter.use(bodyParser.urlencoded({
-    //     extended: true
-    // }));
-    // apiRouter.use(bodyParser.json());
+    //use bodyparser to get POST vars
+    apiRouter.use(bodyParser.urlencoded({
+        extended: true
+    }));
+    apiRouter.use(bodyParser.json());
 
     // test route to make sure everything is working (accessed at GET http://localhost:8080/api)
     apiRouter.get('/', authorize, function (req, res) {
@@ -64,7 +65,7 @@ function createAPIRouter(app) {
             log('registering user %s', req.body.username);
             User.register(new User({
                 username: req.body.username
-            }), req.body.password, function (err) {
+            }), req.body.password, function (err, result) {
                 if (err) {
                     logger.logError(err, 'Error registering user');
                     return respond(res, false, {
@@ -583,6 +584,7 @@ module.exports = createAPIRouter;
 function authorize(req, res, next) {
     // ensure they're logged in
     if (!req.isAuthenticated()) {
+        res.status(401);
         return respond(res, false, {
             message: 'Unauthorized'
         });
@@ -593,9 +595,9 @@ function authorize(req, res, next) {
 function handleError(err, req, res, next) {
     logger.logError(err, 'API Error Handler');
     var statusCode = err.status || 500;
-    return res.status(statusCode).json({
-        success: false,
-        message: err.message,
+    res.status(statusCode);
+    return respond(res, false, {
+        message: err.message
     });
 }
 

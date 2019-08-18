@@ -6,8 +6,8 @@
 
 // REQUIRES /////////////////////////////
 const express = require('express');
-const path = require('path');
 const bodyParser = require('body-parser');
+const path = require('path');
 const passport = require('passport');
 const createAPIRouter = require('./routes/api');
 const createSiteRouter = require('./routes/site');
@@ -43,7 +43,7 @@ function createApp({
     if (app.get('env') === 'development') {
         app.locals.pretty = true;
     }
-    
+
     // gzip responses in production
     if (process.env.NODE_ENV === 'production') {
         app.use(compression());
@@ -58,9 +58,6 @@ function createApp({
 
     // other stuff
     app.use(bodyParser.json());
-    app.use(bodyParser.urlencoded({
-        extended: true
-    }));
     app.use(flash());
 
     // allow app to find list of webpack-ified assets
@@ -79,7 +76,9 @@ function createApp({
     });
 
     // ROUTES //////////////////////
-    app.use('/api', createAPIRouter(app));
+    app.use('/api', createAPIRouter({
+        backend
+    }));
     app.use('/', createSiteRouter(app));
 
     return app;

@@ -1,5 +1,6 @@
 // SITE ROUTER /////////////////////////////
 const express = require('express');
+const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
 const Dataset = require('../models/dataset');
 const Datapoint = require('../models/datapoint');
@@ -101,6 +102,10 @@ function createSiteRouter(app) {
     const Datapoint = app.backend.Datapoint;
 
     const siteRouter = express.Router();
+    //use bodyparser to get POST vars
+    siteRouter.use(bodyParser.urlencoded({
+        extended: true
+    }));
 
     // prep state
     siteRouter.use(function (req, res, next) {
