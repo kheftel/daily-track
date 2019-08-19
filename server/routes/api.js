@@ -597,7 +597,7 @@ function handleError(err, req, res, next) {
     var statusCode = err.status || 500;
     res.status(statusCode);
     return respond(res, false, {
-        message: err.message
+        message: process.env.NODE_ENV == 'production' ? err.message : err.stack
     });
 }
 
