@@ -256,7 +256,8 @@ function createAPIRouter({
 
                 if (dataset) {
                     // does the current user own this dataset?
-                    if (!dataset.owner.equals(req.user._id)) {
+                    // if (!dataset.owner.equals(req.user._id)) {
+                    if (dataset.owner.toString() != req.user._id.toString()) {
                         log('permission denied, %s does not own dataset %s', req.user._id, dataset.owner);
                         return respond(res, false, {
                             errors: [{
@@ -504,62 +505,6 @@ function createAPIRouter({
     //         });
     // });
 
-    // // get a single datapoint - kinda redundant
-    // apiRouter.get('/points/:id',
-
-    //     // authenticate
-    //     authorize,
-
-    //     function (req, res) {
-    //         // grab the dataset from the db
-    //         Datapoint.findById(req.params.id, function (err, datapoint) {
-    //             if (err) {
-    //                 common.logError(err, 'Error while getting datapoint');
-    //                 return respond(res, false, {
-    //                     error: err
-    //                 });
-    //             }
-
-    //             return res.json(datapoint);
-    //         });
-    //     });
-
-    // // PUT = update the datapoint
-    // apiRouter.put('/points/:id',
-
-    //     // authenticate
-    //     authorize,
-
-    //     function (req, res) {
-
-    //         Datapoint.findById(req.params.id, function (err, datapoint) {
-    //             if (err)
-    //                 return res.send(err);
-
-    //             // update the datapoint's info - for now, only y supported
-    //             // TO DO: update datapoint's x value, but test for dups
-    //             ['y'].forEach(function (element) {
-    //                 if (req.body[element] !== undefined)
-    //                     datapoint[element] = req.body[element];
-    //             });
-
-    //             // save the datapoint
-    //             datapoint.save(function (err) {
-    //                 if (err)
-    //                     return res.send(err);
-
-    //                 return res.json({
-    //                     message: 'Datapoint updated!'
-    //                 });
-    //             });
-    //         });
-    //     });
-
-    // sample data
-    apiRouter.get('/sampledata', (request, response) => {
-        response.json(generateSampleData());
-    });
-
     // catch 404 and forward to error handler
     apiRouter.use(function (req, res, next) {
         next(createError(404, 'Page not found: ' + req.url));
@@ -612,32 +557,4 @@ function respond(res, success, data) {
 // helper function to truncate time values from date objects
 function truncateTime(x) {
     return moment(x).utc().format('YYYY-MM-DD');
-}
-
-// generate some data
-function generateSampleData(type = "line", label = "Meditation") {
-    var tempData = {
-        "type": type,
-        "label": label,
-        "data": generateTempData(),
-        "fill": false,
-        "borderColor": "rgb(75, 192, 192)",
-        "lineTension": 0
-    };
-    return tempData;
-}
-
-function generateTempData(numDays = 30, missPercentage = 0.3, maxValue = 30) {
-    var tempData = [];
-    for (var days = -numDays + 1; days <= 0; days++) {
-        tempData.push({
-            x: relativeDateString(days),
-            y: (Math.random() < missPercentage) ? 0 : Math.ceil(Math.random() * maxValue)
-        });
-    }
-    return tempData;
-}
-
-function relativeDateString(daysFromNow) {
-    return moment().add(daysFromNow, 'd').format('YYYY-MM-DD');
 }

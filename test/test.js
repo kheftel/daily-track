@@ -232,7 +232,7 @@ describe('api router', function () {
                 done();
             });
     });
-    it('fails to find nonexistent dataset', function(done) {
+    it('fails to find nonexistent dataset', function (done) {
         server = stubServer({
             createRouter: createAPIRouter,
             ...getTestData('getdatasets')
@@ -240,7 +240,7 @@ describe('api router', function () {
         request(server)
             .get('/sets/asdf')
             .expect(200)
-            .end(function(err, res) {
+            .end(function (err, res) {
                 // console.dir(res.body);
                 if (err) return done(err);
                 assert(!res.body.success);
@@ -259,6 +259,103 @@ describe('api router', function () {
                 assert(res.body.success);
                 assert(res.body.data.data.length == 3);
                 if (err) return done(err);
+                done();
+            });
+    });
+    it('updates a dataset', function (done) {
+        server = stubServer({
+            createRouter: createAPIRouter,
+            ...getTestData('getdataset'),
+        });
+        request(server)
+            .post('/sets/1')
+            .send({
+                name: 'fred',
+                yAxisLabel: 'hours'
+            })
+            .expect(200)
+            .end(function (err, res) {
+                // console.dir(res.body);
+                if (err) return done(err);
+                assert(res.body.success);
+                server.backend.Dataset.findById(1, function (err, result) {
+                    if (err) done(err);
+                    assert(result.name == 'fred');
+                    done();
+                });
+            });
+    });
+    it('won\'t update a dataset owned by someone else', function (done) {
+        server = stubServer({
+            createRouter: createAPIRouter,
+            ...getTestData('getdataset'),
+        });
+        request(server)
+            .post('/sets/3')
+            .send({
+                name: 'fred',
+                yAxisLabel: 'hours'
+            })
+            .expect(200)
+            .end(function (err, res) {
+                // console.dir(res.body);
+                if (err) return done(err);
+                assert(!res.body.success);
+                done();
+            });
+    });
+    it('won\'t update a dataset if data is missing', function (done) {
+        server = stubServer({
+            createRouter: createAPIRouter,
+            ...getTestData('getdataset'),
+        });
+        request(server)
+            .post('/sets/1')
+            .send({})
+            .expect(200)
+            .end(function (err, res) {
+                // console.dir(res.body);
+                if (err) return done(err);
+                assert(!res.body.success);
+                done();
+            });
+    });
+    it('won\'t update a nonexistent dataset', function (done) {
+        server = stubServer({
+            createRouter: createAPIRouter,
+            ...getTestData('getdataset'),
+        });
+        request(server)
+            .post('/sets/999')
+            .send({
+                name: 'fred',
+                yAxisLabel: 'hours'
+            })
+            .expect(200)
+            .end(function (err, res) {
+                // console.dir(res.body);
+                if (err) return done(err);
+                assert(!res.body.success);
+                done();
+            });
+    });
+    it('won\'t delete a non-empty dataset', function (done) {
+        server = stubServer({
+            createRouter: createAPIRouter,
+            ...getTestData('getdataset'),
+        });
+        request(server)
+            .post('/sets/1')
+            .send({
+                delete: 1,
+                name: 'asdf',
+                yAxisLabel: 'asdf'
+            })
+            .expect(200)
+            .end(function (err, res) {
+                // console.dir(res.body);
+                if (err) return done(err);
+                assert(!res.body.success);
                 done();
             });
     });

@@ -82,6 +82,13 @@ function _findById(arr, id) {
     return result;
 }
 
+// function _findOne(arr, filter) {
+//     let result = _exec(arr, filter);
+//     if(result.length >= 1)
+//         return result[0];
+//     return null;
+// }
+
 function _exec(arr, filter) {
     let result = [];
     for (let i = 0; i < arr.length; i++) {
@@ -92,6 +99,12 @@ function _exec(arr, filter) {
         }
     }
     return result;
+}
+
+function _save(arr, o) {
+    let exists = _findById(o._id);
+    if (!exists)
+        arr.push(o);
 }
 
 // Dataset model helpers
@@ -124,10 +137,7 @@ FakeDataset.prototype.toObject = function () {
 };
 
 FakeDataset.prototype.save = function (cb) {
-    if (this._id == null) this._id = 1;
-
-    // doesn't work on update!
-    FakeDataset.sets.push(this);
+    _save(FakeDataset.sets, this);
 
     cb();
 };
@@ -137,12 +147,20 @@ FakeDataset.find = function (filter) {
     this.filter = filter;
     return this;
 };
+FakeDataset.findOne = function (filter) {
+    this.filter = filter;
+    this.one = true;
+    return this;
+};
 FakeDataset.sort = function () {
     return this;
 };
 FakeDataset.exec = function (cb) {
     let result = _exec(FakeDataset.sets, this.filter);
-    this.filter = null;
+    if(this.one)
+        result = result.length >= 1 ? result[0] : null;
+    delete this.filter;
+    delete this.one;
     cb(null, result);
 };
 FakeDataset.findById = function (id, cb) {
@@ -177,10 +195,7 @@ FakeDatapoint.prototype.toObject = function () {
 };
 
 FakeDatapoint.prototype.save = function (cb) {
-    if (this._id == null) this._id = 1;
-
-    // doesn't work on update!
-    FakeDatapoint.points.push(this);
+    _save(FakeDatapoint.points, this);
 
     cb();
 };
@@ -190,12 +205,20 @@ FakeDatapoint.find = function (filter) {
     this.filter = filter;
     return this;
 };
+FakeDatapoint.findOne = function (filter) {
+    this.filter = filter;
+    this.one = true;
+    return this;
+};
 FakeDatapoint.sort = function () {
     return this;
 };
 FakeDatapoint.exec = function (cb) {
     let result = _exec(FakeDatapoint.points, this.filter);
-    this.filter = null;
+    if(this.one)
+        result = result.length >= 1 ? result[0] : null;
+    delete this.filter;
+    delete this.one;
     cb(null, result);
 };
 FakeDatapoint.findById = function (id, cb) {
@@ -267,15 +290,18 @@ testdata.testdatasets = () => ({
         sets: [
             new FakeDataset({
                 owner: 1,
-                name: 'dataset 1'
+                name: 'dataset 1',
+                yAxisLabel: 'hours',
             }),
             new FakeDataset({
                 owner: 1,
-                name: 'dataset 2'
+                name: 'dataset 2',
+                yAxisLabel: 'hours',
             }),
             new FakeDataset({
                 owner: 2,
-                name: 'dataset 3'
+                name: 'dataset 3',
+                yAxisLabel: 'hours',
             }),
         ]
     },
@@ -287,17 +313,17 @@ testdata.testdatapoints = () => ({
             new FakeDatapoint({
                 dataset: 1,
                 x: '2019-01-01',
-                y: 1
+                y: 1,
             }),
             new FakeDatapoint({
                 dataset: 1,
                 x: '2019-01-02',
-                y: 2
+                y: 2,
             }),
             new FakeDatapoint({
                 dataset: 1,
                 x: '2019-01-03',
-                y: 3
+                y: 3,
             }),
         ]
     },
