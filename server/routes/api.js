@@ -412,10 +412,11 @@ function createAPIRouter({
                 })
                 .exec((err, datapoint) => {
                     if (err) {
-                        logger.logError(err, 'error while finding datapoint %s in dataset %s', req.body.x, req.params.id);
-                        return respond(res, false, {
-                            error: err
-                        });
+                        return next(err);
+                        // logger.logError(err, 'error while finding datapoint %s in dataset %s', req.body.x, req.params.id);
+                        // return respond(res, false, {
+                        //     error: err
+                        // });
                     }
 
                     if (datapoint) {

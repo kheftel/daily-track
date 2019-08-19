@@ -609,6 +609,25 @@ describe('api router', function () {
                 done();
             });
     });
+    it('reports db error on update datapoint', function (done) {
+        server = stubServer({
+            createRouter: createAPIRouter,
+            ...getTestData('dberror'),
+        });
+        request(server)
+            .post('/sets/1/data')
+            .send({
+                x: '2019-01-01',
+                y: 10
+            })
+            .expect(500)
+            .end(function (err, res) {
+                // console.dir(res.body);
+                if (err) return done(err);
+                assert(!res.body.success);
+                done();
+            });
+    });
     it('deletes a datapoint', function (done) {
         server = stubServer({
             createRouter: createAPIRouter,

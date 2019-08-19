@@ -223,6 +223,10 @@ var datapoint = {
         // convenience departure from spec
         FakeDatapoint.points = options.points || [];
 
+        delete FakeDatapoint.alwaysFail;
+        if(options.alwaysFail)
+            FakeDatapoint.alwaysFail = true;
+
         return FakeDatapoint;
     }
 };
@@ -392,6 +396,9 @@ testdata.dberror = {
         alwaysFail: true,
     },
     datasetOptions: {
+        alwaysFail: true,
+    },
+    datapointOptions: {
         alwaysFail: true,
     },
 };
