@@ -163,7 +163,7 @@ describe('api router', function () {
     it('responds to /', function (done) {
         server = stubServer({
             createRouter: createAPIRouter,
-            ...getTestData('apiroottest')
+            ...getTestData('loggedin')
         });
         request(server)
             .get('/')
@@ -197,7 +197,7 @@ describe('api router', function () {
     it('creates a dataset', function (done) {
         server = stubServer({
             createRouter: createAPIRouter,
-            ...getTestData('createdataset'),
+            ...getTestData('loggedin'),
         });
         request(server)
             .post('/sets')
@@ -219,7 +219,8 @@ describe('api router', function () {
     it('gets datasets', function (done) {
         server = stubServer({
             createRouter: createAPIRouter,
-            ...getTestData('getdatasets')
+            ...getTestData('loggedin'),
+            ...getTestData('testdatasets'),
         });
         request(server)
             .get('/sets')
@@ -235,7 +236,8 @@ describe('api router', function () {
     it('fails to find nonexistent dataset', function (done) {
         server = stubServer({
             createRouter: createAPIRouter,
-            ...getTestData('getdatasets')
+            ...getTestData('loggedin'),
+            ...getTestData('testdatasets'),
         });
         request(server)
             .get('/sets/asdf')
@@ -250,7 +252,9 @@ describe('api router', function () {
     it('gets a dataset with points', function (done) {
         server = stubServer({
             createRouter: createAPIRouter,
-            ...getTestData('getdataset')
+            ...getTestData('loggedin'),
+            ...getTestData('testdatasets'),
+            ...getTestData('testdatapoints'),
         });
         request(server)
             .get('/sets/1')
@@ -265,7 +269,9 @@ describe('api router', function () {
     it('updates a dataset', function (done) {
         server = stubServer({
             createRouter: createAPIRouter,
-            ...getTestData('getdataset'),
+            ...getTestData('loggedin'),
+            ...getTestData('testdatasets'),
+            ...getTestData('testdatapoints'),
         });
         request(server)
             .post('/sets/1')
@@ -288,7 +294,9 @@ describe('api router', function () {
     it('won\'t update a dataset owned by someone else', function (done) {
         server = stubServer({
             createRouter: createAPIRouter,
-            ...getTestData('getdataset'),
+            ...getTestData('loggedin'),
+            ...getTestData('testdatasets'),
+            ...getTestData('testdatapoints'),
         });
         request(server)
             .post('/sets/3')
@@ -307,7 +315,9 @@ describe('api router', function () {
     it('won\'t update a dataset if data is missing', function (done) {
         server = stubServer({
             createRouter: createAPIRouter,
-            ...getTestData('getdataset'),
+            ...getTestData('loggedin'),
+            ...getTestData('testdatasets'),
+            ...getTestData('testdatapoints'),
         });
         request(server)
             .post('/sets/1')
@@ -323,7 +333,9 @@ describe('api router', function () {
     it('won\'t update a nonexistent dataset', function (done) {
         server = stubServer({
             createRouter: createAPIRouter,
-            ...getTestData('getdataset'),
+            ...getTestData('loggedin'),
+            ...getTestData('testdatasets'),
+            ...getTestData('testdatapoints'),
         });
         request(server)
             .post('/sets/999')
@@ -342,7 +354,9 @@ describe('api router', function () {
     it('won\'t delete a non-empty dataset', function (done) {
         server = stubServer({
             createRouter: createAPIRouter,
-            ...getTestData('getdataset'),
+            ...getTestData('loggedin'),
+            ...getTestData('testdatasets'),
+            ...getTestData('testdatapoints'),
         });
         request(server)
             .post('/sets/1')
@@ -356,6 +370,98 @@ describe('api router', function () {
                 // console.dir(res.body);
                 if (err) return done(err);
                 assert(!res.body.success);
+                done();
+            });
+    });
+    it('deletes an empty dataset', function (done) {
+        server = stubServer({
+            createRouter: createAPIRouter,
+            ...getTestData('loggedin'),
+            ...getTestData('testdatasets'),
+            ...getTestData('testdatapoints'),
+        });
+        request(server)
+            .post('/sets/2')
+            .send({
+                delete: 1,
+                name: 'asdf',
+                yAxisLabel: 'asdf'
+            })
+            .expect(200)
+            .end(function (err, res) {
+                // console.dir(res.body);
+                if (err) return done(err);
+                assert(res.body.success);
+                assert(server.backend.Dataset.sets.length == 2);
+                done();
+            });
+    });
+
+    it('creates a datapoint', function (done) {
+        server = stubServer({
+            createRouter: createAPIRouter,
+            ...getTestData('loggedin'),
+            ...getTestData('testdatasets'),
+        });
+        request(server)
+            .post('/sets/1/data')
+            .send({
+                x: '2019-02-01',
+                y: 8,
+            })
+            .expect(200)
+            .end(function (err, res) {
+                // console.dir(res.body);
+                if (err) return done(err);
+                assert(res.body.success);
+                assert(server.backend.Datapoint.points.length == 1);
+                assert(server.backend.Datapoint.points[0].y == 8);
+                done();
+            });
+    });
+    it('updates a datapoint', function (done) {
+        server = stubServer({
+            createRouter: createAPIRouter,
+            ...getTestData('loggedin'),
+            ...getTestData('testdatasets'),
+            ...getTestData('testdatapoints'),
+        });
+        request(server)
+            .post('/sets/1/data')
+            .send({
+                x: '2019-01-01',
+                y: 8,
+            })
+            .expect(200)
+            .end(function (err, res) {
+                // console.dir(server.backend.Datapoint.points);
+                if (err) return done(err);
+                assert(res.body.success);
+                assert(server.backend.Datapoint.points.length == 3);
+                assert(server.backend.Datapoint.points[0].y == 8);
+                done();
+            });
+    });
+    it('deletes a datapoint', function (done) {
+        server = stubServer({
+            createRouter: createAPIRouter,
+            ...getTestData('loggedin'),
+            ...getTestData('testdatasets'),
+            ...getTestData('testdatapoints'),
+        });
+        request(server)
+            .post('/sets/1/data')
+            .send({
+                x: '2019-01-01',
+                y: 8,
+                delete: 1
+            })
+            .expect(200)
+            .end(function (err, res) {
+                // console.dir(res.body);
+                if (err) return done(err);
+                assert(res.body.success);
+                assert(server.backend.Datapoint.points.length == 2);
                 done();
             });
     });

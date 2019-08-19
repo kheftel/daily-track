@@ -102,9 +102,15 @@ function _exec(arr, filter) {
 }
 
 function _save(arr, o) {
-    let exists = _findById(o._id);
+    let exists = _findById(arr, o._id);
     if (!exists)
         arr.push(o);
+}
+
+function _delete(arr, o) {
+    let pos = arr.indexOf(o);
+    if(pos < 0) return;
+    arr.splice(pos, 1);
 }
 
 // Dataset model helpers
@@ -138,6 +144,12 @@ FakeDataset.prototype.toObject = function () {
 
 FakeDataset.prototype.save = function (cb) {
     _save(FakeDataset.sets, this);
+
+    cb();
+};
+
+FakeDataset.prototype.delete = function(cb) {
+    _delete(FakeDataset.sets, this);
 
     cb();
 };
@@ -196,6 +208,12 @@ FakeDatapoint.prototype.toObject = function () {
 
 FakeDatapoint.prototype.save = function (cb) {
     _save(FakeDatapoint.points, this);
+
+    cb();
+};
+
+FakeDatapoint.prototype.delete = function(cb) {
+    _delete(FakeDatapoint.points, this);
 
     cb();
 };
@@ -327,27 +345,6 @@ testdata.testdatapoints = () => ({
             }),
         ]
     },
-});
-
-// test data used by tests
-
-testdata.apiroottest = () => ({
-    ...getTestData('loggedin'),
-});
-
-testdata.createdataset = () => ({
-    ...getTestData('loggedin'),
-});
-
-testdata.getdatasets = () => ({
-    ...getTestData('loggedin'),
-    ...getTestData('testdatasets'),
-});
-
-testdata.getdataset = () => ({
-    ...getTestData('loggedin'),
-    ...getTestData('testdatasets'),
-    ...getTestData('testdatapoints')
 });
 
 module.exports = {
