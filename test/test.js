@@ -419,7 +419,7 @@ describe('api router', function () {
                 done();
             });
     });
-    it('won\'t update a dataset owned by someone else', function (done) {
+    it('fails to update a dataset owned by someone else', function (done) {
         server = stubServer({
             createRouter: createAPIRouter,
             ...getTestData('loggedin'),
@@ -440,7 +440,7 @@ describe('api router', function () {
                 done();
             });
     });
-    it('won\'t update a dataset if data is missing', function (done) {
+    it('fails to update a dataset if data is missing', function (done) {
         server = stubServer({
             createRouter: createAPIRouter,
             ...getTestData('loggedin'),
@@ -458,7 +458,7 @@ describe('api router', function () {
                 done();
             });
     });
-    it('won\'t update a nonexistent dataset', function (done) {
+    it('fails to update a nonexistent dataset', function (done) {
         server = stubServer({
             createRouter: createAPIRouter,
             ...getTestData('loggedin'),
@@ -479,7 +479,7 @@ describe('api router', function () {
                 done();
             });
     });
-    it('won\'t delete a non-empty dataset', function (done) {
+    it('fails to delete a non-empty dataset', function (done) {
         server = stubServer({
             createRouter: createAPIRouter,
             ...getTestData('loggedin'),
@@ -587,6 +587,25 @@ describe('api router', function () {
                 assert(res.body.success);
                 assert(server.backend.Datapoint.points.length == 3);
                 assert(server.backend.Datapoint.points[0].y == 8);
+                done();
+            });
+    });
+    it('fails to update datapoint if validation errors', function (done) {
+        server = stubServer({
+            createRouter: createAPIRouter,
+            ...getTestData('dberror'),
+        });
+        request(server)
+            .post('/sets/1/data')
+            .send({
+                x: 'fred',
+                y: 1,
+            })
+            .expect(200)
+            .end(function (err, res) {
+                // console.dir(res.body);
+                if (err) return done(err);
+                assert(!res.body.success);
                 done();
             });
     });

@@ -362,15 +362,17 @@ function createAPIRouter({
         }) => {
             // date should be submitted as a UTC string in YYYY-MM-DD format
             // enforce date only by truncating time portion, if any
-            var result;
             try {
-                result = moment(new Date(value).toISOString()).utc().format('YYYY-MM-DD');
+                let date = new Date(value).toISOString();
+                // console.dir(date);
+                let result = moment(date).utc().format('YYYY-MM-DD');
+                req.body.x = result;
+                return true;
             } catch (e) {
+                // console.dir(e);
                 logger.logError(e, 'Invalid date format (should be YYYY-MM-DD)');
                 throw new Error('Invalid date format (should be YYYY-MM-DD)');
             }
-            req.body.x = result;
-            return true;
         }),
         // validate / sanitize value
         body('y', 'Value should be a number, yo.').isNumeric().toInt(),
@@ -398,7 +400,7 @@ function createAPIRouter({
                 var arr = errors.array();
                 log('validation errors: %j', arr);
 
-                respond(res, false, {
+                return respond(res, false, {
                     errors: arr
                 });
             }
