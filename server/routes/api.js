@@ -67,10 +67,11 @@ function createAPIRouter({
                 username: req.body.username
             }), req.body.password, function (err, result) {
                 if (err) {
-                    logger.logError(err, 'Error registering user');
-                    return respond(res, false, {
-                        error: err
-                    });
+                    return next(err);
+                    // logger.logError(err, 'Error registering user');
+                    // return respond(res, false, {
+                    //     error: err
+                    // });
                 }
 
                 return respond(res, true, {
@@ -122,12 +123,14 @@ function createAPIRouter({
 
             // save the dataset and check for errors
             dataset.save(function (err) {
-                if (err) {
-                    logger.logError(err, 'Error saving dataset');
-                    return response(res, false, {
-                        error: err
-                    });
-                }
+                if (err)
+                    return next(err);
+                // if (err) {
+                //     logger.logError(err, 'Error saving dataset');
+                //     return respond(res, false, {
+                //         error: err
+                //     });
+                // }
 
                 return respond(res, true, {
                     message: 'Dataset ' + dataset.name + ' created!'
@@ -142,7 +145,7 @@ function createAPIRouter({
         // authenticate
         authorize,
 
-        function (req, res) {
+        function (req, res, next) {
             Dataset.find({
                     owner: req.user._id
                 })
@@ -151,10 +154,11 @@ function createAPIRouter({
                 })
                 .exec(function (err, datasets) {
                     if (err) {
-                        logger.logError(err, 'Error getting datasets');
-                        return respond(res, false, {
-                            error: err
-                        });
+                        return next(err);
+                        // logger.logError(err, 'Error getting datasets');
+                        // return respond(res, false, {
+                        //     error: err
+                        // });
                     }
 
                     return respond(res, true, {
@@ -173,10 +177,11 @@ function createAPIRouter({
             // grab the dataset from the db
             Dataset.findById(req.params.id, function (err, dataset) {
                 if (err) {
-                    logger.logError(err, 'Database error finding dataset %s', req.params.id);
-                    return respond(res, false, {
-                        error: err
-                    });
+                    return next(err);
+                    // logger.logError(err, 'Database error finding dataset %s', req.params.id);
+                    // return respond(res, false, {
+                    //     error: err
+                    // });
                 }
 
                 // bad id? no dataset found?
@@ -196,10 +201,11 @@ function createAPIRouter({
                     })
                     .exec(function (err, datapoints) {
                         if (err) {
-                            logger.logError(err, 'Database error finding points');
-                            return respond(res, false, {
-                                error: err
-                            });
+                            return next(err);
+                            // logger.logError(err, 'Database error finding points');
+                            // return respond(res, false, {
+                            //     error: err
+                            // });
                         }
 
                         var result = dataset.toObject();
@@ -248,10 +254,11 @@ function createAPIRouter({
 
             Dataset.findById(req.params.id, function (err, dataset) {
                 if (err) {
-                    logger.logError(err, 'Database error while finding dataset %s', req.params.id);
-                    return respond(res, false, {
-                        error: err
-                    });
+                    return next(err);
+                    // logger.logError(err, 'Database error while finding dataset %s', req.params.id);
+                    // return respond(res, false, {
+                    //     error: err
+                    // });
                 }
 
                 if (dataset) {

@@ -1,4 +1,5 @@
 const express = require('express');
+const VError = require('verror');
 
 // log helpers /////////////////////
 var _logs = [];
@@ -29,25 +30,37 @@ var user = {
     stubUserModel(options) {
         options = options || {};
 
-        function FakeUser(options) {
-            this.username = options.username;
-            this.password = options.password;
-        }
-
         // convenience departure from spec
         FakeUser.users = options.users || [];
 
-        FakeUser.register = function (user, password, cb) {
-            user.password = password;
+        delete FakeUser.alwaysFail;
+        if(options.alwaysFail)
+            FakeUser.alwaysFail = true;
 
-            // only supports 1!
-            user._id = 1;
-
-            FakeUser.users.push(user);
-            if (cb) cb();
-        };
         return FakeUser;
     }
+};
+
+function FakeUser(options) {
+    options = options || {};
+    this.username = options.username;
+    this.password = options.password;
+    this.options = options;
+}
+
+FakeUser.register = function (user, password, cb) {
+    if (FakeUser.alwaysFail) {
+        let err = new VError('database error');
+        return cb(err);
+    }
+
+    user.password = password;
+
+    // only supports 1!
+    user._id = 1;
+
+    FakeUser.users.push(user);
+    if (cb) cb(null, this);
 };
 
 // generic stub helpers
@@ -109,7 +122,7 @@ function _save(arr, o) {
 
 function _delete(arr, o) {
     let pos = arr.indexOf(o);
-    if(pos < 0) return;
+    if (pos < 0) return;
     arr.splice(pos, 1);
 }
 
@@ -123,6 +136,10 @@ var dataset = {
 
         FakeDataset._nextId = 1;
 
+        delete FakeDataset.alwaysFail;
+        if(options.alwaysFail)
+            FakeDataset.alwaysFail = true;
+
         return FakeDataset;
     }
 };
@@ -132,6 +149,7 @@ function FakeDataset(options) {
     for (let k in options)
         this[k] = options[k];
     this._id = FakeDataset._nextId;
+    this.options = options;
     FakeDataset._nextId++;
     // this._id = options._id;
     // this.owner = options.owner;
@@ -143,12 +161,17 @@ FakeDataset.prototype.toObject = function () {
 };
 
 FakeDataset.prototype.save = function (cb) {
+    if (FakeDataset.alwaysFail) {
+        let err = new VError('database error');
+        return cb(err);
+    }
+
     _save(FakeDataset.sets, this);
 
-    cb();
+    cb(null, this);
 };
 
-FakeDataset.prototype.delete = function(cb) {
+FakeDataset.prototype.delete = function (cb) {
     _delete(FakeDataset.sets, this);
 
     cb();
@@ -168,14 +191,24 @@ FakeDataset.sort = function () {
     return this;
 };
 FakeDataset.exec = function (cb) {
+    if (FakeDataset.alwaysFail) {
+        let err = new VError('database error');
+        return cb(err);
+    }
+
     let result = _exec(FakeDataset.sets, this.filter);
-    if(this.one)
+    if (this.one)
         result = result.length >= 1 ? result[0] : null;
     delete this.filter;
     delete this.one;
     cb(null, result);
 };
 FakeDataset.findById = function (id, cb) {
+    if (FakeDataset.alwaysFail) {
+        let err = new VError('database error');
+        return cb(err);
+    }
+
     let result = _findById(FakeDataset.sets, id);
     cb(null, result);
 };
@@ -212,7 +245,7 @@ FakeDatapoint.prototype.save = function (cb) {
     cb();
 };
 
-FakeDatapoint.prototype.delete = function(cb) {
+FakeDatapoint.prototype.delete = function (cb) {
     _delete(FakeDatapoint.points, this);
 
     cb();
@@ -232,8 +265,13 @@ FakeDatapoint.sort = function () {
     return this;
 };
 FakeDatapoint.exec = function (cb) {
+    if (FakeDatapoint.alwaysFail) {
+        let err = new VError('database error');
+        return cb(err);
+    }
+
     let result = _exec(FakeDatapoint.points, this.filter);
-    if(this.one)
+    if (this.one)
         result = result.length >= 1 ? result[0] : null;
     delete this.filter;
     delete this.one;
@@ -346,6 +384,17 @@ testdata.testdatapoints = () => ({
         ]
     },
 });
+
+testdata.dberror = {
+    stubAuth: true,
+    user: getTestData('testuser'),
+    userOptions: {
+        alwaysFail: true,
+    },
+    datasetOptions: {
+        alwaysFail: true,
+    },
+};
 
 module.exports = {
     ...logs,

@@ -190,7 +190,45 @@ describe('api router', function () {
             .expect(200)
             .end(function (err, res) {
                 if (err) return done(err);
+                // console.dir(res.body);
                 assert(server.backend.User.users.length == 1);
+                done();
+            });
+    });
+    it('fails to register a user if validation errors', function (done) {
+        server = stubServer({
+            createRouter: createAPIRouter,
+        });
+        request(server)
+            .post('/register')
+            .send({
+                username: 'test',
+            })
+            .expect(200)
+            .end(function (err, res) {
+                if (err) return done(err);
+                assert(!res.body.success);
+                assert(server.backend.User.users.length == 0);
+                done();
+            });
+    });
+    it('reports db error on register user', function (done) {
+        server = stubServer({
+            createRouter: createAPIRouter,
+            ...getTestData('dberror'),
+        });
+        request(server)
+            .post('/register')
+            .send({
+                username: 'test',
+                password: 'password',
+            })
+            .expect(500)
+            .end(function (err, res) {
+                // console.dir(res.body);
+                if (err) return done(err);
+                assert(!res.body.success);
+                assert(server.backend.User.users.length == 0);
                 done();
             });
     });
@@ -207,12 +245,53 @@ describe('api router', function () {
                 owner: 1,
                 chartType: 'line'
             })
-            .expect(200)
+            // .expect(200)
             .end(function (err, res) {
                 // console.dir(res.body);
                 if (err) return done(err);
                 assert(res.body.success);
                 assert(server.backend.Dataset.sets.length == 1);
+                done();
+            });
+    });
+    it('fails to create a dataset if validation errors', function (done) {
+        server = stubServer({
+            createRouter: createAPIRouter,
+            ...getTestData('loggedin'),
+        });
+        request(server)
+            .post('/sets')
+            .send({
+                name: 'dataset 1',
+            })
+            .expect(200)
+            .end(function (err, res) {
+                // console.dir(res.body);
+                if (err) return done(err);
+                assert(!res.body.success);
+                assert(server.backend.Dataset.sets.length == 0);
+                done();
+            });
+    });
+    it('reports db error on create dataset', function (done) {
+        server = stubServer({
+            createRouter: createAPIRouter,
+            ...getTestData('dberror'),
+        });
+        request(server)
+            .post('/sets')
+            .send({
+                name: 'dataset 1',
+                yAxisLabel: 'hours',
+                owner: 1,
+                chartType: 'line'
+            })
+            .expect(500)
+            .end(function (err, res) {
+                // console.dir(res.body);
+                if (err) return done(err);
+                assert(!res.body.success);
+                assert(server.backend.User.users.length == 0);
                 done();
             });
     });
@@ -230,6 +309,21 @@ describe('api router', function () {
                 if (err) return done(err);
                 assert(res.body.success);
                 assert(res.body.data.length == 2);
+                done();
+            });
+    });
+    it('reports db error on get datasets', function (done) {
+        server = stubServer({
+            createRouter: createAPIRouter,
+            ...getTestData('dberror'),
+        });
+        request(server)
+            .get('/sets')
+            .expect(500)
+            .end(function (err, res) {
+                // console.dir(res.body);
+                if (err) return done(err);
+                assert(!res.body.success);
                 done();
             });
     });
@@ -266,6 +360,21 @@ describe('api router', function () {
                 done();
             });
     });
+    it('reports db error on get dataset', function (done) {
+        server = stubServer({
+            createRouter: createAPIRouter,
+            ...getTestData('dberror'),
+        });
+        request(server)
+            .get('/sets/1')
+            .expect(500)
+            .end(function (err, res) {
+                // console.dir(res.body);
+                if (err) return done(err);
+                assert(!res.body.success);
+                done();
+            });
+    });
     it('updates a dataset', function (done) {
         server = stubServer({
             createRouter: createAPIRouter,
@@ -289,6 +398,25 @@ describe('api router', function () {
                     assert(result.name == 'fred');
                     done();
                 });
+            });
+    });
+    it('reports db error on update dataset', function (done) {
+        server = stubServer({
+            createRouter: createAPIRouter,
+            ...getTestData('dberror'),
+        });
+        request(server)
+            .post('/sets/1')
+            .send({
+                name: 'fred',
+                yAxisLabel: 'hours'
+            })
+            .expect(500)
+            .end(function (err, res) {
+                // console.dir(res.body);
+                if (err) return done(err);
+                assert(!res.body.success);
+                done();
             });
     });
     it('won\'t update a dataset owned by someone else', function (done) {
@@ -366,6 +494,26 @@ describe('api router', function () {
                 yAxisLabel: 'asdf'
             })
             .expect(200)
+            .end(function (err, res) {
+                // console.dir(res.body);
+                if (err) return done(err);
+                assert(!res.body.success);
+                done();
+            });
+    });
+    it('reports db error on delete non-empty dataset', function (done) {
+        server = stubServer({
+            createRouter: createAPIRouter,
+            ...getTestData('dberror'),
+        });
+        request(server)
+            .post('/sets/1')
+            .send({
+                delete: 1,
+                name: 'asdf',
+                yAxisLabel: 'asdf'
+            })
+            .expect(500)
             .end(function (err, res) {
                 // console.dir(res.body);
                 if (err) return done(err);
