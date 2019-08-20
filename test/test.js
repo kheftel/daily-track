@@ -125,6 +125,7 @@ describe('api router', function () {
                 message: 'Unauthorized'
             })
             .end(function (err, res) {
+                // console.dir(res.body);
                 if (err) return done(err);
                 done();
             });
@@ -214,6 +215,62 @@ describe('api router', function () {
                 if (err) return done(err);
                 assert(!res.body.success);
                 assert(server.backend.getModel('User').users.length == 0);
+                done();
+            });
+    });
+    it('logs in', function (done) {
+        server = stubServer({
+            createRouter: createAPIRouter,
+            ...getTestData('testusers'),
+        });
+        request(server)
+            .post('/login')
+            .send({
+                username: 'test',
+                password: 'password',
+            })
+            .expect(200)
+            .end(function (err, res) {
+                if (err) return done(err);
+                // console.dir(res.body);
+                assert(res.body.success);
+                done();
+            });
+    });
+    it('fails to log in if password incorrect', function (done) {
+        server = stubServer({
+            createRouter: createAPIRouter,
+            ...getTestData('testusers'),
+        });
+        request(server)
+            .post('/login')
+            .send({
+                username: 'test',
+                password: 'wrong',
+            })
+            .expect(200)
+            .end(function (err, res) {
+                if (err) return done(err);
+                // console.dir(res.body);
+                assert(!res.body.success);
+                done();
+            });
+    });
+    it('fails to log in if validation errors', function (done) {
+        server = stubServer({
+            createRouter: createAPIRouter,
+            ...getTestData('testusers'),
+        });
+        request(server)
+            .post('/login')
+            .send({
+                username: 'test',
+            })
+            .expect(200)
+            .end(function (err, res) {
+                if (err) return done(err);
+                // console.dir(res.body);
+                assert(!res.body.success);
                 done();
             });
     });

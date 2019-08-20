@@ -238,49 +238,44 @@ function createSiteRouter({
     siteRouter.get('/login', function (req, res) {
         res.render('login');
     });
+    siteRouter.get('/login/success', function (req, res) {
+        req.flash('success', 'Welcome, ' + req.user.username + '!');
+        res.redirect('/');
+    });
 
-    siteRouter.post('/login',
-        passport.authenticate('local', {
-            failWithError: true,
-            failureFlash: true
-        }),
-        function (req, res, next) {
-            // handle success
-            if (req.xhr) {
-                return res.json({
-                    success: true,
-                    message: "Login successful for " + req.user.username
-                });
-            }
-            req.flash('success', 'Welcome, ' + req.user.username + '!');
-            return res.redirect('/');
-        },
-        function (err, req, res, next) {
-            // handle error
-            logger.logError(err, 'auth error');
-
-            if (req.xhr) {
-                // only call req.flash() here, because it consumes the messages
-                var errorMessages = req.flash('error');
-                log(errorMessages.join());
-                return res.json({
-                    success: false,
-                    message: errorMessages.join(), // not sure if comma is correct
-                    passporterror: err
-                });
-            }
-            return res.redirect('/login');
-        }
-    );
-
-    // siteRouter.post('/login', passport.authenticate('local', {
-    //     failureRedirect: '/login',
-    //     failureFlash: true
-    // }), function (req, res) {
-    //     if (req.user)
+    // siteRouter.post('/login',
+    //     passport.authenticate('local', {
+    //         failWithError: true,
+    //         failureFlash: true
+    //     }),
+    //     function (req, res, next) {
+    //         // handle success
+    //         if (req.xhr) {
+    //             return res.json({
+    //                 success: true,
+    //                 message: "Login successful for " + req.user.username
+    //             });
+    //         }
     //         req.flash('success', 'Welcome, ' + req.user.username + '!');
-    //     res.redirect('/');
-    // });
+    //         return res.redirect('/');
+    //     },
+    //     function (err, req, res, next) {
+    //         // handle error
+    //         logger.logError(err, 'auth error');
+
+    //         if (req.xhr) {
+    //             // only call req.flash() here, because it consumes the messages
+    //             var errorMessages = req.flash('error');
+    //             log(errorMessages.join());
+    //             return res.json({
+    //                 success: false,
+    //                 message: errorMessages.join(), // not sure if comma is correct
+    //                 passporterror: err
+    //             });
+    //         }
+    //         return res.redirect('/login');
+    //     }
+    // );
 
     // logout
     siteRouter.get('/logout', function (req, res) {
@@ -295,26 +290,26 @@ function createSiteRouter({
     });
 
     // deprecated: all dataset detail views on one page
-    siteRouter.get('/datasets', function (req, res, next) {
-        Dataset.find()
-            .sort({
-                name: 'asc'
-            })
-            .exec(function (err, datasets) {
-                //to do: do something useful with error
-                if (err)
-                    return next(err);
+    // siteRouter.get('/datasets', function (req, res, next) {
+    //     Dataset.find()
+    //         .sort({
+    //             name: 'asc'
+    //         })
+    //         .exec(function (err, datasets) {
+    //             //to do: do something useful with error
+    //             if (err)
+    //                 return next(err);
 
-                res.locals.datasets = datasets;
+    //             res.locals.datasets = datasets;
 
-                // today's date
-                res.locals.defaults = {
-                    x: moment().format('YYYY-MM-DD')
-                };
+    //             // today's date
+    //             res.locals.defaults = {
+    //                 x: moment().format('YYYY-MM-DD')
+    //             };
 
-                res.render('datasets');
-            });
-    });
+    //             res.render('datasets');
+    //         });
+    // });
 
     // new dataset
     siteRouter.get('/set/new', function (req, res, next) {

@@ -5,6 +5,7 @@ if (process.env.NODE_ENV !== 'production') {
 }
 
 // requires
+const passport = require('passport');
 const BackendService = require('./BackendService');
 const BackendMongoose = require('./BackendMongoose');
 const logger = require('./logger');
@@ -21,7 +22,8 @@ const app = createApp({
                 User: require('./models/user'),
                 Dataset: require('./models/dataset'),
                 Datapoint: require('./models/datapoint'),
-            }
+            },
+            passport: passport
         })
     }),
     sessionOptions: {

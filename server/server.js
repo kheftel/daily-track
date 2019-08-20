@@ -67,11 +67,10 @@ function createApp({
     app.use(express.static(path.join(__dirname, '../dist')));
 
     // Configure passport authentication
+    const passport = backendService.backend.passport;
     app.use(passport.initialize());
     app.use(passport.session());
-    backendService.initAuthentication({
-        passport
-    });
+    backendService.initAuthentication();
 
     // ROUTES //////////////////////
     app.use('/api', createAPIRouter({

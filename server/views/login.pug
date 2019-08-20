@@ -4,7 +4,7 @@ block content
     .container-fluid
         .row.justify-content-center
             .col.col-sm-8.col-lg-6.bg-secondary.p-2
-                form#login-form(action="/login" method="post" novalidate)
+                form#login-form(method="post" novalidate)
                     div#username-group.form-group
                         label(for='username') Username:
                         input#username.form-control(type='text', placeholder='' name='username' required)
@@ -20,15 +20,5 @@ block content
                         span.spinner-border.spinner-border-sm.ml-1(role="status" aria-hidden="true")
                 div.mt-2 Don't have an account yet? #[a(href="/register") Sign up!]
 
-    //- form(action="/login",method="post")
-
-    //-     div
-    //-         label Username
-    //-         input(type="text",name="username")
-
-    //-     div
-    //-         label Password
-    //-         input(type="password",name="password")
-
-    //-     div
-    //-         input(type="submit",value="Log In")
+block pagescript
+    script(src=webpack_asset('login', 'js'))

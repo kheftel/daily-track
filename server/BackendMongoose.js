@@ -19,6 +19,8 @@ function BackendMongoose(options) {
     }
 
     this._authModel = options.authModel || 'User';
+
+    this.passport = options.passport;
 }
 
 BackendMongoose.prototype.getModel = function (model) {
@@ -44,14 +46,12 @@ BackendMongoose.prototype.createSession = function (options) {
     });
 };
 
-BackendMongoose.prototype.initAuthentication = function ({
-    passport
-}) {
+BackendMongoose.prototype.initAuthentication = function () {
     // Configure passport-local to use desired model for authentication
     let model = this._models[this._authModel];
-    passport.use(new LocalStrategy(model.authenticate()));
-    passport.serializeUser(model.serializeUser());
-    passport.deserializeUser(model.deserializeUser());
+    this.passport.use(new LocalStrategy(model.authenticate()));
+    this.passport.serializeUser(model.serializeUser());
+    this.passport.deserializeUser(model.deserializeUser());
 };
 
 BackendMongoose.prototype.registerUser = function (options, cb) {
@@ -60,6 +60,12 @@ BackendMongoose.prototype.registerUser = function (options, cb) {
     authModel.register(new authModel({
         username: options.username
     }), options.password, cb);
+};
+
+BackendMongoose.prototype.authenticate = function (options) {
+    return this.passport.authenticate('local', {
+        ...options
+    });
 };
 
 module.exports = BackendMongoose;

@@ -80,6 +80,84 @@ function createAPIRouter({
         }
     ]);
 
+    // log in
+    apiRouter.post('/login', [
+        // validate / sanitize username
+        body('username', 'Userame is required.').not().isEmpty().trim().escape(),
+
+        // validate / sanitize password
+        body('password', 'Password is required.').not().isEmpty().trim().escape(),
+
+        (req, res, next) => {
+            // handle validation errors
+            const errors = validationResult(req);
+
+            if (!errors.isEmpty()) {
+                var arr = errors.array();
+                log('login validation errors: %j', arr);
+
+                return respond(res, false, {
+                    errors: arr
+                });
+            }
+
+            next();
+        },
+
+        backendService.authenticate({
+            failWithError: true,
+            failureFlash: true
+        }),
+
+        // passport.authenticate('local', {
+        //     failWithError: true,
+        //     failureFlash: true
+        // }),
+
+        function (req, res, next) {
+            // handle success
+            // if (req.xhr) {
+            //     return res.json({
+            //         success: true,
+            //         message: "Login successful for " + req.user.username
+            //     });
+            // }
+            // req.flash('success', 'Welcome, ' + req.user.username + '!');
+            // return res.redirect('/');
+
+            return respond(res, true, {
+                message: "Login successful for " + req.user.username
+            });
+        },
+
+        function (err, req, res, next) {
+            // handle error
+            // logger.logError(err, 'auth error');
+
+            // passport stores its error messages in flash in session
+            var errorMessages = req.flash('error');
+
+            // override passport's 401 unauthorized
+            res.status(200);
+            return respond(res, false, {
+                message: errorMessages.join(), // not sure if comma is correct
+                passporterror: err
+            });
+
+            // if (req.xhr) {
+            //     // only call req.flash() here, because it consumes the messages
+            //     var errorMessages = req.flash('error');
+            //     log(errorMessages.join());
+            //     return res.json({
+            //         success: false,
+            //         message: errorMessages.join(), // not sure if comma is correct
+            //         passporterror: err
+            //     });
+            // }
+            // return res.redirect('/login');
+        },
+    ]);
+
     // create a dataset
     apiRouter.post('/sets', [
         // authenticate

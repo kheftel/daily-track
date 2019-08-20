@@ -347,7 +347,29 @@ var server = {
             },
             registerUser(options, cb) {
                 this.backend.registerUser(options, cb);
-            }
+            },
+            authenticate() {
+                return function (req, res, next) {
+                    // console.dir(req.body);
+                    if (req.body.username != 'test' || req.body.password != 'password') {
+                        req.flash = function (e) {
+                            if (e == 'error')
+                                return ['incorrect username or password'];
+                        };
+                        return next(new VError('incorrect username or password'));
+                    }
+
+                    req.user = {
+                        username: req.body.username,
+                        password: req.body.password,
+                    };
+                    req.isAuthenticated = function () {
+                        return req.user != null;
+                    };
+    
+                    return next();
+                };
+            },
         };
         router = options.createRouter({
             backendService
@@ -390,13 +412,19 @@ testdata.testuser = () => ({
     _id: 1,
 });
 
-testdata.loggedin = {
+testdata.testusers = () => ({
+    userOptions: {
+        users: [getTestData('testuser')],
+    },
+});
+
+testdata.loggedin = () => ({
     stubAuth: true,
     user: getTestData('testuser'),
     userOptions: {
         users: [getTestData('testuser')],
     },
-};
+});
 
 testdata.testdatasets = () => ({
     datasetOptions: {

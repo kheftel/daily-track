@@ -51,12 +51,16 @@ BackendService.prototype.createSession = function (options) {
     }
 };
 
-BackendService.prototype.initAuthentication = function (options) {
-    return this.backend.initAuthentication(options);
+BackendService.prototype.initAuthentication = function () {
+    return this.backend.initAuthentication();
 };
 
 BackendService.prototype.registerUser = function(options, cb) {
     return this.backend.registerUser(options, cb);
+};
+
+BackendService.prototype.authenticate = function(options) {
+    return this.backend.authenticate(options);
 };
 
 module.exports = BackendService;

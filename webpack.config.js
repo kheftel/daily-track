@@ -26,6 +26,7 @@ var baseConfig = merge([{
             overview: './src/js/pages/overview.js',
             dataset: './src/js/pages/dataset.js',
             register: './src/js/pages/register.js',
+            login: './src/js/pages/login.js',
             "set-form": './src/js/pages/set-form.js',
             multi: './src/js/pages/multi.js',
             styles: './src/js/styles.js',
@@ -105,6 +106,11 @@ var baseConfig = merge([{
                 title: 'register',
                 filename: 'register.html',
                 chunks: ['runtime', 'styles', 'vendors', 'common', 'register'],
+            }),
+            new HtmlWebpackPlugin({
+                title: 'login',
+                filename: 'login.html',
+                chunks: ['runtime', 'styles', 'vendors', 'common', 'login'],
             }),
             new HtmlWebpackPlugin({
                 title: 'set-form',
