@@ -18,9 +18,9 @@ const app = createApp({
     backendService: new BackendService({
         backend: new BackendMongoose({
             models: {
-                User: require('./models/User'),
-                Dataset: require('./models/Dataset'),
-                Datapoint: require('./models/Datapoint'),
+                User: require('./models/user'),
+                Dataset: require('./models/dataset'),
+                Datapoint: require('./models/datapoint'),
             }
         })
     }),

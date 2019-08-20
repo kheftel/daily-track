@@ -230,7 +230,7 @@ describe('api router', function () {
                 owner: 1,
                 chartType: 'line'
             })
-            // .expect(200)
+            .expect(200)
             .end(function (err, res) {
                 // console.dir(res.body);
                 if (err) return done(err);

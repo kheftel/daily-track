@@ -312,7 +312,13 @@ var backend = {
             getModel(model) {
                 return this.models[model];
             },
-            models: {}
+            models: {},
+            registerUser(options, cb) {
+                let User = this.models.User;
+                User.register(new User({
+                    username: options.username
+                }), options.password, cb);
+            }
         };
 
         for (let k in options.models) {
@@ -338,6 +344,9 @@ var server = {
             }),
             getModel(model) {
                 return this.backend.getModel(model);
+            },
+            registerUser(options, cb) {
+                this.backend.registerUser(options, cb);
             }
         };
         router = options.createRouter({

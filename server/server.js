@@ -70,8 +70,7 @@ function createApp({
     app.use(passport.initialize());
     app.use(passport.session());
     backendService.initAuthentication({
-        passport,
-        model: 'User'
+        passport
     });
 
     // ROUTES //////////////////////

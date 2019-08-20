@@ -27,6 +27,7 @@ function createAPIRouter({
     const Datapoint = backendService.getModel('Datapoint');
 
     var apiRouter = express.Router();
+
     //use bodyparser to get POST vars
     apiRouter.use(bodyParser.urlencoded({
         extended: true
@@ -63,9 +64,11 @@ function createAPIRouter({
 
             // Create user with validated / sanitized data
             log('registering user %s', req.body.username);
-            User.register(new User({
-                username: req.body.username
-            }), req.body.password, function (err, result) {
+
+            backendService.registerUser({
+                username: req.body.username,
+                password: req.body.password,
+            }, function (err, result) {
                 if (err) {
                     return next(logger.verror(err, 'Error registering user'));
                 }

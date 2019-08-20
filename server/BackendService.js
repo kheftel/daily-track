@@ -55,4 +55,8 @@ BackendService.prototype.initAuthentication = function (options) {
     return this.backend.initAuthentication(options);
 };
 
+BackendService.prototype.registerUser = function(options, cb) {
+    return this.backend.registerUser(options, cb);
+};
+
 module.exports = BackendService;
