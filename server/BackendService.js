@@ -17,6 +17,10 @@ function BackendService({
     this.Datapoint = backend.Datapoint;
 }
 
+BackendService.prototype.getModel = function (model) {
+    return this.backend.getModel(model);
+};
+
 BackendService.prototype.connect = function (url) {
     return this.backend.connect(url)
         .then(() => {
@@ -36,8 +40,8 @@ BackendService.prototype.createSession = function (options) {
         case 'backend':
             return this.backend.createSession({
                 secret: secret,
-                saveUninitialized:saveUninitialized,
-                resave:resave,
+                saveUninitialized: saveUninitialized,
+                resave: resave,
             });
         case 'cookie':
             return cookieSession({
@@ -47,7 +51,7 @@ BackendService.prototype.createSession = function (options) {
     }
 };
 
-BackendService.prototype.initAuthentication = function(options) {
+BackendService.prototype.initAuthentication = function (options) {
     return this.backend.initAuthentication(options);
 };
 

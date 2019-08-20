@@ -20,11 +20,11 @@ require('moment-round');
 
 // API /////////////////////////////
 function createAPIRouter({
-    backend
+    backendService
 }) {
-    const User = backend.User;
-    const Dataset = backend.Dataset;
-    const Datapoint = backend.Datapoint;
+    const User = backendService.getModel('User');
+    const Dataset = backendService.getModel('Dataset');
+    const Datapoint = backendService.getModel('Datapoint');
 
     var apiRouter = express.Router();
     //use bodyparser to get POST vars
@@ -67,11 +67,7 @@ function createAPIRouter({
                 username: req.body.username
             }), req.body.password, function (err, result) {
                 if (err) {
-                    return next(err);
-                    // logger.logError(err, 'Error registering user');
-                    // return respond(res, false, {
-                    //     error: err
-                    // });
+                    return next(logger.verror(err, 'Error registering user'));
                 }
 
                 return respond(res, true, {
@@ -123,14 +119,9 @@ function createAPIRouter({
 
             // save the dataset and check for errors
             dataset.save(function (err) {
-                if (err)
-                    return next(err);
-                // if (err) {
-                //     logger.logError(err, 'Error saving dataset');
-                //     return respond(res, false, {
-                //         error: err
-                //     });
-                // }
+                if (err) {
+                    return next(logger.verror(err, 'Error saving dataset'));
+                }
 
                 return respond(res, true, {
                     message: 'Dataset ' + dataset.name + ' created!'
@@ -154,11 +145,7 @@ function createAPIRouter({
                 })
                 .exec(function (err, datasets) {
                     if (err) {
-                        return next(err);
-                        // logger.logError(err, 'Error getting datasets');
-                        // return respond(res, false, {
-                        //     error: err
-                        // });
+                        return next(logger.verror(err, 'Error getting datasets'));
                     }
 
                     return respond(res, true, {
@@ -177,11 +164,7 @@ function createAPIRouter({
             // grab the dataset from the db
             Dataset.findById(req.params.id, function (err, dataset) {
                 if (err) {
-                    return next(err);
-                    // logger.logError(err, 'Database error finding dataset %s', req.params.id);
-                    // return respond(res, false, {
-                    //     error: err
-                    // });
+                    return next(logger.verror(err, 'Database error finding dataset %s', req.params.id));
                 }
 
                 // bad id? no dataset found?
@@ -201,11 +184,7 @@ function createAPIRouter({
                     })
                     .exec(function (err, datapoints) {
                         if (err) {
-                            return next(err);
-                            // logger.logError(err, 'Database error finding points');
-                            // return respond(res, false, {
-                            //     error: err
-                            // });
+                            return next(logger.verror(err, 'Database error finding points'));
                         }
 
                         var result = dataset.toObject();
@@ -254,11 +233,7 @@ function createAPIRouter({
 
             Dataset.findById(req.params.id, function (err, dataset) {
                 if (err) {
-                    return next(err);
-                    // logger.logError(err, 'Database error while finding dataset %s', req.params.id);
-                    // return respond(res, false, {
-                    //     error: err
-                    // });
+                    return next(logger.verror(err, 'Database error while finding dataset %s', req.params.id));
                 }
 
                 if (dataset) {
@@ -281,10 +256,7 @@ function createAPIRouter({
                             })
                             .exec((err, datapoint) => {
                                 if (err) {
-                                    logger.logError('Error while finding datapoints for dataset %s', req.params.id);
-                                    return respond(res, false, {
-                                        error: err
-                                    });
+                                    return next(logger.verror(err, 'Error while finding datapoints for dataset %s', req.params.id));
                                 }
 
                                 if (datapoint) {
@@ -298,10 +270,7 @@ function createAPIRouter({
                                     //empty, can delete
                                     dataset.delete((err) => {
                                         if (err) {
-                                            logger.logError('Database error while deleting dataset %s', req.params.id);
-                                            return respond(res, false, {
-                                                error: err
-                                            });
+                                            return next(logger.verror(err, 'Database error while deleting dataset %s', req.params.id));
                                         }
 
                                         return respond(res, true, {
@@ -324,10 +293,7 @@ function createAPIRouter({
                         // save the dataset
                         dataset.save(function (err) {
                             if (err) {
-                                logger.logError(err, 'Error while saving dataset %s', dataset._id);
-                                return respond(res, false, {
-                                    error: err
-                                });
+                                return next(logger.verror(err, 'Error while saving dataset %s', dataset._id));
                             }
 
                             return respond(res, true, {
@@ -412,11 +378,7 @@ function createAPIRouter({
                 })
                 .exec((err, datapoint) => {
                     if (err) {
-                        return next(err);
-                        // logger.logError(err, 'error while finding datapoint %s in dataset %s', req.body.x, req.params.id);
-                        // return respond(res, false, {
-                        //     error: err
-                        // });
+                        return next(logger.verror(err, 'error while finding datapoint %s in dataset %s', req.body.x, req.params.id));
                     }
 
                     if (datapoint) {
@@ -426,10 +388,7 @@ function createAPIRouter({
                             deletedPoint.x = truncateTime(deletedPoint.x);
                             datapoint.delete((err) => {
                                 if (err) {
-                                    logger.logError(err, 'error while deleting datapoint');
-                                    return respond(res, false, {
-                                        error: err
-                                    });
+                                    return next(logger.verror(err, 'error while deleting datapoint'));
                                 }
 
                                 return respond(res, true, {
@@ -443,10 +402,7 @@ function createAPIRouter({
                             datapoint.tags = req.body.tags;
                             datapoint.save((err) => {
                                 if (err) {
-                                    logger.logError(err, 'Error while updating datapoint');
-                                    return respond(res, false, {
-                                        error: err
-                                    });
+                                    return next(logger.verror(err, 'Error while updating datapoint'));
                                 }
 
                                 var point = datapoint.toObject();
@@ -477,10 +433,7 @@ function createAPIRouter({
                         // save the datapoint and check for errors
                         newpoint.save(function (err) {
                             if (err) {
-                                logger.logError(err, 'Error while saving datapoint');
-                                return respond(res, false, {
-                                    error: err
-                                });
+                                return next(logger.verror(err, 'Error while saving datapoint'));
                             }
 
                             var point = newpoint.toObject();

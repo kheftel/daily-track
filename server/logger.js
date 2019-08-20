@@ -11,7 +11,6 @@ function verror() {
 
 function logError() {
     var curError = verror(...arguments);
-    debugError(curError.message);
     debugError(VError.fullStack(curError));
 }
 

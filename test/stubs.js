@@ -1,5 +1,6 @@
 const express = require('express');
 const VError = require('verror');
+const EventEmitter = require('events');
 
 // log helpers /////////////////////
 var _logs = [];
@@ -34,7 +35,7 @@ var user = {
         FakeUser.users = options.users || [];
 
         delete FakeUser.alwaysFail;
-        if(options.alwaysFail)
+        if (options.alwaysFail)
             FakeUser.alwaysFail = true;
 
         return FakeUser;
@@ -137,7 +138,7 @@ var dataset = {
         FakeDataset._nextId = 1;
 
         delete FakeDataset.alwaysFail;
-        if(options.alwaysFail)
+        if (options.alwaysFail)
             FakeDataset.alwaysFail = true;
 
         return FakeDataset;
@@ -224,7 +225,7 @@ var datapoint = {
         FakeDatapoint.points = options.points || [];
 
         delete FakeDatapoint.alwaysFail;
-        if(options.alwaysFail)
+        if (options.alwaysFail)
             FakeDatapoint.alwaysFail = true;
 
         return FakeDatapoint;
@@ -286,18 +287,61 @@ FakeDatapoint.findById = function (id, cb) {
     cb(null, result);
 };
 
+// backend helpers /////////
+
+var backend = {
+
+    stubBackend(options) {
+        options = options || {};
+
+        let backend = {
+            connection: new EventEmitter(),
+            createSession(options) {
+                return options.secret;
+            },
+            initAuthentication(options) {
+                return 'success';
+            },
+            connect(url) {
+                return (new Promise((resolve, reject) => {
+                    setTimeout(function () {
+                        resolve();
+                    }, 50);
+                }));
+            },
+            getModel(model) {
+                return this.models[model];
+            },
+            models: {}
+        };
+
+        for (let k in options.models) {
+            backend.models[k] = options.models[k];
+        }
+
+        return backend;
+    }
+};
+
 // server helpers //////////
 var server = {
 
     stubServer(options) {
         options = options || {};
-        var backend = {
-            User: user.stubUserModel(options.userOptions),
-            Dataset: dataset.stubDatasetModel(options.datasetOptions),
-            Datapoint: datapoint.stubDatapointModel(options.datapointOptions),
+        var backendService = {
+            backend: backend.stubBackend({
+                models: {
+                    User: user.stubUserModel(options.userOptions),
+                    Dataset: dataset.stubDatasetModel(options.datasetOptions),
+                    Datapoint: datapoint.stubDatapointModel(options.datapointOptions),
+                },
+            }),
+            getModel(model) {
+                return this.backend.getModel(model);
+            }
         };
         router = options.createRouter({
-            backend: backend
+            backendService
         });
         app = express();
         if (options.stubAuth) {
@@ -313,7 +357,7 @@ var server = {
         var server = app.listen(3000, function () {});
 
         // convenience departure from spec
-        server.backend = backend;
+        server.backend = backendService;
 
         return server;
     }
@@ -407,6 +451,7 @@ module.exports = {
     ...logs,
     ...user,
     ...dataset,
+    ...backend,
     ...server,
     ...datapoint,
     ...testdata

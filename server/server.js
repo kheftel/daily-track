@@ -23,18 +23,16 @@ function createApp({
     backendService,
     sessionOptions
 }) {
-    var backend = backendService;
-    backend.connect(process.env.MONGODB_URI)
+    backendService.connect(process.env.MONGODB_URI)
         .then(() => {
             log('connected to backend service');
         });
-    backend.connection.on('error', (err) => {
+    backendService.connection.on('error', (err) => {
         logger.logError(err, 'backend service error');
     });
 
     // APP /////////////
     var app = express();
-    app.backend = backend;
 
     // logging
     app.use(morgan('combined'));
@@ -50,7 +48,7 @@ function createApp({
     }
 
     // set up sessions
-    app.use(backend.createSession(sessionOptions));
+    app.use(backendService.createSession(sessionOptions));
 
     // VIEWS //////////
     app.set('views', path.join(__dirname, 'views'));
@@ -71,15 +69,18 @@ function createApp({
     // Configure passport authentication
     app.use(passport.initialize());
     app.use(passport.session());
-    backend.initAuthentication({
-        passport
+    backendService.initAuthentication({
+        passport,
+        model: 'User'
     });
 
     // ROUTES //////////////////////
     app.use('/api', createAPIRouter({
-        backend
+        backendService
     }));
-    app.use('/', createSiteRouter(app));
+    app.use('/', createSiteRouter({
+        backendService
+    }));
 
     return app;
 }

@@ -6,8 +6,8 @@ const logger = require('../server/logger');
 const createSiteRouter = require('../server/routes/site');
 const createAPIRouter = require('../server/routes/api');
 const BackendService = require('../server/BackendService');
-const EventEmitter = require('events');
 const request = require('supertest');
+const expect = require('chai').expect;
 const {
     stubLog,
     unStubLog,
@@ -15,6 +15,7 @@ const {
     stubUserModel,
     stubDatasetModel,
     stubDatapointModel,
+    stubBackend,
     stubServer,
     getTestData,
 } = require('./stubs');
@@ -64,31 +65,15 @@ describe('logger module', function () {
 
 // BackendService ///////////////////////////
 describe('BackendService', function () {
-    var emitter = new EventEmitter();
     var service = new BackendService({
-        backend: {
-            connection: emitter,
-            createSession(options) {
-                return options.secret;
-            },
-            initAuthentication(options) {
-                return 'success';
-            },
-            connect(url) {
-                return (new Promise((resolve, reject) => {
-                    setTimeout(function () {
-                        resolve();
-                    }, 50);
-                }));
-            }
-        }
+        backend: stubBackend()
     });
     it('exists', function () {
         assert(service != null);
     });
     it('catches errors from backend connection', function () {
         stubLog(logger.error, 'error');
-        emitter.emit('error', 'message');
+        service.connection.emit('error', 'message');
         assert(getStubbedMessages('error').length >= 1);
         unStubLog(logger.error);
     });
@@ -191,7 +176,7 @@ describe('api router', function () {
             .end(function (err, res) {
                 if (err) return done(err);
                 // console.dir(res.body);
-                assert(server.backend.User.users.length == 1);
+                assert(server.backend.getModel('User').users.length == 1);
                 done();
             });
     });
@@ -208,7 +193,7 @@ describe('api router', function () {
             .end(function (err, res) {
                 if (err) return done(err);
                 assert(!res.body.success);
-                assert(server.backend.User.users.length == 0);
+                assert(server.backend.getModel('User').users.length == 0);
                 done();
             });
     });
@@ -228,7 +213,7 @@ describe('api router', function () {
                 // console.dir(res.body);
                 if (err) return done(err);
                 assert(!res.body.success);
-                assert(server.backend.User.users.length == 0);
+                assert(server.backend.getModel('User').users.length == 0);
                 done();
             });
     });
@@ -250,7 +235,7 @@ describe('api router', function () {
                 // console.dir(res.body);
                 if (err) return done(err);
                 assert(res.body.success);
-                assert(server.backend.Dataset.sets.length == 1);
+                assert(server.backend.getModel('Dataset').sets.length == 1);
                 done();
             });
     });
@@ -269,7 +254,7 @@ describe('api router', function () {
                 // console.dir(res.body);
                 if (err) return done(err);
                 assert(!res.body.success);
-                assert(server.backend.Dataset.sets.length == 0);
+                assert(server.backend.getModel('Dataset').sets.length == 0);
                 done();
             });
     });
@@ -291,7 +276,7 @@ describe('api router', function () {
                 // console.dir(res.body);
                 if (err) return done(err);
                 assert(!res.body.success);
-                assert(server.backend.User.users.length == 0);
+                assert(server.backend.getModel('User').users.length == 0);
                 done();
             });
     });
@@ -393,7 +378,7 @@ describe('api router', function () {
                 // console.dir(res.body);
                 if (err) return done(err);
                 assert(res.body.success);
-                server.backend.Dataset.findById(1, function (err, result) {
+                server.backend.getModel('Dataset').findById(1, function (err, result) {
                     if (err) done(err);
                     assert(result.name == 'fred');
                     done();
@@ -540,7 +525,7 @@ describe('api router', function () {
                 // console.dir(res.body);
                 if (err) return done(err);
                 assert(res.body.success);
-                assert(server.backend.Dataset.sets.length == 2);
+                assert(server.backend.getModel('Dataset').sets.length == 2);
                 done();
             });
     });
@@ -562,8 +547,8 @@ describe('api router', function () {
                 // console.dir(res.body);
                 if (err) return done(err);
                 assert(res.body.success);
-                assert(server.backend.Datapoint.points.length == 1);
-                assert(server.backend.Datapoint.points[0].y == 8);
+                assert(server.backend.getModel('Datapoint').points.length == 1);
+                assert(server.backend.getModel('Datapoint').points[0].y == 8);
                 done();
             });
     });
@@ -585,8 +570,8 @@ describe('api router', function () {
                 // console.dir(server.backend.Datapoint.points);
                 if (err) return done(err);
                 assert(res.body.success);
-                assert(server.backend.Datapoint.points.length == 3);
-                assert(server.backend.Datapoint.points[0].y == 8);
+                assert(server.backend.getModel('Datapoint').points.length == 3);
+                assert(server.backend.getModel('Datapoint').points[0].y == 8);
                 done();
             });
     });
@@ -647,7 +632,7 @@ describe('api router', function () {
                 // console.dir(res.body);
                 if (err) return done(err);
                 assert(res.body.success);
-                assert(server.backend.Datapoint.points.length == 2);
+                assert(server.backend.getModel('Datapoint').points.length == 2);
                 done();
             });
     });
@@ -655,7 +640,25 @@ describe('api router', function () {
 
 // SiteRouter //////////////////
 describe('site router', function () {
-    it('should be non-null', function () {
-        assert(createSiteRouter != null);
+    var server;
+    afterEach(function (done) {
+        server.close(done);
+    });
+
+    it('responds to path /', function (done) {
+        server = stubServer({
+            createRouter: createSiteRouter,
+            ...getTestData('loggedin'),
+            ...getTestData('testdatasets'),
+            ...getTestData('testdatapoints'),
+        });
+
+        request(server)
+            .get('/')
+            .end(function(err, res) {
+                // console.dir(res.text);
+                if(err) return done(err);
+                done();
+            });
     });
 });

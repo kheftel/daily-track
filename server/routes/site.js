@@ -2,9 +2,6 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
-const Dataset = require('../models/dataset');
-const Datapoint = require('../models/datapoint');
-const User = require('../models/user');
 const passport = require('passport');
 const _ = require('lodash');
 const moment = require('moment');
@@ -95,13 +92,16 @@ var state = {
     }
 };
 
-function createSiteRouter(app) {
+function createSiteRouter({
+    backendService
+}) {
 
-    const User = app.backend.User;
-    const Dataset = app.backend.Dataset;
-    const Datapoint = app.backend.Datapoint;
+    const User = backendService.getModel('User');
+    const Dataset = backendService.getModel('Dataset');
+    const Datapoint = backendService.getModel('Datapoint');
 
     const siteRouter = express.Router();
+
     //use bodyparser to get POST vars
     siteRouter.use(bodyParser.urlencoded({
         extended: true
@@ -182,9 +182,6 @@ function createSiteRouter(app) {
                     });
                 }
             }
-            // breadcrumbs.push({
-            //     title: active.title
-            // });
             if (breadcrumbs.length > 0)
                 res.locals.breadcrumbs = breadcrumbs;
         }

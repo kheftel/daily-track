@@ -4,7 +4,7 @@ if (process.env.NODE_ENV !== 'production') {
     require('dotenv').config();
 }
 
-// requries
+// requires
 const BackendService = require('./BackendService');
 const BackendMongoose = require('./BackendMongoose');
 const logger = require('./logger');
@@ -16,7 +16,13 @@ const {
 } = require('./server');
 const app = createApp({
     backendService: new BackendService({
-        backend: new BackendMongoose({})
+        backend: new BackendMongoose({
+            models: {
+                User: require('./models/User'),
+                Dataset: require('./models/Dataset'),
+                Datapoint: require('./models/Datapoint'),
+            }
+        })
     }),
     sessionOptions: {
         secret: process.env.SESSION_SECRET,

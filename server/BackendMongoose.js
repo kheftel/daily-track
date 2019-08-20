@@ -4,22 +4,24 @@ const log = logger.log.extend('BackendMongoose');
 const session = require('express-session');
 const MongoStore = require('connect-mongo')(session);
 const LocalStrategy = require('passport-local').Strategy;
-const User = require('./models/user');
-const Dataset = require('./models/dataset');
-const Datapoint = require('./models/datapoint');
 
 function BackendMongoose(options) {
+    options = options || {};
     mongoose.set('useCreateIndex', true);
     this.connection = mongoose.connection;
     this.connection.on('error', (err) => {
         logger.logError(err, 'mongoose error');
     });
 
-    // schemas
-    this.User = User;
-    this.Dataset = Dataset;
-    this.Datapoint = Datapoint;
+    this.models = {};
+    for(let k in options.models) {
+        this.models[k] = options.models[k];
+    }
 }
+
+BackendMongoose.prototype.getModel = function (model) {
+    return this.models[model];
+};
 
 BackendMongoose.prototype.connect = function (url) {
     var result = mongoose.connect(url, {
@@ -41,12 +43,14 @@ BackendMongoose.prototype.createSession = function (options) {
 };
 
 BackendMongoose.prototype.initAuthentication = function ({
-    passport
+    passport,
+    model
 }) {
-    // Configure passport-local to use account model for authentication
-    passport.use(new LocalStrategy(this.User.authenticate()));
-    passport.serializeUser(this.User.serializeUser());
-    passport.deserializeUser(this.User.deserializeUser());
+    // Configure passport-local to use desired model for authentication
+    let _model = this.models[model];
+    passport.use(new LocalStrategy(_model.authenticate()));
+    passport.serializeUser(_model.serializeUser());
+    passport.deserializeUser(_model.deserializeUser());
 };
 
 module.exports = BackendMongoose;

@@ -84,6 +84,7 @@
     "browserify": "^16.2.3",
     "browserslist": "^4.5.5",
     "bundle-buddy": "^0.2.1",
+    "chai": "^4.2.0",
     "clean-webpack-plugin": "^2.0.1",
     "copyfiles": "^2.1.0",
     "coveralls": "^3.0.6",
