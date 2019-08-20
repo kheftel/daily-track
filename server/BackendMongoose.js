@@ -68,4 +68,14 @@ BackendMongoose.prototype.authenticate = function (options) {
     });
 };
 
+BackendMongoose.prototype.create = function (model, options, cb) {
+    let Model = this.getModel(model);
+    let result = new Model();
+    for (let k in options) {
+        result[k] = options[k];
+    }
+    result.save(cb);
+    return result;
+};
+
 module.exports = BackendMongoose;

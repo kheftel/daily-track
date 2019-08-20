@@ -5,6 +5,7 @@ const bodyParser = require('body-parser');
 const createError = require('http-errors');
 const logger = require('../logger');
 const log = logger.log.extend('api');
+const createAPIController = require('../controllers/apicontroller');
 
 const {
     body,
@@ -25,6 +26,8 @@ function createAPIRouter({
     const User = backendService.getModel('User');
     const Dataset = backendService.getModel('Dataset');
     const Datapoint = backendService.getModel('Datapoint');
+
+    var controller = createAPIController(backendService);
 
     var apiRouter = express.Router();
 
@@ -109,22 +112,8 @@ function createAPIRouter({
             failureFlash: true
         }),
 
-        // passport.authenticate('local', {
-        //     failWithError: true,
-        //     failureFlash: true
-        // }),
-
         function (req, res, next) {
             // handle success
-            // if (req.xhr) {
-            //     return res.json({
-            //         success: true,
-            //         message: "Login successful for " + req.user.username
-            //     });
-            // }
-            // req.flash('success', 'Welcome, ' + req.user.username + '!');
-            // return res.redirect('/');
-
             return respond(res, true, {
                 message: "Login successful for " + req.user.username
             });
@@ -132,7 +121,6 @@ function createAPIRouter({
 
         function (err, req, res, next) {
             // handle error
-            // logger.logError(err, 'auth error');
 
             // passport stores its error messages in flash in session
             var errorMessages = req.flash('error');
@@ -143,18 +131,6 @@ function createAPIRouter({
                 message: errorMessages.join(), // not sure if comma is correct
                 passporterror: err
             });
-
-            // if (req.xhr) {
-            //     // only call req.flash() here, because it consumes the messages
-            //     var errorMessages = req.flash('error');
-            //     log(errorMessages.join());
-            //     return res.json({
-            //         success: false,
-            //         message: errorMessages.join(), // not sure if comma is correct
-            //         passporterror: err
-            //     });
-            // }
-            // return res.redirect('/login');
         },
     ]);
 
@@ -190,22 +166,20 @@ function createAPIRouter({
 
             // Create dataset with validated / sanitized data
             log('creating dataset %s', req.body.name);
-            var dataset = new Dataset();
-            dataset.name = req.body.name;
-            dataset.yAxisLabel = req.body.yAxisLabel;
-            dataset.owner = req.body.owner; // hidden field
-            dataset.chartType = 'line'; // req.body.chartType;
-            dataset.precision = 'daily';
-            dataset.xAxisLabel = 'Date';
-
-            // save the dataset and check for errors
-            dataset.save(function (err) {
+            backendService.create('Dataset', {
+                name: req.body.name,
+                yAxisLabel: req.body.yAxisLabel,
+                owner: req.body.owner, // hidden field
+                chartType: 'line',
+                precision: 'daily',
+                xAxisLabel: 'Date',
+            }, function (err, result) {
                 if (err) {
                     return next(logger.verror(err, 'Error saving dataset'));
                 }
 
                 return respond(res, true, {
-                    message: 'Dataset ' + dataset.name + ' created!'
+                    message: 'Dataset ' + result.name + ' created!'
                 });
             });
         }
@@ -218,21 +192,15 @@ function createAPIRouter({
         authorize,
 
         function (req, res, next) {
-            Dataset.find({
-                    owner: req.user._id
-                })
-                .sort({
-                    name: 'asc'
-                })
-                .exec(function (err, datasets) {
-                    if (err) {
-                        return next(logger.verror(err, 'Error getting datasets'));
-                    }
+            controller.getDatasetsForUser(req.user._id, function (err, datasets) {
+                if (err) {
+                    return next(logger.verror(err, 'Error getting datasets'));
+                }
 
-                    return respond(res, true, {
-                        data: datasets
-                    });
+                return respond(res, true, {
+                    data: datasets
                 });
+            });
         });
 
     // get dataset (includes datapoints)
@@ -242,47 +210,20 @@ function createAPIRouter({
         authorize,
 
         function (req, res, next) {
-            // grab the dataset from the db
-            Dataset.findById(req.params.id, function (err, dataset) {
+            controller.getDatasetWithPoints(req.params.id, function (err, result) {
                 if (err) {
-                    return next(logger.verror(err, 'Database error finding dataset %s', req.params.id));
+                    return next(logger.verror(err, 'Database error getting dataset %s', req.params.id));
                 }
 
-                // bad id? no dataset found?
-                if (!dataset) {
-                    log("No dataset found for id %s", req.params.id);
+                if (!result) {
                     return respond(res, false, {
                         message: "No dataset found for id " + req.params.id
                     });
                 }
 
-                // populate its datapoints
-                Datapoint.find({
-                        'dataset': req.params.id,
-                    })
-                    .sort({
-                        x: 'asc'
-                    })
-                    .exec(function (err, datapoints) {
-                        if (err) {
-                            return next(logger.verror(err, 'Database error finding points'));
-                        }
-
-                        var result = dataset.toObject();
-
-                        // truncate to time only
-                        for (let i = 0; i < datapoints.length; i++) {
-                            var point = datapoints[i].toObject();
-                            point.x = truncateTime(point.x); //moment(point.x).utc().format('YYYY-MM-DD');
-                            datapoints[i] = point;
-                        }
-
-                        result.data = datapoints;
-
-                        return respond(res, true, {
-                            data: result
-                        });
-                    });
+                return respond(res, true, {
+                    data: result
+                });
             });
         });
 

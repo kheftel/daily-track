@@ -247,7 +247,7 @@ FakeDatapoint.prototype.toObject = function () {
 FakeDatapoint.prototype.save = function (cb) {
     _save(FakeDatapoint.points, this);
 
-    cb();
+    cb(null, this);
 };
 
 FakeDatapoint.prototype.delete = function (cb) {
@@ -318,6 +318,15 @@ var backend = {
                 User.register(new User({
                     username: options.username
                 }), options.password, cb);
+            },
+            create(model, options, cb) {
+                let Model = this.getModel(model);
+                let result = new Model();
+                for (let k in options) {
+                    result[k] = options[k];
+                }
+                result.save(cb);
+                return result;
             }
         };
 
@@ -366,10 +375,13 @@ var server = {
                     req.isAuthenticated = function () {
                         return req.user != null;
                     };
-    
+
                     return next();
                 };
             },
+            create(model, options, cb) {
+                return this.backend.create(model, options, cb);
+            }
         };
         router = options.createRouter({
             backendService

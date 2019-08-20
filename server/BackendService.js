@@ -63,4 +63,8 @@ BackendService.prototype.authenticate = function(options) {
     return this.backend.authenticate(options);
 };
 
+BackendService.prototype.create = function (model, options, cb) {
+    return this.backend.create(model, options, cb);
+};
+
 module.exports = BackendService;
