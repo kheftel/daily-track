@@ -429,54 +429,20 @@ function addDatasetsFromIds(ids, complete) {
                 } else
                     this.addDatasetFromModel(data.data);
                 console.log(data);
-            }).fail((err) => {
-                console.log(err);
+            }).fail((xhr) => {
+                console.log(xhr.responseJSON);
             })
         );
     });
     // Can't pass a literal array, so use apply.
     $.when.apply($, deferreds).then(() => {
         if (complete) complete();
-    }).fail((err) => {
-        console.log(err);
+    }).fail((xhr) => {
+        console.log(xhr.responseJSON);
     }).always(() => {
         // Or use always if you want to do the same thing
         // whether the call succeeds or fails
     });
-
-    // function load(id) {
-    //     console.log('loading set ' + id);
-    //     $.ajax({
-    //         url: '/api/sets/' + id,
-    //         method: 'GET',
-    //         success: (dataset) => {
-    //             datasets.push(dataset);
-    //             next();
-    //         },
-    //         error: (err) => {
-    //             console.log(err);
-    //             next();
-    //         }
-    //     });
-    // }
-
-    // var next = function () {
-    //     console.log(which + '/' + ids.length);
-    //     if (which < ids.length) {
-    //         load(ids[which]);
-    //         which++;
-    //     } else if (which == ids.length) {
-    //         // all done
-    //         datasets.forEach((set, i) => {
-    //             console.log('adding set ' + i + ', id=' + set._id);
-    //             this.addDatasetFromModel(set);
-    //         });
-
-    //         if (complete) complete();
-    //     }
-    // }.bind(this);
-
-    // next();
 }
 ModuleChartDetail.prototype.addDatasetsFromIds = addDatasetsFromIds;
 
@@ -564,7 +530,7 @@ function addDatasetFromModel(dataset, complete) {
                     encode: true
                 })
                 .done((data) => {
-                    console.log('ajax resopnse:');
+                    console.log('ajax response:');
                     console.log(data);
 
                     // enable btn
@@ -615,18 +581,18 @@ function addDatasetFromModel(dataset, complete) {
                             });
                     }
                 })
-                .fail((data) => {
+                .fail((xhr) => {
                     // enable btn
                     $(this._btnDrpDeleteSet).prop('disabled', false);
 
                     $.toast({
                         title: 'Error!',
-                        content: (data && data.message) || 'Unable to delete, please try again later',
+                        content: (xhr && xhr.responseJSON && xhr.responseJSON.message) || 'Unable to delete, please try again later',
                         type: 'error',
                         delay: 5000
                     });
                     console.log('ajax error:');
-                    console.log(data);
+                    console.log(xhr.responseJSON);
                 });
         });
     }

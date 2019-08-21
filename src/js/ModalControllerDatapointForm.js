@@ -100,7 +100,7 @@ function ModalControllerDatapointForm() {
                     // window.location = '/thank-you'; // redirect a user to another page
                 }
             })
-            .fail((data) => {
+            .fail((xhr) => {
                 // enable save btn
                 this.getView(btn).prop('disabled', false);
                 // this.getView('#save .spinner-border').addClass('d-none');
@@ -110,13 +110,13 @@ function ModalControllerDatapointForm() {
 
                 $.toast({
                     title: 'Error!',
-                    content: 'Unable to save, please try again later',
+                    content: (xhr && xhr.responseJSON && xhr.responseJSON.message) || 'Unable to save, please try again later',
                     type: 'error',
                     delay: 5000
                 });
 
                 console.log('ajax error:');
-                console.log(data);
+                console.log(xhr.responseJSON);
             });
     };
 

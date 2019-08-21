@@ -108,20 +108,30 @@ function createAPIController(backendService) {
 
                     if (!datapoint) {
                         // create new one
-                        let newpoint = new Datapoint();
-                        newpoint.dataset = datasetid;
+                        datapoint = new Datapoint();
+                        datapoint.dataset = datasetid;
                         for (let k in options) {
-                            newpoint[k] = options[k];
+                            datapoint[k] = options[k];
                         }
 
-                        // save the datapoint
-                        newpoint.save(cb);
                     } else {
                         // update
                         datapoint.y = options.y;
                         datapoint.tags = options.tags;
-                        datapoint.save(cb);
                     }
+
+                    var point = datapoint.toObject();
+                    point.x = truncateTime(point.x);
+
+                    // save the datapoint
+                    datapoint.save((err) => {
+                        if (err) return cb(err);
+
+                        return cb(null, {
+                            success: true,
+                            datapoint: point
+                        });
+                    });
                 });
         },
         deleteDatapoint(datasetid, options, cb) {

@@ -78,20 +78,20 @@ block pagescript
                     // window.location = '/thank-you'; // redirect a user to another page
                 }
             })
-            .fail(function(data) {
+            .fail(function(xhr) {
                 // hide the spinner
                 $('#save').removeClass('disabled');
                 $('#save .spinner-border').addClass('d-none');
 
                 $.toast({
                     title: 'Error!',
-                    content: 'Unable to save, please try again later',
+                    content: (xhr && xhr.responseJSON && xhr.responseJSON.message) || 'Unable to save, please try again later',
                     type: 'error',
                     delay: 5000
                 });
 
                 console.log('ajax error:');
-                console.log(data);
+                console.log(xhr.responseJSON);
             });
 
             // stop the form from submitting the normal way and refreshing the page

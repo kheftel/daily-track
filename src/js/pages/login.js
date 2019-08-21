@@ -80,19 +80,19 @@ $('#login-form').submit(function (event) {
                 // window.location = '/thank-you'; // redirect a user to another page
             }
         })
-        .fail(function (data) {
+        .fail(function (xhr) {
             // enable btn
             $('#save').prop('disabled', false);
 
             $.toast({
                 title: 'Error!',
-                content: 'Unable to log in, please try again later',
+                content: (xhr && xhr.responseJSON && xhr.responseJSON.message) || 'Unable to log in, please try again later',
                 type: 'error',
                 delay: 5000
             });
 
             // TO DO: show a user error
-            console.log(data);
+            console.log(xhr.responseJSON);
         });
 
     // stop the form from submitting the normal way and refreshing the page

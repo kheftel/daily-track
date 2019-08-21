@@ -23,10 +23,6 @@ require('moment-round');
 function createAPIRouter({
     backendService
 }) {
-    const User = backendService.getModel('User');
-    const Dataset = backendService.getModel('Dataset');
-    const Datapoint = backendService.getModel('Datapoint');
-
     var controller = createAPIController(backendService);
 
     var apiRouter = express.Router();
@@ -354,11 +350,12 @@ function createAPIRouter({
                     x: req.body.x,
                     y: req.body.y,
                     tags: req.body.tags,
-                }, (err) => {
+                }, (err, response) => {
                     if (err) return next(logger.verror(err, 'Error updating point'));
 
                     return respond(res, true, {
-                        message: 'Datapoint saved'
+                        message: 'Datapoint saved',
+                        datapoint: response.datapoint
                     });
                 });
             } else {

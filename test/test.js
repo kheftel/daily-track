@@ -693,6 +693,29 @@ describe('api router', function () {
                 done();
             });
     });
+    it('fails to delete a non-existent datapoint', function (done) {
+        server = stubServer({
+            createRouter: createAPIRouter,
+            ...getTestData('loggedin'),
+            ...getTestData('testdatasets'),
+            ...getTestData('testdatapoints'),
+        });
+        request(server)
+            .post('/sets/1/data')
+            .send({
+                x: '2017-01-01',
+                y: 8,
+                delete: 1
+            })
+            .expect(200)
+            .end(function (err, res) {
+                // console.dir(res.body);
+                if (err) return done(err);
+                assert(!res.body.success);
+                assert(server.backend.getModel('Datapoint').points.length == 3);
+                done();
+            });
+    });
 });
 
 // SiteRouter //////////////////

@@ -10,6 +10,7 @@ const ensureLoggedIn = require('connect-ensure-login').ensureLoggedIn;
 const ensureLoggedOut = require('connect-ensure-login').ensureLoggedOut;
 const logger = require('../logger');
 const log = logger.log.extend('siterouter');
+const createSiteController = require('../controllers/sitecontroller');
 
 // template data
 var state = {
@@ -95,10 +96,11 @@ var state = {
 function createSiteRouter({
     backendService
 }) {
-
     const User = backendService.getModel('User');
     const Dataset = backendService.getModel('Dataset');
     const Datapoint = backendService.getModel('Datapoint');
+
+    var controller = createSiteController(backendService);
 
     const siteRouter = express.Router();
 
