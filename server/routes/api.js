@@ -173,13 +173,13 @@ function createAPIRouter({
                 chartType: 'line',
                 precision: 'daily',
                 xAxisLabel: 'Date',
-            }, function (err, result) {
+            }, function (err) {
                 if (err) {
                     return next(logger.verror(err, 'Error saving dataset'));
                 }
 
                 return respond(res, true, {
-                    message: 'Dataset ' + result.name + ' created!'
+                    message: 'Dataset ' + req.body.name + ' created!'
                 });
             });
         }
@@ -253,85 +253,40 @@ function createAPIRouter({
                 });
             }
 
-            Dataset.findById(req.params.id, function (err, dataset) {
-                if (err) {
-                    return next(logger.verror(err, 'Database error while finding dataset %s', req.params.id));
-                }
+            if (req.body.delete != 1) {
+                // update dataset
+                controller.updateDatasetForUser(req.user._id, req.params.id, {
+                    name: req.body.name,
+                    yAxisLabel: req.body.yAxisLabel
+                }, (err, response) => {
+                    if (err) return next(logger.verror(err, 'Error updating dataset %s', req.params.id));
 
-                if (dataset) {
-                    // does the current user own this dataset?
-                    // if (!dataset.owner.equals(req.user._id)) {
-                    if (dataset.owner.toString() != req.user._id.toString()) {
-                        log('permission denied, %s does not own dataset %s', req.user._id, dataset.owner);
+                    if (response && response.message) {
                         return respond(res, false, {
-                            errors: [{
-                                msg: 'Permission denied, you do not own this dataset'
-                            }]
+                            message: response.message
                         });
                     }
 
-                    if (req.body.delete == "1") {
-                        // delete dataset, but only if it has no datapoints
-
-                        Datapoint.findOne({
-                                dataset: req.params.id
-                            })
-                            .exec((err, datapoint) => {
-                                if (err) {
-                                    return next(logger.verror(err, 'Error while finding datapoints for dataset %s', req.params.id));
-                                }
-
-                                if (datapoint) {
-                                    // cannot delete
-                                    return respond(res, false, {
-                                        errors: [{
-                                            msg: 'Cannot delete non-empty dataset. Please delete all points first.'
-                                        }]
-                                    });
-                                } else {
-                                    //empty, can delete
-                                    dataset.delete((err) => {
-                                        if (err) {
-                                            return next(logger.verror(err, 'Database error while deleting dataset %s', req.params.id));
-                                        }
-
-                                        return respond(res, true, {
-                                            message: 'Dataset deleted'
-                                        });
-                                    });
-                                }
-                            });
-                    } else {
-                        // update dataset
-                        dataset.name = req.body.name;
-                        dataset.yAxisLabel = req.body.yAxisLabel;
-                        // dataset.chartType = req.body.chartType;
-
-                        // ['name', 'chartType', 'yAxisLabel'].forEach(function (element) {
-                        //     if (req.body[element] !== undefined)
-                        //         dataset[element] = req.body[element];
-                        // });
-
-                        // save the dataset
-                        dataset.save(function (err) {
-                            if (err) {
-                                return next(logger.verror(err, 'Error while saving dataset %s', dataset._id));
-                            }
-
-                            return respond(res, true, {
-                                message: 'Dataset ' + dataset.name + ' updated!'
-                            });
-                        });
-                    }
-                } else {
-                    // dataset not found
-                    return respond(res, false, {
-                        errors: [{
-                            msg: "No dataset found"
-                        }]
+                    return respond(res, true, {
+                        message: 'Dataset updated!'
                     });
-                }
-            });
+                });
+            } else {
+                // delete dataset
+                controller.deleteDatasetForUser(req.user._id, req.params.id, (err, response) => {
+                    if (err) return next(logger.verror(err, 'Error deleting dataset'));
+
+                    if (response && response.message) {
+                        return respond(res, false, {
+                            message: response.message
+                        });
+                    }
+
+                    return respond(res, true, {
+                        message: 'Dataset deleted'
+                    });
+                });
+            }
         }
     ]);
 
@@ -393,80 +348,116 @@ function createAPIRouter({
                 });
             }
 
-            // Create/update/delete datapoint with validated / sanitized data
-            Datapoint.findOne({
-                    dataset: req.params.id,
-                    x: req.body.x
-                })
-                .exec((err, datapoint) => {
-                    if (err) {
-                        return next(logger.verror(err, 'error while finding datapoint %s in dataset %s', req.body.x, req.params.id));
-                    }
+            if (req.body.delete != 1) {
+                // create/update datapoint
+                controller.createOrUpdateDatapointForDataset(req.params.id, {
+                    x: req.body.x,
+                    y: req.body.y,
+                    tags: req.body.tags,
+                }, (err) => {
+                    if (err) return next(logger.verror(err, 'Error updating point'));
 
-                    if (datapoint) {
-                        if (req.body.delete == "1") {
-                            // delete datapoint
-                            var deletedPoint = datapoint.toObject();
-                            deletedPoint.x = truncateTime(deletedPoint.x);
-                            datapoint.delete((err) => {
-                                if (err) {
-                                    return next(logger.verror(err, 'error while deleting datapoint'));
-                                }
+                    return respond(res, true, {
+                        message: 'Datapoint saved'
+                    });
+                });
+            } else {
+                // delete datapoint
+                controller.deleteDatapoint(req.params.id, {
+                    x: req.body.x,
+                }, (err, response) => {
+                    if (err) return next(logger.verror(err, 'Error deleting datapoint'));
 
-                                return respond(res, true, {
-                                    message: 'Datapoint deleted',
-                                    datapoint: deletedPoint
-                                });
-                            });
-                        } else {
-                            // update datapoint
-                            datapoint.y = req.body.y;
-                            datapoint.tags = req.body.tags;
-                            datapoint.save((err) => {
-                                if (err) {
-                                    return next(logger.verror(err, 'Error while updating datapoint'));
-                                }
-
-                                var point = datapoint.toObject();
-                                point.x = truncateTime(point.x);
-                                return respond(res, true, {
-                                    message: 'Datapoint updated',
-                                    datapoint: point
-                                });
-                            });
-                        }
-                    } else {
-                        // delete error
-                        if (req.body.delete == "1") {
-                            return respond(res, false, {
-                                errors: [{
-                                    msg: "No datapoint to delete"
-                                }]
-                            });
-                        }
-
-                        // create new datapoint
-                        var newpoint = new Datapoint();
-                        newpoint.x = req.body.x;
-                        newpoint.y = req.body.y;
-                        newpoint.tags = req.body.tags;
-                        newpoint.dataset = req.params.id;
-
-                        // save the datapoint and check for errors
-                        newpoint.save(function (err) {
-                            if (err) {
-                                return next(logger.verror(err, 'Error while saving datapoint'));
-                            }
-
-                            var point = newpoint.toObject();
-                            point.x = truncateTime(point.x);
-                            return respond(res, true, {
-                                message: 'Datapoint created for ' + req.body.x,
-                                datapoint: point
-                            });
+                    if (response.success) {
+                        // datapoint was deleted
+                        return respond(res, true, {
+                            message: 'Dataset deleted',
+                            datapoint: response.datapoint,
                         });
+                    } else {
+                        if (response.message) {
+                            return respond(res, false, {
+                                message: response.message,
+                            });
+                        }
                     }
                 });
+            }
+
+            // Create/update/delete datapoint with validated / sanitized data
+            // Datapoint.findOne({
+            //         dataset: req.params.id,
+            //         x: req.body.x
+            //     })
+            //     .exec((err, datapoint) => {
+            //         if (err) {
+            //             return next(logger.verror(err, 'error while finding datapoint %s in dataset %s', req.body.x, req.params.id));
+            //         }
+
+            //         if (datapoint) {
+            //             if (req.body.delete == "1") {
+            //                 // delete datapoint
+            //                 var deletedPoint = datapoint.toObject();
+            //                 deletedPoint.x = truncateTime(deletedPoint.x);
+            //                 datapoint.delete((err) => {
+            //                     if (err) {
+            //                         return next(logger.verror(err, 'error while deleting datapoint'));
+            //                     }
+
+            //                     return respond(res, true, {
+            //                         message: 'Datapoint deleted',
+            //                         datapoint: deletedPoint
+            //                     });
+            //                 });
+            //             } else {
+            //                 // update datapoint
+            //                 datapoint.y = req.body.y;
+            //                 datapoint.tags = req.body.tags;
+            //                 datapoint.save((err) => {
+            //                     if (err) {
+            //                         return next(logger.verror(err, 'Error while updating datapoint'));
+            //                     }
+
+            //                     var point = datapoint.toObject();
+            //                     point.x = truncateTime(point.x);
+            //                     return respond(res, true, {
+            //                         message: 'Datapoint updated',
+            //                         datapoint: point
+            //                     });
+            //                 });
+            //             }
+            //         } else {
+            //             // delete error
+            //             if (req.body.delete == "1") {
+            //                 return respond(res, false, {
+            //                     errors: [{
+            //                         msg: "No datapoint to delete"
+            //                     }]
+            //                 });
+            //             }
+
+            //             // create new datapoint
+            //             var newpoint = new Datapoint();
+            //             newpoint.x = req.body.x;
+            //             newpoint.y = req.body.y;
+            //             newpoint.tags = req.body.tags;
+            //             newpoint.dataset = req.params.id;
+
+            //             // save the datapoint and check for errors
+            //             newpoint.save(function (err) {
+            //                 if (err) {
+            //                     return next(logger.verror(err, 'Error while saving datapoint'));
+            //                 }
+
+            //                 var point = newpoint.toObject();
+            //                 point.x = truncateTime(point.x);
+            //                 return respond(res, true, {
+            //                     message: 'Datapoint created for ' + req.body.x,
+            //                     datapoint: point
+            //                 });
+            //             });
+            //         }
+            //     });
         }
     ]);
 

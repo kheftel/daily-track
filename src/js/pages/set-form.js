@@ -71,11 +71,22 @@ $('#set-form').submit(function (event) {
                         }
                     });
                 }
+
                 // db saving error
                 if (data.error) {
                     $.toast({
                         title: 'Error!',
                         content: data.error.message || 'Unable to save, please try again later',
+                        type: 'error',
+                        delay: 5000
+                    });
+                }
+                
+                // other message
+                if (data.message) {
+                    $.toast({
+                        title: 'Error!',
+                        content: data.message,
                         type: 'error',
                         delay: 5000
                     });
@@ -104,7 +115,7 @@ $('#set-form').submit(function (event) {
 
             $.toast({
                 title: 'Error!',
-                content: 'Unable to save, please try again later',
+                content: (data && data.message) || 'Unable to save, please try again later',
                 type: 'error',
                 delay: 5000
             });

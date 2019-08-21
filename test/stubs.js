@@ -169,7 +169,7 @@ FakeDataset.prototype.save = function (cb) {
 
     _save(FakeDataset.sets, this);
 
-    cb(null, this);
+    cb(null);
 };
 
 FakeDataset.prototype.delete = function (cb) {
@@ -247,7 +247,7 @@ FakeDatapoint.prototype.toObject = function () {
 FakeDatapoint.prototype.save = function (cb) {
     _save(FakeDatapoint.points, this);
 
-    cb(null, this);
+    cb(null);
 };
 
 FakeDatapoint.prototype.delete = function (cb) {

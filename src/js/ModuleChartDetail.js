@@ -584,6 +584,14 @@ function addDatasetFromModel(dataset, complete) {
                                 });
                             });
                         }
+                        if (data.message) {
+                            $.toast({
+                                title: 'Error',
+                                content: data.message,
+                                type: 'error',
+                                delay: 5000
+                            });
+                        }
                     } else {
                         $(this._main)
                             .removeClass('anim-disappear')
@@ -613,7 +621,7 @@ function addDatasetFromModel(dataset, complete) {
 
                     $.toast({
                         title: 'Error!',
-                        content: 'Unable to delete, please try again later',
+                        content: (data && data.message) || 'Unable to delete, please try again later',
                         type: 'error',
                         delay: 5000
                     });
