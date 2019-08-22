@@ -7,6 +7,7 @@ function BackendService({
 }) {
     this.backend = backend;
     this.connection = backend.connection;
+    this.passport = backend.passport;
     this.connection.on('error', (err) => {
         logger.logError(err, 'backend error');
     });

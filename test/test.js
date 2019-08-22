@@ -3,8 +3,8 @@ const should = require('should');
 const VError = require('verror');
 const debug = require('debug');
 const logger = require('../server/logger');
-const createSiteRouter = require('../server/routes/site');
-const createAPIRouter = require('../server/routes/api');
+const siteRouter = require('../server/routes/site');
+const apiRouter = require('../server/routes/api');
 const BackendService = require('../server/BackendService');
 const request = require('supertest');
 const expect = require('chai').expect;
@@ -116,7 +116,7 @@ describe('api router', function () {
 
     it('responds unauthorized if not logged in', function (done) {
         server = stubServer({
-            createRouter: createAPIRouter
+            createRouter: apiRouter
         });
         request(server)
             .get('/')
@@ -132,7 +132,7 @@ describe('api router', function () {
     });
     it('sends 404', function (done) {
         server = stubServer({
-            createRouter: createAPIRouter
+            createRouter: apiRouter
         });
         request(server)
             .get('/nonexistentpage')
@@ -148,7 +148,7 @@ describe('api router', function () {
     });
     it('responds to /', function (done) {
         server = stubServer({
-            createRouter: createAPIRouter,
+            createRouter: apiRouter,
             ...getTestData('loggedin')
         });
         request(server)
@@ -165,7 +165,7 @@ describe('api router', function () {
     });
     it('registers a user', function (done) {
         server = stubServer({
-            createRouter: createAPIRouter,
+            createRouter: apiRouter,
         });
         request(server)
             .post('/register')
@@ -183,7 +183,7 @@ describe('api router', function () {
     });
     it('fails to register a user if validation errors', function (done) {
         server = stubServer({
-            createRouter: createAPIRouter,
+            createRouter: apiRouter,
         });
         request(server)
             .post('/register')
@@ -200,7 +200,7 @@ describe('api router', function () {
     });
     it('reports db error on register user', function (done) {
         server = stubServer({
-            createRouter: createAPIRouter,
+            createRouter: apiRouter,
             ...getTestData('dberror'),
         });
         request(server)
@@ -220,7 +220,7 @@ describe('api router', function () {
     });
     it('logs in', function (done) {
         server = stubServer({
-            createRouter: createAPIRouter,
+            createRouter: apiRouter,
             ...getTestData('testusers'),
         });
         request(server)
@@ -239,7 +239,7 @@ describe('api router', function () {
     });
     it('fails to log in if password incorrect', function (done) {
         server = stubServer({
-            createRouter: createAPIRouter,
+            createRouter: apiRouter,
             ...getTestData('testusers'),
         });
         request(server)
@@ -258,7 +258,7 @@ describe('api router', function () {
     });
     it('fails to log in if validation errors', function (done) {
         server = stubServer({
-            createRouter: createAPIRouter,
+            createRouter: apiRouter,
             ...getTestData('testusers'),
         });
         request(server)
@@ -276,7 +276,7 @@ describe('api router', function () {
     });
     it('creates a dataset', function (done) {
         server = stubServer({
-            createRouter: createAPIRouter,
+            createRouter: apiRouter,
             ...getTestData('loggedin'),
         });
         request(server)
@@ -298,7 +298,7 @@ describe('api router', function () {
     });
     it('fails to create a dataset if validation errors', function (done) {
         server = stubServer({
-            createRouter: createAPIRouter,
+            createRouter: apiRouter,
             ...getTestData('loggedin'),
         });
         request(server)
@@ -317,7 +317,7 @@ describe('api router', function () {
     });
     it('reports db error on create dataset', function (done) {
         server = stubServer({
-            createRouter: createAPIRouter,
+            createRouter: apiRouter,
             ...getTestData('dberror'),
         });
         request(server)
@@ -339,7 +339,7 @@ describe('api router', function () {
     });
     it('gets datasets', function (done) {
         server = stubServer({
-            createRouter: createAPIRouter,
+            createRouter: apiRouter,
             ...getTestData('loggedin'),
             ...getTestData('testdatasets'),
         });
@@ -356,7 +356,7 @@ describe('api router', function () {
     });
     it('reports db error on get datasets', function (done) {
         server = stubServer({
-            createRouter: createAPIRouter,
+            createRouter: apiRouter,
             ...getTestData('dberror'),
         });
         request(server)
@@ -371,7 +371,7 @@ describe('api router', function () {
     });
     it('fails to find nonexistent dataset', function (done) {
         server = stubServer({
-            createRouter: createAPIRouter,
+            createRouter: apiRouter,
             ...getTestData('loggedin'),
             ...getTestData('testdatasets'),
         });
@@ -387,7 +387,7 @@ describe('api router', function () {
     });
     it('gets a dataset with points', function (done) {
         server = stubServer({
-            createRouter: createAPIRouter,
+            createRouter: apiRouter,
             ...getTestData('loggedin'),
             ...getTestData('testdatasets'),
             ...getTestData('testdatapoints'),
@@ -404,7 +404,7 @@ describe('api router', function () {
     });
     it('reports db error on get dataset', function (done) {
         server = stubServer({
-            createRouter: createAPIRouter,
+            createRouter: apiRouter,
             ...getTestData('dberror'),
         });
         request(server)
@@ -419,7 +419,7 @@ describe('api router', function () {
     });
     it('updates a dataset', function (done) {
         server = stubServer({
-            createRouter: createAPIRouter,
+            createRouter: apiRouter,
             ...getTestData('loggedin'),
             ...getTestData('testdatasets'),
             ...getTestData('testdatapoints'),
@@ -444,7 +444,7 @@ describe('api router', function () {
     });
     it('reports db error on update dataset', function (done) {
         server = stubServer({
-            createRouter: createAPIRouter,
+            createRouter: apiRouter,
             ...getTestData('dberror'),
         });
         request(server)
@@ -463,7 +463,7 @@ describe('api router', function () {
     });
     it('fails to update a dataset owned by someone else', function (done) {
         server = stubServer({
-            createRouter: createAPIRouter,
+            createRouter: apiRouter,
             ...getTestData('loggedin'),
             ...getTestData('testdatasets'),
             ...getTestData('testdatapoints'),
@@ -484,7 +484,7 @@ describe('api router', function () {
     });
     it('fails to update a dataset if data is missing', function (done) {
         server = stubServer({
-            createRouter: createAPIRouter,
+            createRouter: apiRouter,
             ...getTestData('loggedin'),
             ...getTestData('testdatasets'),
             ...getTestData('testdatapoints'),
@@ -502,7 +502,7 @@ describe('api router', function () {
     });
     it('fails to update a nonexistent dataset', function (done) {
         server = stubServer({
-            createRouter: createAPIRouter,
+            createRouter: apiRouter,
             ...getTestData('loggedin'),
             ...getTestData('testdatasets'),
             ...getTestData('testdatapoints'),
@@ -523,7 +523,7 @@ describe('api router', function () {
     });
     it('fails to delete a non-empty dataset', function (done) {
         server = stubServer({
-            createRouter: createAPIRouter,
+            createRouter: apiRouter,
             ...getTestData('loggedin'),
             ...getTestData('testdatasets'),
             ...getTestData('testdatapoints'),
@@ -545,7 +545,7 @@ describe('api router', function () {
     });
     it('reports db error on delete non-empty dataset', function (done) {
         server = stubServer({
-            createRouter: createAPIRouter,
+            createRouter: apiRouter,
             ...getTestData('dberror'),
         });
         request(server)
@@ -565,7 +565,7 @@ describe('api router', function () {
     });
     it('deletes an empty dataset', function (done) {
         server = stubServer({
-            createRouter: createAPIRouter,
+            createRouter: apiRouter,
             ...getTestData('loggedin'),
             ...getTestData('testdatasets'),
             ...getTestData('testdatapoints'),
@@ -589,7 +589,7 @@ describe('api router', function () {
 
     it('creates a datapoint', function (done) {
         server = stubServer({
-            createRouter: createAPIRouter,
+            createRouter: apiRouter,
             ...getTestData('loggedin'),
             ...getTestData('testdatasets'),
         });
@@ -611,7 +611,7 @@ describe('api router', function () {
     });
     it('updates a datapoint', function (done) {
         server = stubServer({
-            createRouter: createAPIRouter,
+            createRouter: apiRouter,
             ...getTestData('loggedin'),
             ...getTestData('testdatasets'),
             ...getTestData('testdatapoints'),
@@ -634,7 +634,7 @@ describe('api router', function () {
     });
     it('fails to update datapoint if validation errors', function (done) {
         server = stubServer({
-            createRouter: createAPIRouter,
+            createRouter: apiRouter,
             ...getTestData('dberror'),
         });
         request(server)
@@ -653,7 +653,7 @@ describe('api router', function () {
     });
     it('reports db error on update datapoint', function (done) {
         server = stubServer({
-            createRouter: createAPIRouter,
+            createRouter: apiRouter,
             ...getTestData('dberror'),
         });
         request(server)
@@ -672,7 +672,7 @@ describe('api router', function () {
     });
     it('deletes a datapoint', function (done) {
         server = stubServer({
-            createRouter: createAPIRouter,
+            createRouter: apiRouter,
             ...getTestData('loggedin'),
             ...getTestData('testdatasets'),
             ...getTestData('testdatapoints'),
@@ -695,7 +695,7 @@ describe('api router', function () {
     });
     it('fails to delete a non-existent datapoint', function (done) {
         server = stubServer({
-            createRouter: createAPIRouter,
+            createRouter: apiRouter,
             ...getTestData('loggedin'),
             ...getTestData('testdatasets'),
             ...getTestData('testdatapoints'),
@@ -727,7 +727,7 @@ describe('site router', function () {
 
     it('responds to path /', function (done) {
         server = stubServer({
-            createRouter: createSiteRouter,
+            createRouter: siteRouter,
             ...getTestData('loggedin'),
             ...getTestData('testdatasets'),
             ...getTestData('testdatapoints'),

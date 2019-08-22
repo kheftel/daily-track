@@ -289,7 +289,7 @@ FakeDatapoint.findById = function (id, cb) {
 
 // backend helpers /////////
 
-var backend = {
+var backendHelpers = {
 
     stubBackend(options) {
         options = options || {};
@@ -344,7 +344,7 @@ var server = {
     stubServer(options) {
         options = options || {};
         var backendService = {
-            backend: backend.stubBackend({
+            backend: backendHelpers.stubBackend({
                 models: {
                     User: user.stubUserModel(options.userOptions),
                     Dataset: dataset.stubDatasetModel(options.datasetOptions),
@@ -384,18 +384,16 @@ var server = {
             }
         };
         router = options.createRouter({
-            backendService
+            backend: backendService
         });
         app = express();
-        if (options.stubAuth) {
-            app.use((req, res, next) => {
-                req.user = options.user;
-                req.isAuthenticated = function () {
-                    return req.user != null;
-                };
-                next();
-            });
-        }
+        app.use((req, res, next) => {
+            if (options.stubAuth) req.user = options.user;
+            req.isAuthenticated = function () {
+                return req.user != null;
+            };
+            next();
+        });
         app.use(router);
         var server = app.listen(3000, function () {});
 
@@ -500,7 +498,7 @@ module.exports = {
     ...logs,
     ...user,
     ...dataset,
-    ...backend,
+    ...backendHelpers,
     ...server,
     ...datapoint,
     ...testdata

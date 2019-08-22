@@ -1,10 +1,16 @@
 const moment = require('moment');
 const VError = require('verror');
 
-function createAPIController(backendService) {
-    const Dataset = backendService.getModel('Dataset');
-    const Datapoint = backendService.getModel('Datapoint');
+function backendController(backend) {
+    const Dataset = backend.getModel('Dataset');
+    const Datapoint = backend.getModel('Datapoint');
     let controller = {
+        getDataset(id, cb) {
+            Dataset.findById(id, (err, dataset) => {
+                if (err) return cb(err);
+                return cb(null, dataset);
+            });
+        },
         getDatasetsForUser(id, cb) {
             Dataset.find({
                     owner: id
@@ -14,11 +20,15 @@ function createAPIController(backendService) {
                 })
                 .exec(cb);
         },
-        getDataset(id, cb) {
-            Dataset.findById(id, (err, dataset) => {
-                if (err) return cb(err);
-                return cb(null, dataset);
-            });
+        getDatasetsForUserAndLabel(id, label, cb) {
+            Dataset.find({
+                    owner: id,
+                    yAxisLabel: label,
+                })
+                .sort({
+                    name: 'asc'
+                })
+                .exec(cb);
         },
         getDatasetWithPoints(id, cb) {
             controller.getDataset(id, (err, dataset) => {
@@ -166,7 +176,7 @@ function createAPIController(backendService) {
     return controller;
 }
 
-module.exports = createAPIController;
+module.exports = backendController;
 
 // helper function to truncate time values from date objects
 function truncateTime(x) {
