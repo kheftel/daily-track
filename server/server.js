@@ -9,8 +9,8 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const path = require('path');
 const passport = require('passport');
-const createAPIRouter = require('./routes/api');
-const createSiteRouter = require('./routes/site');
+const apiRouter = require('./routes/api');
+const siteRouter = require('./routes/site');
 const morgan = require('morgan');
 const webpackAssets = require('express-webpack-assets');
 const flash = require('connect-flash');
@@ -20,14 +20,14 @@ const logger = require('./logger');
 const log = logger.log.extend('server');
 
 function createApp({
-    backendService,
+    backend,
     sessionOptions
 }) {
-    backendService.connect(process.env.MONGODB_URI)
+    backend.connect(process.env.MONGODB_URI)
         .then(() => {
             log('connected to backend service');
         });
-    backendService.connection.on('error', (err) => {
+    backend.connection.on('error', (err) => {
         logger.logError(err, 'backend service error');
     });
 
@@ -48,14 +48,13 @@ function createApp({
     }
 
     // set up sessions
-    app.use(backendService.createSession(sessionOptions));
+    app.use(backend.createSession(sessionOptions));
 
     // VIEWS //////////
     app.set('views', path.join(__dirname, 'views'));
     app.set('view engine', 'pug');
 
     // other stuff
-    app.use(bodyParser.json());
     app.use(flash());
 
     // allow app to find list of webpack-ified assets
@@ -67,17 +66,17 @@ function createApp({
     app.use(express.static(path.join(__dirname, '../dist')));
 
     // Configure passport authentication
-    const passport = backendService.backend.passport;
+    const passport = backend.passport;
     app.use(passport.initialize());
     app.use(passport.session());
-    backendService.initAuthentication();
+    backend.initAuthentication();
 
     // ROUTES //////////////////////
-    app.use('/api', createAPIRouter({
-        backendService
+    app.use('/api', apiRouter({
+        backend
     }));
-    app.use('/', createSiteRouter({
-        backendService
+    app.use('/', siteRouter({
+        backend
     }));
 
     return app;

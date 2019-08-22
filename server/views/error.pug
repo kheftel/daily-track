@@ -13,14 +13,3 @@ block content
             pre.bg-secondary= error.path
             p stringify on error:
             pre.bg-secondary= JSON.stringify(error)
-            - console.log('=================== error template, error object: ================== ')
-            - for(var k in error) { console.log(k + ' = ' + error[k] + '\n=====================\n'); }
-            - console.log('===================================== ')
-            - console.log(error)
-            //- .card.border-light.h-100.shadow-rb
-            //-     .card-header.p-2
-            //-         .card-title.m-0.d-flex.content-justify-between
-            //-             = message
-            //-     .card-body(style="position: relative;")
-            //-         h5= error.status
-            //-         pre.chartcontainer #{error.stack}

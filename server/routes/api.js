@@ -5,7 +5,7 @@ const bodyParser = require('body-parser');
 const createError = require('http-errors');
 const logger = require('../logger');
 const log = logger.log.extend('api');
-const createAPIController = require('../controllers/apicontroller');
+const backendController = require('../controllers/backendcontroller');
 
 const {
     body,
@@ -20,18 +20,17 @@ const {
 require('moment-round');
 
 // API /////////////////////////////
-function createAPIRouter({
-    backendService
+function apiRouter({
+    backend
 }) {
-    var controller = createAPIController(backendService);
+    var controller = backendController(backend);
 
     var apiRouter = express.Router();
 
-    //use bodyparser to get POST vars
-    apiRouter.use(bodyParser.urlencoded({
+    apiRouter.use(express.urlencoded({
         extended: true
     }));
-    apiRouter.use(bodyParser.json());
+    apiRouter.use(express.json());
 
     // test route to make sure everything is working (accessed at GET http://localhost:8080/api)
     apiRouter.get('/', authorize, function (req, res) {
@@ -64,7 +63,7 @@ function createAPIRouter({
             // Create user with validated / sanitized data
             log('registering user %s', req.body.username);
 
-            backendService.registerUser({
+            backend.registerUser({
                 username: req.body.username,
                 password: req.body.password,
             }, function (err, result) {
@@ -103,7 +102,7 @@ function createAPIRouter({
             next();
         },
 
-        backendService.authenticate({
+        backend.authenticate({
             failWithError: true,
             failureFlash: true
         }),
@@ -129,6 +128,24 @@ function createAPIRouter({
             });
         },
     ]);
+
+    // get all the datasets
+    apiRouter.get('/sets',
+
+        // authenticate
+        authorize,
+
+        function (req, res, next) {
+            controller.getDatasetsForUser(req.user._id, function (err, datasets) {
+                if (err) {
+                    return next(logger.verror(err, 'Error getting datasets'));
+                }
+
+                return respond(res, true, {
+                    data: datasets
+                });
+            });
+        });
 
     // create a dataset
     apiRouter.post('/sets', [
@@ -162,7 +179,7 @@ function createAPIRouter({
 
             // Create dataset with validated / sanitized data
             log('creating dataset %s', req.body.name);
-            backendService.create('Dataset', {
+            backend.create('Dataset', {
                 name: req.body.name,
                 yAxisLabel: req.body.yAxisLabel,
                 owner: req.body.owner, // hidden field
@@ -180,24 +197,6 @@ function createAPIRouter({
             });
         }
     ]);
-
-    // get all the datasets
-    apiRouter.get('/sets',
-
-        // authenticate
-        authorize,
-
-        function (req, res, next) {
-            controller.getDatasetsForUser(req.user._id, function (err, datasets) {
-                if (err) {
-                    return next(logger.verror(err, 'Error getting datasets'));
-                }
-
-                return respond(res, true, {
-                    data: datasets
-                });
-            });
-        });
 
     // get dataset (includes datapoints)
     apiRouter.get('/sets/:id',
@@ -489,7 +488,7 @@ function createAPIRouter({
     return apiRouter;
 }
 
-module.exports = createAPIRouter;
+module.exports = apiRouter;
 
 // helper functions /////////
 
