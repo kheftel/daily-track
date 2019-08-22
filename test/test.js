@@ -142,6 +142,7 @@ describe('api router', function () {
                 assert(!res.body.success);
             })
             .end(function (err, res) {
+                // console.dir(res.body);
                 if (err) return done(err);
                 done();
             });
