@@ -335,15 +335,11 @@ var backendHelpers = {
         }
 
         return backend;
-    }
-};
+    },
 
-// server helpers //////////
-var server = {
-
-    stubServer(options) {
+    stubBackendService(options) {
         options = options || {};
-        var backendService = {
+        return {
             backend: backendHelpers.stubBackend({
                 models: {
                     User: user.stubUserModel(options.userOptions),
@@ -382,7 +378,16 @@ var server = {
             create(model, options, cb) {
                 return this.backend.create(model, options, cb);
             }
-        };
+        };   
+    }
+};
+
+// server helpers //////////
+var server = {
+
+    stubServer(options) {
+        options = options || {};
+        var backendService = backendHelpers.stubBackendService(options);
         router = options.createRouter({
             backend: backendService
         });

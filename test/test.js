@@ -3,6 +3,7 @@ const should = require('should');
 const VError = require('verror');
 const debug = require('debug');
 const logger = require('../server/logger');
+const siteController = require('../server/controllers/sitecontroller');
 const siteRouter = require('../server/routes/site');
 const apiRouter = require('../server/routes/api');
 const BackendService = require('../server/BackendService');
@@ -16,6 +17,7 @@ const {
     stubDatasetModel,
     stubDatapointModel,
     stubBackend,
+    stubBackendService,
     stubServer,
     getTestData,
 } = require('./stubs');
@@ -104,6 +106,229 @@ describe('BackendService', function () {
             .then(function () {
                 done();
             });
+    });
+});
+
+function stubReqLoggedin(options) {
+    options = options || {};
+    return {
+        user: getTestData('testuser'),
+        flash: () => {},
+        logout: () => {},
+        params: options.params || {},
+        app: options.app || {},
+    };
+}
+
+function stubReqEmpty() {
+    return {
+        flash: () => {},
+        logout: () => {},
+    };
+}
+
+function stubResEmpty() {
+    return {
+        locals: {
+            active: {}
+        },
+    };
+}
+
+function stubResWithOptions(options) {
+    options = options || {};
+    return {
+        locals: {
+            active: {}
+        },
+        status: options.status || (() => {}),
+        render: options.render || (() => {}),
+        redirect: options.redirect || (() => {}),
+    };
+}
+
+// siteController ////////////////////////////
+describe('siteController', function () {
+    it('renders overview page', function (done) {
+        let controller = siteController(stubBackendService({
+            ...getTestData('testdatasets'),
+        }));
+        controller.overview()(
+            stubReqLoggedin(),
+            stubResWithOptions({
+                render: function (template) { // not arrow func
+                    assert(template == 'overview');
+                    // this == subbed res
+                    assert(this.locals.datasets.length == 2);
+                    done();
+                }
+            }),
+            () => {});
+    });
+    it('reports error rendering overview page', function (done) {
+        let controller = siteController(stubBackendService({
+            ...getTestData('dberror'),
+        }));
+        controller.overview()(
+            stubReqLoggedin(),
+            stubResEmpty(),
+            (err) => {
+                // console.dir(err);
+                assert(err instanceof Error);
+                done();
+            });
+    });
+    it('renders register page', function (done) {
+        let controller = siteController(stubBackendService());
+        controller.register()(
+            stubReqEmpty(),
+            stubResWithOptions({
+                render: (template) => {
+                    assert(template == 'register');
+                    done();
+                }
+            }),
+            () => {});
+    });
+    it('redirects to /login after register', function (done) {
+        let controller = siteController(stubBackendService());
+        controller.registerSuccess()(
+            stubReqEmpty(),
+            stubResWithOptions({
+                redirect: (dest) => {
+                    assert(dest == '/login');
+                    done();
+                }
+            }),
+            () => {});
+    });
+    it('redirects to / after logout', function (done) {
+        let controller = siteController(stubBackendService());
+        controller.logout()(
+            stubReqEmpty(),
+            stubResWithOptions({
+                redirect: (dest) => {
+                    assert(dest == '/');
+                    done();
+                }
+            }),
+            () => {});
+    });
+    it('renders new set page', function (done) {
+        let controller = siteController(stubBackendService());
+        controller.newDataset()(
+            stubReqEmpty(),
+            stubResWithOptions({
+                render: (template) => {
+                    assert(template == 'set-form');
+                    done();
+                }
+            }),
+            () => {});
+    });
+    it('renders set detail page', function (done) {
+        let controller = siteController(stubBackendService({
+            ...getTestData('testdatasets'),
+        }));
+        controller.viewDataset()(
+            stubReqLoggedin({
+                params: {
+                    id: 1
+                }
+            }),
+            stubResWithOptions({
+                render: (template) => {
+                    assert(template == 'dataset');
+                    done();
+                }
+            }),
+            () => {});
+    });
+    it('renders edit dataset page', function (done) {
+        let controller = siteController(stubBackendService({
+            ...getTestData('testdatasets'),
+        }));
+        controller.editDataset()(
+            stubReqLoggedin({
+                params: {
+                    id: 1
+                }
+            }),
+            stubResWithOptions({
+                render: (template) => {
+                    assert(template == 'set-form');
+                    done();
+                }
+            }),
+            () => {});
+    });
+    it('renders multi list page', function (done) {
+        let controller = siteController(stubBackendService({
+            ...getTestData('testdatasets'),
+        }));
+        controller.multiList()(
+            stubReqLoggedin({
+                params: {
+                    id: 1
+                }
+            }),
+            stubResWithOptions({
+                render: (template) => {
+                    assert(template == 'multi');
+                    done();
+                }
+            }),
+            () => {});
+    });
+    it('renders multi detail page', function (done) {
+        let controller = siteController(stubBackendService({
+            ...getTestData('testdatasets'),
+        }));
+        controller.multiList()(
+            stubReqLoggedin({
+                params: {
+                    id: 1,
+                    label: 'hours'
+                }
+            }),
+            stubResWithOptions({
+                render: (template) => {
+                    assert(template == 'multi');
+                    done();
+                }
+            }),
+            () => {});
+    });
+    it('returns 404 error', function (done) {
+        let controller = siteController(stubBackendService({
+            ...getTestData('testdatasets'),
+        }));
+        controller.create404()(
+            stubReqLoggedin(),
+            stubResWithOptions(),
+            (err) => {
+                assert(err instanceof Error);
+                done();
+            });
+    });
+    it('renders error page', function (done) {
+        let controller = siteController(stubBackendService({
+            ...getTestData('testdatasets'),
+        }));
+        controller.handleError()(
+            new Error('an error occurred'),
+            stubReqLoggedin({
+                app: {
+                    get: () => {}
+                }
+            }),
+            stubResWithOptions({
+                render: (template) => {
+                    assert(template == 'error');
+                    done();
+                }
+            }),
+            () => {});
     });
 });
 
@@ -736,9 +961,9 @@ describe('site router', function () {
 
         request(server)
             .get('/')
-            .end(function(err, res) {
+            .end(function (err, res) {
                 // console.dir(res.text);
-                if(err) return done(err);
+                if (err) return done(err);
                 done();
             });
     });

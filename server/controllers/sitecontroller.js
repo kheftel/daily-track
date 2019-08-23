@@ -92,7 +92,7 @@ function siteController(backend) {
                 // log('locals: %o', res.locals);
 
                 // pass some node module utility stuff along too!
-                res.locals.moment = moment;
+                // res.locals.moment = moment;
 
                 next();
             };
@@ -398,11 +398,13 @@ function setPageTitle(res, title) {
 }
 
 function replace_dataset_unit(str, label) {
+    if(!str) return str;
     str = str.replace('${DATASET_UNIT}', label ? label : '');
     return str;
 }
 
 function replace_dataset_name(str, name) {
+    if(!str) return str;
     str = str.replace('${DATASET_NAME}', name ? name : '');
     return str;
 }
