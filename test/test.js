@@ -117,6 +117,8 @@ function stubReqLoggedin(options) {
         logout: () => {},
         params: options.params || {},
         app: options.app || {},
+        path: options.path || '/',
+        isAuthenticated: options.isAuthenticated || (() => true),
     };
 }
 
@@ -149,6 +151,16 @@ function stubResWithOptions(options) {
 
 // siteController ////////////////////////////
 describe('siteController', function () {
+    it('initializes rendering', function (done) {
+        let controller = siteController(stubBackendService());
+        controller.initialize()(
+            stubReqLoggedin({
+                path: '/',
+            }),
+            stubResEmpty(),
+            done
+        );
+    });
     it('renders overview page', function (done) {
         let controller = siteController(stubBackendService({
             ...getTestData('testdatasets'),
@@ -374,7 +386,7 @@ describe('siteController', function () {
         let controller = siteController(stubBackendService({
             ...getTestData('testdatasets'),
         }));
-        controller.multiList()(
+        controller.multiDetail()(
             stubReqLoggedin({
                 params: {
                     id: 1,
@@ -388,6 +400,23 @@ describe('siteController', function () {
                 }
             }),
             () => {});
+    });
+    it('reports database error rendering multi detail page', function (done) {
+        let controller = siteController(stubBackendService({
+            ...getTestData('dberror'),
+        }));
+        controller.multiDetail()(
+            stubReqLoggedin({
+                params: {
+                    id: 1,
+                    label: 'hours'
+                }
+            }),
+            stubResEmpty(),
+            (err) => {
+                assert(err instanceof Error);
+                done();
+            });
     });
     it('returns 404 error', function (done) {
         let controller = siteController(stubBackendService({

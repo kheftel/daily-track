@@ -229,7 +229,7 @@ function siteController(backend) {
                 controller.getDatasetsForUserAndLabel(req.user._id, req.params.label, (err, datasets) => {
                     if (err) {
                         logger.logError(err, 'Database error getting datasets for user %s', req.user._id);
-                        return next(error);
+                        return next(err);
                     }
         
                     res.locals.datasets = datasets;
