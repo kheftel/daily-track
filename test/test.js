@@ -67,19 +67,20 @@ describe('logger module', function () {
 
 // BackendService ///////////////////////////
 describe('BackendService', function () {
-    var service = new BackendService({
-        backend: stubBackend()
-    });
-    it('exists', function () {
-        assert(service != null);
-    });
+    var service;
     it('catches errors from backend connection', function () {
+        service = new BackendService({
+            backend: stubBackend()
+        });
         stubLog(logger.error, 'error');
         service.connection.emit('error', 'message');
         assert(getStubbedMessages('error').length >= 1);
         unStubLog(logger.error);
     });
     it('creates a backend session', function () {
+        service = new BackendService({
+            backend: stubBackend()
+        });
         assert(service.createSession({
             secret: 'keyboard cat'
         }) == 'keyboard cat');
@@ -90,6 +91,9 @@ describe('BackendService', function () {
         assert(service.createSession() == null);
     });
     it('creates a cookie session', function () {
+        service = new BackendService({
+            backend: stubBackend()
+        });
         assert(service.createSession({
             type: 'cookie',
             secret: 'keyboard cat',
@@ -97,11 +101,56 @@ describe('BackendService', function () {
         }) != null);
     });
     it('initializes authentication', function () {
+        service = new BackendService({
+            backend: stubBackend()
+        });
         assert(service.initAuthentication({
             option: 'someoption'
         }) == 'success');
     });
+    it('registers user', function () {
+        service = new BackendService({
+            backend: stubBackend({
+                models: {
+                    User: stubUserModel(),
+                }
+            })
+        });
+        service.registerUser({
+            username: 'test',
+            password: 'password'
+        });
+        assert(service.getModel('User').users.length == 1);
+    });
+    it('creates model objects', function () {
+        service = new BackendService({
+            backend: stubBackend({
+                models: {
+                    Dataset: stubDatasetModel(),
+                }
+            })
+        });
+        service.create('Dataset', null, (err) => {
+            assert(err == null);
+        });
+    });
+    it('authenticates', function (done) {
+        service = new BackendService({
+            backend: stubBackend({
+                authenticate: () => {
+                    done();
+                }
+            })
+        });
+        service.authenticate({
+            username: 'test',
+            password: 'password'
+        });
+    });
     it('connects to backend', function (done) {
+        service = new BackendService({
+            backend: stubBackend()
+        });
         service.connect('http://example.com')
             .then(function () {
                 done();
@@ -113,7 +162,7 @@ function stubReqLoggedin(options) {
     options = options || {};
     return {
         user: getTestData('testuser'),
-        flash: () => {},
+        flash: options.flash || (() => {}),
         logout: () => {},
         params: options.params || {},
         app: options.app || {},
@@ -140,7 +189,7 @@ function stubResEmpty() {
 function stubResWithOptions(options) {
     options = options || {};
     return {
-        locals: {
+        locals: options.locals || {
             active: {}
         },
         status: options.status || (() => {}),
@@ -157,6 +206,25 @@ describe('siteController', function () {
             stubReqLoggedin({
                 path: '/',
                 isAuthenticated: () => false,
+            }),
+            stubResWithOptions({
+                redirect: (dest) => {
+                    assert(dest == '/login');
+                    done();
+                }
+            }),
+            () => {}
+        );
+    });
+    it('ACL: deep link redirects to login if not authenticated', function (done) {
+        let controller = siteController(stubBackendService());
+        controller.initialize()(
+            stubReqLoggedin({
+                path: '/set/new',
+                isAuthenticated: () => false,
+                flash: () => ({
+                    error: 'Please login first'
+                })
             }),
             stubResWithOptions({
                 redirect: (dest) => {
@@ -315,6 +383,11 @@ describe('siteController', function () {
                 }
             }),
             stubResWithOptions({
+                locals: {
+                    active: {
+                        title: '${DATASET_NAME}'
+                    }
+                },
                 render: (template) => {
                     assert(template == 'dataset');
                     done();
@@ -436,6 +509,11 @@ describe('siteController', function () {
                 }
             }),
             stubResWithOptions({
+                locals: {
+                    active: {
+                        title: '${DATASET_UNIT}'
+                    }
+                },
                 render: (template) => {
                     assert(template == 'multi');
                     done();

@@ -410,8 +410,3 @@ function respond(res, success, data) {
     };
     return res.json(response);
 }
-
-// helper function to truncate time values from date objects
-function truncateTime(x) {
-    return moment(x).utc().format('YYYY-MM-DD');
-}

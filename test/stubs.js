@@ -327,7 +327,8 @@ var backendHelpers = {
                 }
                 result.save(cb);
                 return result;
-            }
+            },
+            authenticate: options.authenticate || function () {}
         };
 
         for (let k in options.models) {
@@ -378,7 +379,7 @@ var backendHelpers = {
             create(model, options, cb) {
                 return this.backend.create(model, options, cb);
             }
-        };   
+        };
     }
 };
 
