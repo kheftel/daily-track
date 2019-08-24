@@ -209,7 +209,7 @@ function siteController(backend) {
                 controller.getDatasetsForUser(req.user._id, (err, datasets) => {
                     if (err) {
                         logger.logError(err, 'database error getting datasets for user %s', req.user._id);
-                        return next(error);
+                        return next(err);
                     }
         
                     // compute a list of unique units

@@ -165,7 +165,7 @@ describe('siteController', function () {
             }),
             () => {});
     });
-    it('reports error rendering overview page', function (done) {
+    it('reports database error rendering overview page', function (done) {
         let controller = siteController(stubBackendService({
             ...getTestData('dberror'),
         }));
@@ -197,6 +197,30 @@ describe('siteController', function () {
             stubResWithOptions({
                 redirect: (dest) => {
                     assert(dest == '/login');
+                    done();
+                }
+            }),
+            () => {});
+    });
+    it('renders login page', function (done) {
+        let controller = siteController(stubBackendService());
+        controller.login()(
+            stubReqEmpty(),
+            stubResWithOptions({
+                render: (template) => {
+                    assert(template == 'login');
+                    done();
+                }
+            }),
+            () => {});
+    });
+    it('redirects to / after login', function (done) {
+        let controller = siteController(stubBackendService());
+        controller.loginSuccess()(
+            stubReqLoggedin(),
+            stubResWithOptions({
+                redirect: (dest) => {
+                    assert(dest == '/');
                     done();
                 }
             }),
@@ -244,6 +268,35 @@ describe('siteController', function () {
             }),
             () => {});
     });
+    it('reports error rendering nonexistent set detail page', function (done) {
+        let controller = siteController(stubBackendService({
+            ...getTestData('testdatasets'),
+        }));
+        controller.viewDataset()(
+            stubReqLoggedin({
+                params: {
+                    id: 999
+                }
+            }),
+            stubResEmpty(),
+            (err) => {
+                assert(err instanceof Error);
+                done();
+            });
+    });
+    it('reports database error rendering set detail page', function (done) {
+        let controller = siteController(stubBackendService({
+            ...getTestData('dberror'),
+        }));
+        controller.viewDataset()(
+            stubReqLoggedin(),
+            stubResEmpty(),
+            (err) => {
+                // console.dir(err);
+                assert(err instanceof Error);
+                done();
+            });
+    });
     it('renders edit dataset page', function (done) {
         let controller = siteController(stubBackendService({
             ...getTestData('testdatasets'),
@@ -262,16 +315,41 @@ describe('siteController', function () {
             }),
             () => {});
     });
+    it('reports error rendering nonexistent edit dataset page', function (done) {
+        let controller = siteController(stubBackendService({
+            ...getTestData('testdatasets'),
+        }));
+        controller.editDataset()(
+            stubReqLoggedin({
+                params: {
+                    id: 999
+                }
+            }),
+            stubResEmpty(),
+            (err) => {
+                assert(err instanceof Error);
+                done();
+            });
+    });
+    it('reports database error rendering edit dataset page', function (done) {
+        let controller = siteController(stubBackendService({
+            ...getTestData('dberror'),
+        }));
+        controller.editDataset()(
+            stubReqLoggedin(),
+            stubResEmpty(),
+            (err) => {
+                // console.dir(err);
+                assert(err instanceof Error);
+                done();
+            });
+    });
     it('renders multi list page', function (done) {
         let controller = siteController(stubBackendService({
             ...getTestData('testdatasets'),
         }));
         controller.multiList()(
-            stubReqLoggedin({
-                params: {
-                    id: 1
-                }
-            }),
+            stubReqLoggedin(),
             stubResWithOptions({
                 render: (template) => {
                     assert(template == 'multi');
@@ -279,6 +357,18 @@ describe('siteController', function () {
                 }
             }),
             () => {});
+    });
+    it('reports database error rendering multi list page', function (done) {
+        let controller = siteController(stubBackendService({
+            ...getTestData('dberror'),
+        }));
+        controller.multiList()(
+            stubReqLoggedin(),
+            stubResEmpty(),
+            (err) => {
+                assert(err instanceof Error);
+                done();
+            });
     });
     it('renders multi detail page', function (done) {
         let controller = siteController(stubBackendService({
@@ -961,6 +1051,7 @@ describe('site router', function () {
 
         request(server)
             .get('/')
+            // .expect(200)
             .end(function (err, res) {
                 // console.dir(res.text);
                 if (err) return done(err);
