@@ -151,11 +151,53 @@ function stubResWithOptions(options) {
 
 // siteController ////////////////////////////
 describe('siteController', function () {
-    it('initializes rendering', function (done) {
+    it('ACL: / redirects to login if not authenticated', function (done) {
         let controller = siteController(stubBackendService());
         controller.initialize()(
             stubReqLoggedin({
                 path: '/',
+                isAuthenticated: () => false,
+            }),
+            stubResWithOptions({
+                redirect: (dest) => {
+                    assert(dest == '/login');
+                    done();
+                }
+            }),
+            () => {}
+        );
+    });
+    it('ACL: /login redirects to / if authenticated', function (done) {
+        let controller = siteController(stubBackendService());
+        controller.initialize()(
+            stubReqLoggedin({
+                path: '/login',
+                isAuthenticated: () => true,
+            }),
+            stubResWithOptions({
+                redirect: (dest) => {
+                    assert(dest == '/');
+                    done();
+                }
+            }),
+            () => {}
+        );
+    });
+    it('initializes rendering for static pages', function (done) {
+        let controller = siteController(stubBackendService());
+        controller.initialize()(
+            stubReqLoggedin({
+                path: '/',
+            }),
+            stubResEmpty(),
+            done
+        );
+    });
+    it('initializes rendering for dynamic pages', function (done) {
+        let controller = siteController(stubBackendService());
+        controller.initialize()(
+            stubReqLoggedin({
+                path: '/set/blah',
             }),
             stubResEmpty(),
             done
