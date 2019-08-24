@@ -222,9 +222,6 @@ describe('siteController', function () {
             stubReqLoggedin({
                 path: '/set/new',
                 isAuthenticated: () => false,
-                flash: () => ({
-                    error: 'Please login first'
-                })
             }),
             stubResWithOptions({
                 redirect: (dest) => {
@@ -266,6 +263,10 @@ describe('siteController', function () {
         controller.initialize()(
             stubReqLoggedin({
                 path: '/set/blah',
+                flash: () => ({
+                    info: 'some info message',
+                    error: 'some error message',
+                }),
             }),
             stubResEmpty(),
             done
