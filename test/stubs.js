@@ -306,7 +306,7 @@ var backendHelpers = {
                 return (new Promise((resolve, reject) => {
                     setTimeout(function () {
                         resolve();
-                    }, 50);
+                    }, 5);
                 }));
             },
             getModel(model) {

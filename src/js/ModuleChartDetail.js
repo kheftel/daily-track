@@ -409,40 +409,46 @@ ModuleChartDetail.prototype.addDataset = addDataset;
  * @param  {} complete oncomplete function
  */
 function addDatasetsFromIds(ids, complete) {
-    var which = 0;
-    var datasets = [];
-
-    var deferreds = [];
-    $.each(ids, (i, id) => {
-        deferreds.push(
-            $.ajax({
-                url: '/api/sets/' + id,
-                method: 'GET',
-            }).done((data) => {
-                if (!data.success) {
+    let promises = [];
+    ids.forEach((id, i) => {
+        // console.log(i);
+        promises.push(
+            fetch('/api/sets/' + id)
+            .then((response) => response.json())
+            .catch((err) => {
+                console.dir(err);
+                $.toast({
+                    title: 'Error',
+                    content: err.message || 'Unable to load, try again later',
+                    type: 'error',
+                    delay: 5000
+                });
+            })
+        );
+    });
+    Promise.all(promises)
+        .then((results) => {
+            // console.dir(results);
+            results.forEach((result, i) => {
+                result = result || {};
+                // console.log(i);
+                if (!result.success) {
                     $.toast({
                         title: 'Error',
-                        content: data.message || (data.error && data.error.message) || 'Unable to load, try again later',
+                        content: result.message || (result.error && result.error.message) || 'Unable to load, try again later',
                         type: 'error',
                         delay: 5000
                     });
                 } else
-                    this.addDatasetFromModel(data.data);
-                console.log(data);
-            }).fail((xhr) => {
-                console.log(xhr.responseJSON);
-            })
-        );
-    });
-    // Can't pass a literal array, so use apply.
-    $.when.apply($, deferreds).then(() => {
-        if (complete) complete();
-    }).fail((xhr) => {
-        console.log(xhr.responseJSON);
-    }).always(() => {
-        // Or use always if you want to do the same thing
-        // whether the call succeeds or fails
-    });
+                    this.addDatasetFromModel(result.data);
+            });
+
+            if (complete) complete();
+        }).catch((err) => {
+            console.dir(err);
+
+            if (complete) complete();
+        });
 }
 ModuleChartDetail.prototype.addDatasetsFromIds = addDatasetsFromIds;
 
@@ -597,8 +603,8 @@ function addDatasetFromModel(dataset, complete) {
         });
     }
 
-    console.log('dataset added:');
-    console.log(dataset);
+    // console.log('dataset added:');
+    // console.log(dataset);
 
     // console.log('scaleservice time defaults:');
     // console.log(Chart.scaleService.defaults.time);

@@ -158,10 +158,10 @@ describe('BackendService', function () {
     });
 });
 
-function stubReqLoggedin(options) {
+function stubReqWithOptions(options) {
     options = options || {};
     return {
-        user: getTestData('testuser'),
+        user: options.user || getTestData('testuser'),
         flash: options.flash || (() => {}),
         logout: () => {},
         params: options.params || {},
@@ -203,7 +203,7 @@ describe('siteController', function () {
     it('ACL: / redirects to login if not authenticated', function (done) {
         let controller = siteController(stubBackendService());
         controller.initialize()(
-            stubReqLoggedin({
+            stubReqWithOptions({
                 path: '/',
                 isAuthenticated: () => false,
             }),
@@ -219,7 +219,7 @@ describe('siteController', function () {
     it('ACL: deep link redirects to login if not authenticated', function (done) {
         let controller = siteController(stubBackendService());
         controller.initialize()(
-            stubReqLoggedin({
+            stubReqWithOptions({
                 path: '/set/new',
                 isAuthenticated: () => false,
             }),
@@ -235,7 +235,7 @@ describe('siteController', function () {
     it('ACL: /login redirects to / if authenticated', function (done) {
         let controller = siteController(stubBackendService());
         controller.initialize()(
-            stubReqLoggedin({
+            stubReqWithOptions({
                 path: '/login',
                 isAuthenticated: () => true,
             }),
@@ -251,7 +251,7 @@ describe('siteController', function () {
     it('initializes rendering for static pages', function (done) {
         let controller = siteController(stubBackendService());
         controller.initialize()(
-            stubReqLoggedin({
+            stubReqWithOptions({
                 path: '/',
             }),
             stubResEmpty(),
@@ -261,7 +261,7 @@ describe('siteController', function () {
     it('initializes rendering for dynamic pages', function (done) {
         let controller = siteController(stubBackendService());
         controller.initialize()(
-            stubReqLoggedin({
+            stubReqWithOptions({
                 path: '/set/blah',
                 flash: () => ({
                     info: 'some info message',
@@ -277,7 +277,7 @@ describe('siteController', function () {
             ...getTestData('testdatasets'),
         }));
         controller.overview()(
-            stubReqLoggedin(),
+            stubReqWithOptions(),
             stubResWithOptions({
                 render: function (template) { // not arrow func
                     assert(template == 'overview');
@@ -293,7 +293,7 @@ describe('siteController', function () {
             ...getTestData('dberror'),
         }));
         controller.overview()(
-            stubReqLoggedin(),
+            stubReqWithOptions(),
             stubResEmpty(),
             (err) => {
                 // console.dir(err);
@@ -340,7 +340,7 @@ describe('siteController', function () {
     it('redirects to / after login', function (done) {
         let controller = siteController(stubBackendService());
         controller.loginSuccess()(
-            stubReqLoggedin(),
+            stubReqWithOptions(),
             stubResWithOptions({
                 redirect: (dest) => {
                     assert(dest == '/');
@@ -378,7 +378,7 @@ describe('siteController', function () {
             ...getTestData('testdatasets'),
         }));
         controller.viewDataset()(
-            stubReqLoggedin({
+            stubReqWithOptions({
                 params: {
                     id: 1
                 }
@@ -401,7 +401,7 @@ describe('siteController', function () {
             ...getTestData('testdatasets'),
         }));
         controller.viewDataset()(
-            stubReqLoggedin({
+            stubReqWithOptions({
                 params: {
                     id: 999
                 }
@@ -417,7 +417,7 @@ describe('siteController', function () {
             ...getTestData('dberror'),
         }));
         controller.viewDataset()(
-            stubReqLoggedin(),
+            stubReqWithOptions(),
             stubResEmpty(),
             (err) => {
                 // console.dir(err);
@@ -430,7 +430,7 @@ describe('siteController', function () {
             ...getTestData('testdatasets'),
         }));
         controller.editDataset()(
-            stubReqLoggedin({
+            stubReqWithOptions({
                 params: {
                     id: 1
                 }
@@ -448,7 +448,7 @@ describe('siteController', function () {
             ...getTestData('testdatasets'),
         }));
         controller.editDataset()(
-            stubReqLoggedin({
+            stubReqWithOptions({
                 params: {
                     id: 999
                 }
@@ -464,7 +464,7 @@ describe('siteController', function () {
             ...getTestData('dberror'),
         }));
         controller.editDataset()(
-            stubReqLoggedin(),
+            stubReqWithOptions(),
             stubResEmpty(),
             (err) => {
                 // console.dir(err);
@@ -477,7 +477,7 @@ describe('siteController', function () {
             ...getTestData('testdatasets'),
         }));
         controller.multiList()(
-            stubReqLoggedin(),
+            stubReqWithOptions(),
             stubResWithOptions({
                 render: (template) => {
                     assert(template == 'multi');
@@ -491,7 +491,7 @@ describe('siteController', function () {
             ...getTestData('dberror'),
         }));
         controller.multiList()(
-            stubReqLoggedin(),
+            stubReqWithOptions(),
             stubResEmpty(),
             (err) => {
                 assert(err instanceof Error);
@@ -503,7 +503,7 @@ describe('siteController', function () {
             ...getTestData('testdatasets'),
         }));
         controller.multiDetail()(
-            stubReqLoggedin({
+            stubReqWithOptions({
                 params: {
                     id: 1,
                     label: 'hours'
@@ -527,7 +527,7 @@ describe('siteController', function () {
             ...getTestData('dberror'),
         }));
         controller.multiDetail()(
-            stubReqLoggedin({
+            stubReqWithOptions({
                 params: {
                     id: 1,
                     label: 'hours'
@@ -544,7 +544,7 @@ describe('siteController', function () {
             ...getTestData('testdatasets'),
         }));
         controller.create404()(
-            stubReqLoggedin(),
+            stubReqWithOptions(),
             stubResWithOptions(),
             (err) => {
                 assert(err instanceof Error);
@@ -557,7 +557,7 @@ describe('siteController', function () {
         }));
         controller.handleError()(
             new Error('an error occurred'),
-            stubReqLoggedin({
+            stubReqWithOptions({
                 app: {
                     get: () => {}
                 }
