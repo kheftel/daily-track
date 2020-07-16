@@ -266,7 +266,7 @@ exports.packtrackerUpload = function () {
     return (process.env.CI && process.env.PT_PROJECT_TOKEN) ? {
         plugins: [new PacktrackerPlugin({
             project_token: process.env.PT_PROJECT_TOKEN,
-            upload: true,
+            upload: process.env.CI === 'true',
             branch: process.env.TRAVIS_BRANCH,
 
             // fail_build: true,
