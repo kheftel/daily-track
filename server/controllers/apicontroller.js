@@ -1,8 +1,8 @@
 const moment = require('moment');
-const backendController = require('./backendcontroller');
+const BackendController = require('./backendcontroller');
 const createError = require('http-errors');
 const logger = require('../logger');
-const log = logger.log.extend('apiController');
+const log = logger.log.extend('ApiController');
 
 const {
     body,
@@ -14,8 +14,8 @@ const {
     Sanitizers
 } = require('express-validator/filter');
 
-function apiController(backend) {
-    const controller = backendController(backend);
+function ApiController(backendService) {
+    const backendController = BackendController(backendService);
     const instance = {
         test() {
             return [authorize, function (req, res) {
@@ -48,7 +48,7 @@ function apiController(backend) {
                     // Create user with validated / sanitized data
                     log('registering user %s', req.body.username);
 
-                    backend.registerUser({
+                    backendService.registerUser({
                         username: req.body.username,
                         password: req.body.password,
                     }, function (err, result) {
@@ -87,7 +87,7 @@ function apiController(backend) {
                     next();
                 },
 
-                backend.authenticate({
+                backendService.authenticate({
                     failWithError: true,
                     failureFlash: true
                 }),
@@ -118,7 +118,7 @@ function apiController(backend) {
             return [authorize,
 
                 function (req, res, next) {
-                    controller.getDatasetsForUser(req.user._id, function (err, datasets) {
+                    backendController.getDatasetsForUser(req.user._id, function (err, datasets) {
                         if (err) {
                             return next(logger.verror(err, 'Error getting datasets'));
                         }
@@ -162,7 +162,7 @@ function apiController(backend) {
 
                     // Create dataset with validated / sanitized data
                     log('creating dataset %s', req.body.name);
-                    backend.create('Dataset', {
+                    backendService.create('Dataset', {
                         name: req.body.name,
                         yAxisLabel: req.body.yAxisLabel,
                         owner: req.body.owner, // hidden field
@@ -185,7 +185,7 @@ function apiController(backend) {
             return [authorize,
 
                 function (req, res, next) {
-                    controller.getDatasetWithPoints(req.params.id, function (err, result) {
+                    backendController.getDatasetWithPoints(req.params.id, function (err, result) {
                         if (err) {
                             return next(logger.verror(err, 'Database error getting dataset %s', req.params.id));
                         }
@@ -231,7 +231,7 @@ function apiController(backend) {
 
                     if (req.body.delete != 1) {
                         // update dataset
-                        controller.updateDatasetForUser(req.user._id, req.params.id, {
+                        backendController.updateDatasetForUser(req.user._id, req.params.id, {
                             name: req.body.name,
                             yAxisLabel: req.body.yAxisLabel,
                             chartType: req.body.chartType
@@ -250,7 +250,7 @@ function apiController(backend) {
                         });
                     } else {
                         // delete dataset
-                        controller.deleteDatasetForUser(req.user._id, req.params.id, (err, response) => {
+                        backendController.deleteDatasetForUser(req.user._id, req.params.id, (err, response) => {
                             if (err) return next(logger.verror(err, 'Error deleting dataset'));
 
                             if (response && response.message) {
@@ -327,7 +327,7 @@ function apiController(backend) {
         
                     if (req.body.delete != 1) {
                         // create/update datapoint
-                        controller.createOrUpdateDatapointForDataset(req.params.id, {
+                        backendController.createOrUpdateDatapointForDataset(req.params.id, {
                             x: req.body.x,
                             y: req.body.y,
                             tags: req.body.tags,
@@ -341,7 +341,7 @@ function apiController(backend) {
                         });
                     } else {
                         // delete datapoint
-                        controller.deleteDatapoint(req.params.id, {
+                        backendController.deleteDatapoint(req.params.id, {
                             x: req.body.x,
                         }, (err, response) => {
                             if (err) return next(logger.verror(err, 'Error deleting datapoint'));
@@ -383,7 +383,7 @@ function apiController(backend) {
     return instance;
 }
 
-module.exports = apiController;
+module.exports = ApiController;
 
 // helper functions /////////
 

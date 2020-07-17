@@ -1,12 +1,12 @@
 const moment = require('moment');
 const logger = require('../logger');
-const log = logger.log.extend('siteController');
+const log = logger.log.extend('SiteController');
 const _ = require('lodash');
 const createError = require('http-errors');
-const backendController = require('./backendcontroller');
+const BackendController = require('./backendcontroller');
 
-function siteController(backend) {
-    const controller = backendController(backend);
+function SiteController(backendService) {
+    const backendController = BackendController(backendService);
     const instance = {
         initialize() {
             return (req, res, next) => {
@@ -99,7 +99,7 @@ function siteController(backend) {
         },
         overview() {
             return (req, res, next) => {
-                controller.getDatasetsForUserSortedByUnit(req.user._id, (err, datasets) => {
+                backendController.getDatasetsForUserSortedByUnit(req.user._id, (err, datasets) => {
                     if (err) return next(logger.verror(err, 'Error getting datasets'));
 
                     res.locals.datasets = datasets;
@@ -148,7 +148,7 @@ function siteController(backend) {
         },
         viewDataset() {
             return (req, res, next) => {
-                controller.getDataset(req.params.id, (err, dataset) => {
+                backendController.getDataset(req.params.id, (err, dataset) => {
                     if (err) {
                         logger.logError(err, 'Database error loading dataset %s', req.params.id);
                         return next(err);
@@ -171,7 +171,7 @@ function siteController(backend) {
         editDataset() {
             return (req, res, next) => {
                 // grab the dataset from the db
-                controller.getDataset(req.params.id, (err, dataset) => {
+                backendController.getDataset(req.params.id, (err, dataset) => {
                     if (err) {
                         logger.logError(err, 'Dataset not found for id %s', req.params.id);
                         return next(err);
@@ -206,7 +206,7 @@ function siteController(backend) {
         },
         multiList() {
             return (req, res, next) => {
-                controller.getDatasetsForUser(req.user._id, (err, datasets) => {
+                backendController.getDatasetsForUser(req.user._id, (err, datasets) => {
                     if (err) {
                         logger.logError(err, 'database error getting datasets for user %s', req.user._id);
                         return next(err);
@@ -226,7 +226,7 @@ function siteController(backend) {
         },
         multiDetail() {
             return (req, res, next) => {
-                controller.getDatasetsForUserAndLabel(req.user._id, req.params.label, (err, datasets) => {
+                backendController.getDatasetsForUserAndLabel(req.user._id, req.params.label, (err, datasets) => {
                     if (err) {
                         logger.logError(err, 'Database error getting datasets for user %s', req.user._id);
                         return next(err);
@@ -409,5 +409,5 @@ function replace_dataset_name(str, name) {
     return str;
 }
 
-siteController.setPageTitle = setPageTitle;
-module.exports = siteController;
+SiteController.setPageTitle = setPageTitle;
+module.exports = SiteController;

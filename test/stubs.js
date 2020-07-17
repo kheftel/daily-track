@@ -390,7 +390,7 @@ var server = {
         options = options || {};
         var backendService = backendHelpers.stubBackendService(options);
         router = options.createRouter({
-            backend: backendService
+            backendService
         });
         app = express();
         app.use((req, res, next) => {
@@ -404,7 +404,7 @@ var server = {
         var server = app.listen(3000, function () {});
 
         // convenience departure from spec
-        server.backend = backendService;
+        server.backendService = backendService;
 
         return server;
     }

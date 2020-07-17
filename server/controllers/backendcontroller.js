@@ -1,7 +1,7 @@
 const moment = require('moment');
 const VError = require('verror');
 
-function backendController(backend) {
+function BackendController(backend) {
     const Dataset = backend.getModel('Dataset');
     const Datapoint = backend.getModel('Datapoint');
     let controller = {
@@ -180,7 +180,7 @@ function backendController(backend) {
     return controller;
 }
 
-module.exports = backendController;
+module.exports = BackendController;
 
 // helper function to truncate time values from date objects
 function truncateTime(x) {

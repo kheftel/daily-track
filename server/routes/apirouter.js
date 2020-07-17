@@ -1,6 +1,6 @@
 // REQUIRES /////////////////////////////
 const express = require('express');
-const apiController = require('../controllers/apicontroller');
+const ApiController = require('../controllers/apicontroller');
 
 const {
     body,
@@ -15,10 +15,10 @@ const {
 require('moment-round');
 
 // API /////////////////////////////
-function apiRouter({
-    backend
+function ApiRouter({
+    backendService
 }) {
-    const api = apiController(backend);
+    const api = ApiController(backendService);
 
     var apiRouter = express.Router();
 
@@ -80,4 +80,4 @@ function apiRouter({
     return apiRouter;
 }
 
-module.exports = apiRouter;
+module.exports = ApiRouter;

@@ -3,9 +3,9 @@ const should = require('should');
 const VError = require('verror');
 const debug = require('debug');
 const logger = require('../server/logger');
-const siteController = require('../server/controllers/sitecontroller');
-const siteRouter = require('../server/routes/site');
-const apiRouter = require('../server/routes/api');
+const SiteController = require('../server/controllers/sitecontroller');
+const SiteRouter = require('../server/routes/siterouter');
+const ApiRouter = require('../server/routes/apirouter');
 const BackendService = require('../server/BackendService');
 const request = require('supertest');
 const expect = require('chai').expect;
@@ -201,7 +201,7 @@ function stubResWithOptions(options) {
 // siteController ////////////////////////////
 describe('siteController', function () {
     it('ACL: / redirects to login if not authenticated', function (done) {
-        let controller = siteController(stubBackendService());
+        let controller = SiteController(stubBackendService());
         controller.initialize()(
             stubReqWithOptions({
                 path: '/',
@@ -217,7 +217,7 @@ describe('siteController', function () {
         );
     });
     it('ACL: deep link redirects to login if not authenticated', function (done) {
-        let controller = siteController(stubBackendService());
+        let controller = SiteController(stubBackendService());
         controller.initialize()(
             stubReqWithOptions({
                 path: '/set/new',
@@ -233,7 +233,7 @@ describe('siteController', function () {
         );
     });
     it('ACL: /login redirects to / if authenticated', function (done) {
-        let controller = siteController(stubBackendService());
+        let controller = SiteController(stubBackendService());
         controller.initialize()(
             stubReqWithOptions({
                 path: '/login',
@@ -249,7 +249,7 @@ describe('siteController', function () {
         );
     });
     it('initializes rendering for static pages', function (done) {
-        let controller = siteController(stubBackendService());
+        let controller = SiteController(stubBackendService());
         controller.initialize()(
             stubReqWithOptions({
                 path: '/',
@@ -259,7 +259,7 @@ describe('siteController', function () {
         );
     });
     it('initializes rendering for dynamic pages', function (done) {
-        let controller = siteController(stubBackendService());
+        let controller = SiteController(stubBackendService());
         controller.initialize()(
             stubReqWithOptions({
                 path: '/set/blah',
@@ -273,7 +273,7 @@ describe('siteController', function () {
         );
     });
     it('renders overview page', function (done) {
-        let controller = siteController(stubBackendService({
+        let controller = SiteController(stubBackendService({
             ...getTestData('testdatasets'),
         }));
         controller.overview()(
@@ -289,7 +289,7 @@ describe('siteController', function () {
             () => {});
     });
     it('reports database error rendering overview page', function (done) {
-        let controller = siteController(stubBackendService({
+        let controller = SiteController(stubBackendService({
             ...getTestData('dberror'),
         }));
         controller.overview()(
@@ -302,7 +302,7 @@ describe('siteController', function () {
             });
     });
     it('renders register page', function (done) {
-        let controller = siteController(stubBackendService());
+        let controller = SiteController(stubBackendService());
         controller.register()(
             stubReqEmpty(),
             stubResWithOptions({
@@ -314,7 +314,7 @@ describe('siteController', function () {
             () => {});
     });
     it('redirects to /login after register', function (done) {
-        let controller = siteController(stubBackendService());
+        let controller = SiteController(stubBackendService());
         controller.registerSuccess()(
             stubReqEmpty(),
             stubResWithOptions({
@@ -326,7 +326,7 @@ describe('siteController', function () {
             () => {});
     });
     it('renders login page', function (done) {
-        let controller = siteController(stubBackendService());
+        let controller = SiteController(stubBackendService());
         controller.login()(
             stubReqEmpty(),
             stubResWithOptions({
@@ -338,7 +338,7 @@ describe('siteController', function () {
             () => {});
     });
     it('redirects to / after login', function (done) {
-        let controller = siteController(stubBackendService());
+        let controller = SiteController(stubBackendService());
         controller.loginSuccess()(
             stubReqWithOptions(),
             stubResWithOptions({
@@ -350,7 +350,7 @@ describe('siteController', function () {
             () => {});
     });
     it('redirects to / after logout', function (done) {
-        let controller = siteController(stubBackendService());
+        let controller = SiteController(stubBackendService());
         controller.logout()(
             stubReqEmpty(),
             stubResWithOptions({
@@ -362,7 +362,7 @@ describe('siteController', function () {
             () => {});
     });
     it('renders new set page', function (done) {
-        let controller = siteController(stubBackendService());
+        let controller = SiteController(stubBackendService());
         controller.newDataset()(
             stubReqEmpty(),
             stubResWithOptions({
@@ -374,7 +374,7 @@ describe('siteController', function () {
             () => {});
     });
     it('renders set detail page', function (done) {
-        let controller = siteController(stubBackendService({
+        let controller = SiteController(stubBackendService({
             ...getTestData('testdatasets'),
         }));
         controller.viewDataset()(
@@ -397,7 +397,7 @@ describe('siteController', function () {
             () => {});
     });
     it('reports error rendering nonexistent set detail page', function (done) {
-        let controller = siteController(stubBackendService({
+        let controller = SiteController(stubBackendService({
             ...getTestData('testdatasets'),
         }));
         controller.viewDataset()(
@@ -413,7 +413,7 @@ describe('siteController', function () {
             });
     });
     it('reports database error rendering set detail page', function (done) {
-        let controller = siteController(stubBackendService({
+        let controller = SiteController(stubBackendService({
             ...getTestData('dberror'),
         }));
         controller.viewDataset()(
@@ -426,7 +426,7 @@ describe('siteController', function () {
             });
     });
     it('renders edit dataset page', function (done) {
-        let controller = siteController(stubBackendService({
+        let controller = SiteController(stubBackendService({
             ...getTestData('testdatasets'),
         }));
         controller.editDataset()(
@@ -444,7 +444,7 @@ describe('siteController', function () {
             () => {});
     });
     it('reports error rendering nonexistent edit dataset page', function (done) {
-        let controller = siteController(stubBackendService({
+        let controller = SiteController(stubBackendService({
             ...getTestData('testdatasets'),
         }));
         controller.editDataset()(
@@ -460,7 +460,7 @@ describe('siteController', function () {
             });
     });
     it('reports database error rendering edit dataset page', function (done) {
-        let controller = siteController(stubBackendService({
+        let controller = SiteController(stubBackendService({
             ...getTestData('dberror'),
         }));
         controller.editDataset()(
@@ -473,7 +473,7 @@ describe('siteController', function () {
             });
     });
     it('renders multi list page', function (done) {
-        let controller = siteController(stubBackendService({
+        let controller = SiteController(stubBackendService({
             ...getTestData('testdatasets'),
         }));
         controller.multiList()(
@@ -487,7 +487,7 @@ describe('siteController', function () {
             () => {});
     });
     it('reports database error rendering multi list page', function (done) {
-        let controller = siteController(stubBackendService({
+        let controller = SiteController(stubBackendService({
             ...getTestData('dberror'),
         }));
         controller.multiList()(
@@ -499,7 +499,7 @@ describe('siteController', function () {
             });
     });
     it('renders multi detail page', function (done) {
-        let controller = siteController(stubBackendService({
+        let controller = SiteController(stubBackendService({
             ...getTestData('testdatasets'),
         }));
         controller.multiDetail()(
@@ -523,7 +523,7 @@ describe('siteController', function () {
             () => {});
     });
     it('reports database error rendering multi detail page', function (done) {
-        let controller = siteController(stubBackendService({
+        let controller = SiteController(stubBackendService({
             ...getTestData('dberror'),
         }));
         controller.multiDetail()(
@@ -540,7 +540,7 @@ describe('siteController', function () {
             });
     });
     it('returns 404 error', function (done) {
-        let controller = siteController(stubBackendService({
+        let controller = SiteController(stubBackendService({
             ...getTestData('testdatasets'),
         }));
         controller.create404()(
@@ -552,7 +552,7 @@ describe('siteController', function () {
             });
     });
     it('renders error page', function (done) {
-        let controller = siteController(stubBackendService({
+        let controller = SiteController(stubBackendService({
             ...getTestData('testdatasets'),
         }));
         controller.handleError()(
@@ -581,7 +581,7 @@ describe('api router', function () {
 
     it('responds unauthorized if not logged in', function (done) {
         server = stubServer({
-            createRouter: apiRouter
+            createRouter: ApiRouter
         });
         request(server)
             .get('/')
@@ -597,7 +597,7 @@ describe('api router', function () {
     });
     it('sends 404', function (done) {
         server = stubServer({
-            createRouter: apiRouter
+            createRouter: ApiRouter
         });
         request(server)
             .get('/nonexistentpage')
@@ -614,7 +614,7 @@ describe('api router', function () {
     });
     it('responds to /', function (done) {
         server = stubServer({
-            createRouter: apiRouter,
+            createRouter: ApiRouter,
             ...getTestData('loggedin')
         });
         request(server)
@@ -631,7 +631,7 @@ describe('api router', function () {
     });
     it('registers a user', function (done) {
         server = stubServer({
-            createRouter: apiRouter,
+            createRouter: ApiRouter,
         });
         request(server)
             .post('/register')
@@ -643,13 +643,13 @@ describe('api router', function () {
             .end(function (err, res) {
                 if (err) return done(err);
                 // console.dir(res.body);
-                assert(server.backend.getModel('User').users.length == 1);
+                assert(server.backendService.getModel('User').users.length == 1);
                 done();
             });
     });
     it('fails to register a user if validation errors', function (done) {
         server = stubServer({
-            createRouter: apiRouter,
+            createRouter: ApiRouter,
         });
         request(server)
             .post('/register')
@@ -660,13 +660,13 @@ describe('api router', function () {
             .end(function (err, res) {
                 if (err) return done(err);
                 assert(!res.body.success);
-                assert(server.backend.getModel('User').users.length == 0);
+                assert(server.backendService.getModel('User').users.length == 0);
                 done();
             });
     });
     it('reports db error on register user', function (done) {
         server = stubServer({
-            createRouter: apiRouter,
+            createRouter: ApiRouter,
             ...getTestData('dberror'),
         });
         request(server)
@@ -680,13 +680,13 @@ describe('api router', function () {
                 // console.dir(res.body);
                 if (err) return done(err);
                 assert(!res.body.success);
-                assert(server.backend.getModel('User').users.length == 0);
+                assert(server.backendService.getModel('User').users.length == 0);
                 done();
             });
     });
     it('logs in', function (done) {
         server = stubServer({
-            createRouter: apiRouter,
+            createRouter: ApiRouter,
             ...getTestData('testusers'),
         });
         request(server)
@@ -705,7 +705,7 @@ describe('api router', function () {
     });
     it('fails to log in if password incorrect', function (done) {
         server = stubServer({
-            createRouter: apiRouter,
+            createRouter: ApiRouter,
             ...getTestData('testusers'),
         });
         request(server)
@@ -724,7 +724,7 @@ describe('api router', function () {
     });
     it('fails to log in if validation errors', function (done) {
         server = stubServer({
-            createRouter: apiRouter,
+            createRouter: ApiRouter,
             ...getTestData('testusers'),
         });
         request(server)
@@ -742,7 +742,7 @@ describe('api router', function () {
     });
     it('creates a dataset', function (done) {
         server = stubServer({
-            createRouter: apiRouter,
+            createRouter: ApiRouter,
             ...getTestData('loggedin'),
         });
         request(server)
@@ -758,13 +758,13 @@ describe('api router', function () {
                 // console.dir(res.body);
                 if (err) return done(err);
                 assert(res.body.success);
-                assert(server.backend.getModel('Dataset').sets.length == 1);
+                assert(server.backendService.getModel('Dataset').sets.length == 1);
                 done();
             });
     });
     it('fails to create a dataset if validation errors', function (done) {
         server = stubServer({
-            createRouter: apiRouter,
+            createRouter: ApiRouter,
             ...getTestData('loggedin'),
         });
         request(server)
@@ -777,13 +777,13 @@ describe('api router', function () {
                 // console.dir(res.body);
                 if (err) return done(err);
                 assert(!res.body.success);
-                assert(server.backend.getModel('Dataset').sets.length == 0);
+                assert(server.backendService.getModel('Dataset').sets.length == 0);
                 done();
             });
     });
     it('reports db error on create dataset', function (done) {
         server = stubServer({
-            createRouter: apiRouter,
+            createRouter: ApiRouter,
             ...getTestData('dberror'),
         });
         request(server)
@@ -799,13 +799,13 @@ describe('api router', function () {
                 // console.dir(res.body);
                 if (err) return done(err);
                 assert(!res.body.success);
-                assert(server.backend.getModel('User').users.length == 0);
+                assert(server.backendService.getModel('User').users.length == 0);
                 done();
             });
     });
     it('gets datasets', function (done) {
         server = stubServer({
-            createRouter: apiRouter,
+            createRouter: ApiRouter,
             ...getTestData('loggedin'),
             ...getTestData('testdatasets'),
         });
@@ -822,7 +822,7 @@ describe('api router', function () {
     });
     it('reports db error on get datasets', function (done) {
         server = stubServer({
-            createRouter: apiRouter,
+            createRouter: ApiRouter,
             ...getTestData('dberror'),
         });
         request(server)
@@ -837,7 +837,7 @@ describe('api router', function () {
     });
     it('fails to find nonexistent dataset', function (done) {
         server = stubServer({
-            createRouter: apiRouter,
+            createRouter: ApiRouter,
             ...getTestData('loggedin'),
             ...getTestData('testdatasets'),
         });
@@ -853,7 +853,7 @@ describe('api router', function () {
     });
     it('gets a dataset with points', function (done) {
         server = stubServer({
-            createRouter: apiRouter,
+            createRouter: ApiRouter,
             ...getTestData('loggedin'),
             ...getTestData('testdatasets'),
             ...getTestData('testdatapoints'),
@@ -870,7 +870,7 @@ describe('api router', function () {
     });
     it('reports db error on get dataset', function (done) {
         server = stubServer({
-            createRouter: apiRouter,
+            createRouter: ApiRouter,
             ...getTestData('dberror'),
         });
         request(server)
@@ -885,7 +885,7 @@ describe('api router', function () {
     });
     it('updates a dataset', function (done) {
         server = stubServer({
-            createRouter: apiRouter,
+            createRouter: ApiRouter,
             ...getTestData('loggedin'),
             ...getTestData('testdatasets'),
             ...getTestData('testdatapoints'),
@@ -902,7 +902,7 @@ describe('api router', function () {
                 // console.dir(res.body);
                 if (err) return done(err);
                 assert(res.body.success);
-                server.backend.getModel('Dataset').findById(1, function (err, result) {
+                server.backendService.getModel('Dataset').findById(1, function (err, result) {
                     if (err) done(err);
                     assert(result.name == 'fred');
                     done();
@@ -911,7 +911,7 @@ describe('api router', function () {
     });
     it('reports db error on update dataset', function (done) {
         server = stubServer({
-            createRouter: apiRouter,
+            createRouter: ApiRouter,
             ...getTestData('dberror'),
         });
         request(server)
@@ -931,7 +931,7 @@ describe('api router', function () {
     });
     it('fails to update a dataset owned by someone else', function (done) {
         server = stubServer({
-            createRouter: apiRouter,
+            createRouter: ApiRouter,
             ...getTestData('loggedin'),
             ...getTestData('testdatasets'),
             ...getTestData('testdatapoints'),
@@ -953,7 +953,7 @@ describe('api router', function () {
     });
     it('fails to update a dataset if data is missing', function (done) {
         server = stubServer({
-            createRouter: apiRouter,
+            createRouter: ApiRouter,
             ...getTestData('loggedin'),
             ...getTestData('testdatasets'),
             ...getTestData('testdatapoints'),
@@ -971,7 +971,7 @@ describe('api router', function () {
     });
     it('fails to update a nonexistent dataset', function (done) {
         server = stubServer({
-            createRouter: apiRouter,
+            createRouter: ApiRouter,
             ...getTestData('loggedin'),
             ...getTestData('testdatasets'),
             ...getTestData('testdatapoints'),
@@ -992,7 +992,7 @@ describe('api router', function () {
     });
     it('fails to delete a non-empty dataset', function (done) {
         server = stubServer({
-            createRouter: apiRouter,
+            createRouter: ApiRouter,
             ...getTestData('loggedin'),
             ...getTestData('testdatasets'),
             ...getTestData('testdatapoints'),
@@ -1014,7 +1014,7 @@ describe('api router', function () {
     });
     it('reports db error on delete non-empty dataset', function (done) {
         server = stubServer({
-            createRouter: apiRouter,
+            createRouter: ApiRouter,
             ...getTestData('dberror'),
         });
         request(server)
@@ -1035,7 +1035,7 @@ describe('api router', function () {
     });
     it('deletes an empty dataset', function (done) {
         server = stubServer({
-            createRouter: apiRouter,
+            createRouter: ApiRouter,
             ...getTestData('loggedin'),
             ...getTestData('testdatasets'),
             ...getTestData('testdatapoints'),
@@ -1053,14 +1053,14 @@ describe('api router', function () {
                 // console.dir(res.body);
                 if (err) return done(err);
                 assert(res.body.success);
-                assert(server.backend.getModel('Dataset').sets.length == 2);
+                assert(server.backendService.getModel('Dataset').sets.length == 2);
                 done();
             });
     });
 
     it('creates a datapoint', function (done) {
         server = stubServer({
-            createRouter: apiRouter,
+            createRouter: ApiRouter,
             ...getTestData('loggedin'),
             ...getTestData('testdatasets'),
         });
@@ -1075,14 +1075,14 @@ describe('api router', function () {
                 // console.dir(res.body);
                 if (err) return done(err);
                 assert(res.body.success);
-                assert(server.backend.getModel('Datapoint').points.length == 1);
-                assert(server.backend.getModel('Datapoint').points[0].y == 8);
+                assert(server.backendService.getModel('Datapoint').points.length == 1);
+                assert(server.backendService.getModel('Datapoint').points[0].y == 8);
                 done();
             });
     });
     it('updates a datapoint', function (done) {
         server = stubServer({
-            createRouter: apiRouter,
+            createRouter: ApiRouter,
             ...getTestData('loggedin'),
             ...getTestData('testdatasets'),
             ...getTestData('testdatapoints'),
@@ -1095,17 +1095,17 @@ describe('api router', function () {
             })
             .expect(200)
             .end(function (err, res) {
-                // console.dir(server.backend.Datapoint.points);
+                // console.dir(server.backendService.Datapoint.points);
                 if (err) return done(err);
                 assert(res.body.success);
-                assert(server.backend.getModel('Datapoint').points.length == 3);
-                assert(server.backend.getModel('Datapoint').points[0].y == 8);
+                assert(server.backendService.getModel('Datapoint').points.length == 3);
+                assert(server.backendService.getModel('Datapoint').points[0].y == 8);
                 done();
             });
     });
     it('fails to update datapoint if validation errors', function (done) {
         server = stubServer({
-            createRouter: apiRouter,
+            createRouter: ApiRouter,
             ...getTestData('dberror'),
         });
         request(server)
@@ -1124,7 +1124,7 @@ describe('api router', function () {
     });
     it('reports db error on update datapoint', function (done) {
         server = stubServer({
-            createRouter: apiRouter,
+            createRouter: ApiRouter,
             ...getTestData('dberror'),
         });
         request(server)
@@ -1143,7 +1143,7 @@ describe('api router', function () {
     });
     it('deletes a datapoint', function (done) {
         server = stubServer({
-            createRouter: apiRouter,
+            createRouter: ApiRouter,
             ...getTestData('loggedin'),
             ...getTestData('testdatasets'),
             ...getTestData('testdatapoints'),
@@ -1160,13 +1160,13 @@ describe('api router', function () {
                 // console.dir(res.body);
                 if (err) return done(err);
                 assert(res.body.success);
-                assert(server.backend.getModel('Datapoint').points.length == 2);
+                assert(server.backendService.getModel('Datapoint').points.length == 2);
                 done();
             });
     });
     it('fails to delete a non-existent datapoint', function (done) {
         server = stubServer({
-            createRouter: apiRouter,
+            createRouter: ApiRouter,
             ...getTestData('loggedin'),
             ...getTestData('testdatasets'),
             ...getTestData('testdatapoints'),
@@ -1183,7 +1183,7 @@ describe('api router', function () {
                 // console.dir(res.body);
                 if (err) return done(err);
                 assert(!res.body.success);
-                assert(server.backend.getModel('Datapoint').points.length == 3);
+                assert(server.backendService.getModel('Datapoint').points.length == 3);
                 done();
             });
     });
@@ -1198,7 +1198,7 @@ describe('site router', function () {
 
     it('responds to path /', function (done) {
         server = stubServer({
-            createRouter: siteRouter,
+            createRouter: SiteRouter,
             ...getTestData('loggedin'),
             ...getTestData('testdatasets'),
             ...getTestData('testdatapoints'),

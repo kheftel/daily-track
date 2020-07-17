@@ -9,8 +9,8 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const path = require('path');
 const passport = require('passport');
-const apiRouter = require('./routes/api');
-const siteRouter = require('./routes/site');
+const ApiRouter = require('./routes/apirouter');
+const SiteRouter = require('./routes/siterouter');
 const morgan = require('morgan');
 const webpackAssets = require('express-webpack-assets');
 const flash = require('connect-flash');
@@ -20,14 +20,14 @@ const logger = require('./logger');
 const log = logger.log.extend('server');
 
 function createApp({
-    backend,
+    backendService,
     sessionOptions
 }) {
-    backend.connect(process.env.MONGODB_URI)
+    backendService.connect(process.env.MONGODB_URI)
         .then(() => {
             log('connected to backend service');
         });
-    backend.connection.on('error', (err) => {
+    backendService.connection.on('error', (err) => {
         logger.logError(err, 'backend service error');
     });
 
@@ -48,7 +48,7 @@ function createApp({
     }
 
     // set up sessions
-    app.use(backend.createSession(sessionOptions));
+    app.use(backendService.createSession(sessionOptions));
 
     // VIEWS //////////
     app.set('views', path.join(__dirname, 'views'));
@@ -66,17 +66,17 @@ function createApp({
     app.use(express.static(path.join(__dirname, '../dist')));
 
     // Configure passport authentication
-    const passport = backend.passport;
+    const passport = backendService.passport;
     app.use(passport.initialize());
     app.use(passport.session());
-    backend.initAuthentication();
+    backendService.initAuthentication();
 
     // ROUTES //////////////////////
-    app.use('/api', apiRouter({
-        backend
+    app.use('/api', ApiRouter({
+        backendService
     }));
-    app.use('/', siteRouter({
-        backend
+    app.use('/', SiteRouter({
+        backendService
     }));
 
     return app;

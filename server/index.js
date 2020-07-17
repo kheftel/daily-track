@@ -16,7 +16,7 @@ const {
     createApp
 } = require('./server');
 const app = createApp({
-    backend: new BackendService({
+    backendService: new BackendService({
         backend: new BackendMongoose({
             models: {
                 User: require('./models/user'),
