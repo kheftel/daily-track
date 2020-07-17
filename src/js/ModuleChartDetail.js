@@ -135,21 +135,21 @@ var ModuleChartDetail = function (container, datapointModal, ids = null) {
     this._colorScheme = this.defaultColorScheme;
 
     // create chart
-    var config = JSON.parse(JSON.stringify(ModuleChartDetail.defaultConfig));
-    config.options.plugins.zoom.pan.onPan = ({
+    var chartOptions = JSON.parse(JSON.stringify(ModuleChartDetail.defaultOptions));
+    chartOptions.options.plugins.zoom.pan.onPan = ({
         chart
     }) => {
         this.updateRangeLabel();
     };
 
-    config.options.plugins.zoom.pan.onPanComplete = ({
+    chartOptions.options.plugins.zoom.pan.onPanComplete = ({
         chart
     }) => {
         this.updateTagCloud();
     };
 
     // chart onclick
-    config.options.onClick = (e, arr) => {
+    chartOptions.options.onClick = (e, arr) => {
         console.log(arr);
         if (!Array.isArray(arr) || arr.length == 0 || arr.length > 1) return; // only support single datasets for now
 
@@ -163,7 +163,7 @@ var ModuleChartDetail = function (container, datapointModal, ids = null) {
     };
 
     // legend onclick
-    config.options.legend.onClick = (e, legendItem) => {
+    chartOptions.options.legend.onClick = (e, legendItem) => {
         var index = legendItem.datasetIndex;
         var ci = this._chart;
         var meta = ci.getDatasetMeta(index);
@@ -181,13 +181,36 @@ var ModuleChartDetail = function (container, datapointModal, ids = null) {
     };
 
     // create chart
-    this._chart = new Chart(this._canvas, config);
+    this._chart = new Chart(this._canvas, chartOptions);
 
     // set default zoom level
     this.newZoom('week');
 
     this._id = _numControllers;
     _numControllers++;
+
+    var complete = function () {
+        // update chart
+        this._chart.update();
+        this.updateTagCloud();
+
+        // fade in the main content container
+        $(this._contentContainer).removeClass('d-none');
+        this._contentContainer.style.opacity = 1;
+        $(this._spinner).addClass('d-none');
+
+        console.log('chart options:');
+        console.dir(this.chartOptions);
+        console.log('chart data:');
+        console.dir(this._chart.data);
+    }.bind(this);
+
+    // load dataset(s)
+    if (ids && Array.isArray(ids)) {
+        this.addDatasetsFromIds(ids, complete);
+    } else if (this._containerData.setid) {
+        this.addDataset(this._containerData.setid, complete);
+    }
 
     // extra instance vars
     var chartColors = {
@@ -251,6 +274,23 @@ var ModuleChartDetail = function (container, datapointModal, ids = null) {
         }
     });
 
+    /** global options object from chart (readonly) */
+    Object.defineProperty(ModuleChartDetail.prototype, 'chartOptions', {
+        get() {
+            return this._chart.options;
+        }
+    });
+
+    /** global type from chart. does NOT update chart, you must do that manually */
+    Object.defineProperty(ModuleChartDetail.prototype, 'chartType', {
+        get() {
+            return this.chartOptions.type;
+        },
+        set(val) {
+            this.chartOptions.type = val;
+        }
+    });
+
     /** xAxis config object from chart (readonly) */
     Object.defineProperty(ModuleChartDetail.prototype, 'xAxis', {
         get() {
@@ -294,23 +334,6 @@ var ModuleChartDetail = function (container, datapointModal, ids = null) {
     //     }
     // });
 
-    var complete = function () {
-        // update chart
-        this._chart.update();
-        this.updateTagCloud();
-
-        // fade in the main content container
-        $(this._contentContainer).removeClass('d-none');
-        this._contentContainer.style.opacity = 1;
-        $(this._spinner).addClass('d-none');
-    }.bind(this);
-
-    // load dataset(s)
-    if (ids && Array.isArray(ids)) {
-        this.addDatasetsFromIds(ids, complete);
-    } else if (this._containerData.setid) {
-        this.addDataset(this._containerData.setid, complete);
-    }
 };
 
 // INSTANCE METHODS ////////////////////////////////////////////////////////////
@@ -391,7 +414,10 @@ function addDataset(id, complete) {
                 });
                 if (complete) complete();
             } else
-                this.addDatasetFromModel(data.data, complete);
+                // set chart type to match dataset type
+                this.chartType = data.data.chartType;
+
+            this.addDatasetFromModel(data.data, complete);
         },
         error: (err) => {
             console.log(err);
@@ -414,16 +440,16 @@ function addDatasetsFromIds(ids, complete) {
         // console.log(i);
         promises.push(
             fetch('/api/sets/' + id)
-            .then((response) => response.json())
-            .catch((err) => {
-                console.dir(err);
-                $.toast({
-                    title: 'Error',
-                    content: err.message || 'Unable to load, try again later',
-                    type: 'error',
-                    delay: 5000
-                });
-            })
+                .then((response) => response.json())
+                .catch((err) => {
+                    console.dir(err);
+                    $.toast({
+                        title: 'Error',
+                        content: err.message || 'Unable to load, try again later',
+                        type: 'error',
+                        delay: 5000
+                    });
+                })
         );
     });
     Promise.all(promises)
@@ -462,18 +488,94 @@ function addDatasetFromModel(dataset, complete) {
     // translate for chart dataset object
     dataset.type = dataset.chartType;
     dataset.label = dataset.name;
-    if (this.datasets >= 1) dataset.label += ' (' + dataset.yAxisLabel + ')';
+    if (this.datasets >= 1) dataset.label += ' (' + dataset.yAxisLabel + ')'; // TODO: check this???
     dataset.data = dataset.data;
     dataset.fill = false;
     dataset.pointBackgroundColor = this.getColor(this.datasets.length);
     dataset.pointBorderColor = this.getColor(this.datasets.length);
     dataset.borderColor = this.getColor(this.datasets.length);
-    dataset.backgroundColor = Chart.helpers.color(this.getColor(this.datasets.length)).alpha(0.6).rgbString();
+    dataset.backgroundColor = this.getColor(this.datasets.length);// Chart.helpers.color(this.getColor(this.datasets.length)).alpha(0.6).rgbString();
 
     // don't trigger a chart update yet
     // TO DO: what if different charts have different y axis labels?
     this.xAxis.scaleLabel.labelString = dataset.xAxisLabel;
     this.yAxis.scaleLabel.labelString = dataset.yAxisLabel;
+
+    if (dataset.type == 'bar') {
+
+        dataset.backgroundColor = this.getColor(this.datasets.length);
+        delete dataset.pointBackgroundColor;
+        delete dataset.pointBorderColor;
+        delete dataset.borderColor;
+        delete dataset.borderWidth;
+
+        // put the grid lines between the bars
+        this.xAxis.gridLines.offsetGridLines = true;
+
+        // stack axes
+        this.xAxis.stacked = true;
+        this.yAxis.stacked = true;
+
+        // if a bar graph, put empty values corresponding to our total label space
+        var newData = [];
+        var zd = ChartConfig.zoomData.week;
+        var curDate = moment(ChartConfig.today).startOf(zd.unit).add(zd.labelStart);
+        var curDateFormatted = curDate.format('YYYY-MM-DD');
+        var totalPointsNeeded = zd.numLabels;
+
+        // pad up to the first existing data point
+        var firstExisting = dataset.data[0];
+        var firstExistingFormatted = moment(firstExisting.x).format('YYYY-MM-DD');
+        while (curDateFormatted != firstExistingFormatted) {
+            newData.push({ x: curDateFormatted, y: null });
+            curDate.add({ days: 1 });
+            curDateFormatted = curDate.format('YYYY-MM-DD');
+        }
+
+        // pad between existing data points
+        for (var i = 0; i < dataset.data.length; i++) {
+            newData.push(dataset.data[i]);
+
+            if (i < dataset.data.length - 1) {
+                // calculate and add blank points til the next dataset point
+                var curPoint = dataset.data[i];
+                var nextPoint = dataset.data[i + 1];
+                curDate = moment(curPoint.x).add({ days: 1 });
+                curDateFormatted = curDate.format('YYYY-MM-DD');
+                var endFormatted = moment(nextPoint.x).format('YYYY-MM-DD');
+                while (curDateFormatted != endFormatted) {
+                    newData.push({ x: curDateFormatted, y: null });
+                    curDate.add({ days: 1 });
+                    curDateFormatted = curDate.format('YYYY-MM-DD');
+                }
+            }
+        }
+
+        // pad after existing data points
+        curDate.add({days: 1});
+        curDateFormatted = curDate.format('YYYY-MM-DD');
+        while (newData.length < totalPointsNeeded) {
+            newData.push({ x: curDateFormatted, y: null });
+            curDate.add({ days: 1 });
+            curDateFormatted = curDate.format('YYYY-MM-DD');
+        }
+
+        console.log('dataset data padded:');
+        console.dir(newData);
+        dataset.data = newData;
+    }
+
+    /*
+
+var i, k;
+for (var k in ChartConfig.zoomData) {
+    var data = ChartConfig.zoomData[k];
+    var label = moment(ChartConfig.today).startOf(data.unit).add(data.labelStart);
+    for (i = 0; i < data.numLabels; i++) {
+        data.labels.push(label.format('YYYY-MM-DD'));
+        label.add(data.labelIncrement);
+    }
+}    */
 
     this.datasets.push(dataset);
     if (!this._datasetIds)
@@ -525,16 +627,16 @@ function addDatasetFromModel(dataset, complete) {
 
             // delete set from database
             $.ajax({
-                    url: '/api/sets/' + dataset._id,
-                    method: 'POST',
-                    data: {
-                        name: dataset.name,
-                        yAxisLabel: dataset.yAxisLabel,
-                        delete: '1'
-                    },
-                    dataType: 'json',
-                    encode: true
-                })
+                url: '/api/sets/' + dataset._id,
+                method: 'POST',
+                data: {
+                    name: dataset.name,
+                    yAxisLabel: dataset.yAxisLabel,
+                    delete: '1'
+                },
+                dataType: 'json',
+                encode: true
+            })
                 .done((data) => {
                     console.log('ajax response:');
                     console.log(data);
@@ -892,8 +994,8 @@ ModuleChartDetail.prototype.deleteDatasetValue = deleteDatasetValue;
 // STATIC VARIABLES ////////////////////////////////////////////////////////////
 ModuleChartDetail.defaultButtonClasses = ['btn', 'btn-primary'];
 
-ModuleChartDetail.defaultConfig = {
-    type: "line",
+ModuleChartDetail.defaultOptions = {
+    type: "bar", // for some reason, if this is line, we can't show bar charts, but bar charts can show either
     options: {
         legend: {
             display: false

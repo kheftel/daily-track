@@ -894,7 +894,8 @@ describe('api router', function () {
             .post('/sets/1')
             .send({
                 name: 'fred',
-                yAxisLabel: 'hours'
+                yAxisLabel: 'hours',
+                chartType: 'line'
             })
             // .expect(200)
             .end(function (err, res) {
@@ -917,7 +918,8 @@ describe('api router', function () {
             .post('/sets/1')
             .send({
                 name: 'fred',
-                yAxisLabel: 'hours'
+                yAxisLabel: 'hours',
+                chartType: 'line'
             })
             .expect(500)
             .end(function (err, res) {
@@ -938,7 +940,8 @@ describe('api router', function () {
             .post('/sets/3')
             .send({
                 name: 'fred',
-                yAxisLabel: 'hours'
+                yAxisLabel: 'hours',
+                chartType: 'line'
             })
             // .expect(200)
             .end(function (err, res) {
@@ -1019,7 +1022,8 @@ describe('api router', function () {
             .send({
                 delete: 1,
                 name: 'asdf',
-                yAxisLabel: 'asdf'
+                yAxisLabel: 'asdf',
+                chartType: 'line'
             })
             .expect(500)
             .end(function (err, res) {
@@ -1041,7 +1045,8 @@ describe('api router', function () {
             .send({
                 delete: 1,
                 name: 'asdf',
-                yAxisLabel: 'asdf'
+                yAxisLabel: 'asdf',
+                chartType: 'line'
             })
             .expect(200)
             .end(function (err, res) {

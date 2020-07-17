@@ -12,23 +12,23 @@ block content
             input#yAxisLabel.form-control(type='text', placeholder='Minutes, hours, pounds, etc' name='yAxisLabel' value=(undefined===dataset ? '' : dataset.yAxisLabel) required)
             #yAxisLabel-invalid.invalid-feedback
             #yAxisLabel-valid.valid-feedback
-        //- div#chartType-group.form-group
-        //-     label(for='chartType') Chart Type:
-        //-     select#chartType.form-control(name='chartType' required)
-        //-         if(undefined!==dataset && dataset.chartType == 'line')
-        //-             option(selected)
-        //-                 | line
-        //-         else
-        //-             option
-        //-                 | line
-        //-         if(undefined!==dataset && dataset.chartType == 'bar')
-        //-             option(selected)
-        //-                 | bar
-        //-         else
-        //-             option
-        //-                 | bar
-        //-     #chartType-invalid.invalid-feedback
-        //-     #chartType-valid.valid-feedback
+        div#chartType-group.form-group
+            label(for='chartType') Chart Type:
+            select#chartType.form-control(name='chartType' required)
+                if(undefined !== dataset && dataset.chartType === 'line')
+                    option(selected value='line')
+                        | line
+                else
+                    option(value='line')
+                        | line
+                if(undefined !== dataset && dataset.chartType == 'bar')
+                    option(selected value='bar')
+                        | bar
+                else
+                    option(value='bar')
+                        | bar
+            #chartType-invalid.invalid-feedback
+            #chartType-valid.valid-feedback
         input#owner(type='hidden' name='owner' value=(undefined===user ? '' : user._id))
         button#save.btn.btn-success(type='submit')
             | Save

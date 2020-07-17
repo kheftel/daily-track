@@ -31,10 +31,10 @@ $('#set-form').submit(function (event) {
     // get the form data
     // there are many ways to get this data using jQuery (you can use the class or id also)
     var formData = {
-        'name': $('input[name=name]').val(),
-        'yAxisLabel': $('input[name=yAxisLabel]').val(),
-        //- 'chartType':    $('select[name=chartType]').val(),
-        'owner': $('input[name=owner]').val() // hidden
+        'name':         $('input[name=name]').val(),
+        'yAxisLabel':   $('input[name=yAxisLabel]').val(),
+        'chartType':    $('select[name=chartType]').val(),
+        'owner':        $('input[name=owner]').val() // hidden
     };
     console.log(formData);
 
@@ -101,12 +101,7 @@ $('#set-form').submit(function (event) {
                 });
 
                 // redirect to homepage with a timeout so you can see the message
-                setTimeout(() => window.location.href = '/', 500);
-
-                //- $('form').append('<div class="alert alert-success">' + data.message + '</div>');
-
-                // usually after form submission, you'll want to redirect
-                // window.location = '/thank-you'; // redirect a user to another page
+                // setTimeout(() => window.location.href = '/', 500);
             }
         })
         .fail(function (xhr) {

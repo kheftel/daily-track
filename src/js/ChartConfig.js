@@ -58,7 +58,11 @@ defaults.elements.point.pointStyle = (context) => pointContextHasTags(context) ?
 defaults.elements.line.borderWidth = 2;
 
 // bars
-defaults.elements.rectangle.borderWidth = 2;
+defaults.elements.rectangle.borderWidth = 0;
+
+// bar charts
+// defaults.bar.scales.xAxes[0].stacked = true;
+// defaults.bar.scales.yAxes[0].stacked = true;
 
 // hover / tooltips
 defaults.hover.mode = 'nearest';
@@ -112,7 +116,8 @@ Chart.scaleService.updateScaleDefaults('linear', {
     ticks: {
         fontColor: 'white',
         padding: 5,
-        mirror: false
+        mirror: false,
+        "beginAtZero": true, // always show zero at the bottom of the graph
     },
     gridLines: {
         color: 'rgba(255, 255, 255, 0.2)',
@@ -125,6 +130,7 @@ Chart.scaleService.updateScaleDefaults('linear', {
         fontColor: 'white',
         labelString: 'no data'
     },
+
 });
 
 // axes can be customized including ticks here: https://www.chartjs.org/docs/latest/axes/#callbacks
@@ -148,6 +154,21 @@ var ChartConfig = {
                 'days': 1
             },
             numLabels: 360,
+            labels: []
+        },
+        "2week": {
+            label: '2 Weeks',
+            unit: 'week',
+            viewport: {
+                'weeks': -2
+            },
+            labelStart: {
+                'weeks': -52
+            },
+            labelIncrement: {
+                'weeks': 1
+            },
+            numLabels: 104,
             labels: []
         },
         "month": {

@@ -215,8 +215,8 @@ function apiController(backend) {
                 // validate / sanitize unit
                 body('yAxisLabel', 'Unit is required.').not().isEmpty().trim().escape(),
 
-                // sanitize chartType
-                // sanitizeBody('chartType').escape(),
+                // validate / sanitize chartType
+                body('chartType', 'Chart type is required.').not().isEmpty().trim().escape(),
 
                 function (req, res, next) {
                     // handle validation errors
@@ -233,7 +233,8 @@ function apiController(backend) {
                         // update dataset
                         controller.updateDatasetForUser(req.user._id, req.params.id, {
                             name: req.body.name,
-                            yAxisLabel: req.body.yAxisLabel
+                            yAxisLabel: req.body.yAxisLabel,
+                            chartType: req.body.chartType
                         }, (err, response) => {
                             if (err) return next(logger.verror(err, 'Error updating dataset %s', req.params.id));
 

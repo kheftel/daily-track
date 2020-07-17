@@ -160,7 +160,7 @@ p.getPointFromSet = function (val) {
     let data = this._dataset.data;
     let newDatapoint = null;
     for (let i = 0; i < data.length; i++) {
-        if (val == data[i].x) {
+        if (val == data[i].x && data[i].y != null) {
             newDatapoint = data[i];
             break;
         }
