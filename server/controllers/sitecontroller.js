@@ -104,7 +104,7 @@ function SiteController(backendService) {
                     if (err) return next(logger.verror(err, 'Error getting datasets'));
 
                     res.locals.groups = groups;
-                    res.locals.keys = Object.keys(groups);
+                    res.locals.keys = Object.keys(groups).sort();
                     res.render('overview');
                 });
             };

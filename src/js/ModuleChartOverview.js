@@ -24,19 +24,17 @@ var ModuleChartOverview = function (container, datapointModal) {
 
     this._datapointModal = datapointModal;
     this._datapointModal.getView().on('saved', (event, id, datapoint) => {
-        if(!this._dataset) return;
+        if (!this._dataset) return;
         console.log(id + ' vs ' + this._dataset._id);
-        if(id == this._dataset._id)
-        {
+        if (id == this._dataset._id) {
             console.log('refresh');
             this.refresh();
         }
     });
     this._datapointModal.getView().on('deleted', (event, id, datapoint) => {
-        if(!this._dataset) return;
+        if (!this._dataset) return;
         console.log(id + ' vs ' + this._dataset._id);
-        if(id == this._dataset._id)
-        {
+        if (id == this._dataset._id) {
             console.log('refresh');
             this.refresh();
         }
@@ -62,27 +60,20 @@ var ModuleChartOverview = function (container, datapointModal) {
     this._detailLink = elem('a', this._cardHeader, ['text-white', 'align-middle', 'm-0'], null, setid ? setname : 'Create Dataset');
     this._detailLink.href = setid ? '/set/' + setid : '/set/new';
 
+    // streak
+    this._streak = elem('div', this._cardHeader, ['ml-auto', 'mr-1']);
+
     // dropdown
-    this._drpHeader = elem('div', this._cardHeader, ['dropdown', 'ml-auto']);
-    this._drpHeaderBtn = elem('button', this._drpHeader, ['btn', 'btn-primary', 'btn-shadow', 'dropdown-toggle']);
-    $(this._drpHeaderBtn).addClass('d-none');
-    $(this._drpHeaderBtn)
-        .attr('type', 'button')
-        .attr('data-toggle', 'dropdown');
-    this._drpHeaderBody = elem('div', this._drpHeader, ['dropdown-menu', 'dropdown-menu-right']);
-    /* <div class="dropdown">
-      <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-        Dropdown button
-      </button>
-      <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-        <a class="dropdown-item" href="#">Action</a>
-        <a class="dropdown-item" href="#">Another action</a>
-        <a class="dropdown-item" href="#">Something else here</a>
-      </div>
-    </div> */
+    // this._drpHeader = elem('div', this._cardHeader, ['dropdown', 'ml-auto']);
+    // this._drpHeaderBtn = elem('button', this._drpHeader, ['btn', 'btn-primary', 'btn-shadow', 'dropdown-toggle']);
+    // $(this._drpHeaderBtn).addClass('d-none');
+    // $(this._drpHeaderBtn)
+    //     .attr('type', 'button')
+    //     .attr('data-toggle', 'dropdown');
+    // this._drpHeaderBody = elem('div', this._drpHeader, ['dropdown-menu', 'dropdown-menu-right']);
 
     // edit item in dropdown
-    this._editButton = iconLink(['d-none', 'dropdown-item'], this._drpHeaderBody, 'fa-edit', 'Edit');
+    // this._editButton = iconLink(['d-none', 'dropdown-item'], this._drpHeaderBody, 'fa-edit', 'Edit');
 
     // three visual states: showing _cntent, _spinner, or _createSet
 
@@ -106,7 +97,7 @@ var ModuleChartOverview = function (container, datapointModal) {
 
     var row2 = elem('div', this._content, ['row', 'm-0']);
     var col1 = elem('div', row2, ['col-6', 'p-1']);
-    
+
     // track button
     this._btnTrack = largeIconButton(['w-100'], col1, 'fa-plus-square fa-2x', 'Track', () => {
         this._datapointModal.show(this._dataset);
@@ -119,7 +110,7 @@ var ModuleChartOverview = function (container, datapointModal) {
     }, '');
 
     // set dataset
-    if(setid)
+    if (setid)
         this.setDataset(setid);
     else
         this.setVisualState(this._createSet);
@@ -138,7 +129,7 @@ p.defaultFocusStyle = {
     borderWidth: 3
 };
 
-p.setVisualState = function(state) {
+p.setVisualState = function (state) {
     this._state = state;
 
     $(this._spinner).addClass('d-none');
@@ -147,9 +138,9 @@ p.setVisualState = function(state) {
 
     $(state).removeClass('d-none');
 
-    $(this._drpHeader).removeClass('d-none');
-    if(state == this._createSet)
-        $(this._drpHeader).addClass('d-none');       
+    // $(this._drpHeader).removeClass('d-none');
+    // if (state == this._createSet)
+    // $(this._drpHeader).addClass('d-none');
 };
 
 // convenience functions ////////////////////////
@@ -245,8 +236,8 @@ function iconLink(classList, parent, icon, text, href, click, style) {
 /**
  * refresh module's content
  */
-p.refresh = function() {
-    if(!this._dataset) return;
+p.refresh = function () {
+    if (!this._dataset) return;
     this.setDataset(this._dataset._id);
 };
 
@@ -262,7 +253,7 @@ p.setDataset = function (id, complete) {
         url: '/api/sets/' + id,
         method: 'GET',
         success: (data) => {
-            if(!data.success) {
+            if (!data.success) {
                 $.toast({
                     title: 'Error',
                     content: data.message || (data.error && data.error.message) || 'Unable to load, try again later',
@@ -297,68 +288,119 @@ p.setDataset = function (id, complete) {
 p.setDatasetFromModel = function (dataset, complete) {
     this._dataset = dataset;
 
-    console.log(dataset);
+    // console.log(dataset);
 
     // show / activate edit button
     $(this._editButton).removeClass('d-none').attr('href', '/set/' + dataset._id + '/edit');
 
     // populate stats content
     this.updateStats();
-    
+
     if (complete) complete();
 };
 
-p.updateStats = function() {
+p.updateStats = function () {
     var numPoints = this._dataset.data.length;
     var unit = this._dataset.yAxisLabel;
     var trackedClass = 'text-dark';
-    var tracked, value;
+    var tracked, value, streak = 0, streakEmoji, streaklabel;
 
-    if(numPoints > 0)
-    {
+    if (numPoints > 0) {
         var mToday = moment().startOf('day');
         var oLastPoint = this._dataset.data[numPoints - 1];
         var mLastPoint = moment(oLastPoint.x);
         var days = mLastPoint.diff(mToday, 'day');
 
+        // streak
+        // if last point is today, add one to streak
+        if (mLastPoint.format('YYYY-MM-DD') == mToday.format('YYYY-MM-DD'))
+            streak = 1;
+        // add one streak for yesterday and every consecutive day before that with a tracked value
+        var streakCounter = moment(mToday).add({ day: -1 });
+        var matchStreakCounter = point => point != null && point.y != null && point.x == streakCounter.format('YYYY-MM-DD');
+        while (true) {
+            var found = this._dataset.data.find(matchStreakCounter);
+            if (found) {
+                streak++;
+                streakCounter.add({ days: -1 });
+            }
+            else
+                break;
+        }
+        var level0 = ['😭','🙃','😱','😬','🤪','🤨','🤭','😐','😑','🥺'];
+        var level1 = ['🙂','😏','😗','😀'];
+        var level2 = ['😊','😃','😙','😚'];
+        var level3 = ['😇','😘','😄','😍'];
+        var level4 = ['😋','😁','🤗','🥰'];
+        var level5 = ['😻','🤠','🤑'];
+        var level6 = ['😎','🤩'];
+        var level7 = ['🥳','👽'];
+        if (streak == 0)
+            streakEmoji = level0;
+        else if (streak < 2)
+            streakEmoji = level1;
+        else if (streak < 4)
+            streakEmoji = level2;
+        else if (streak < 6)
+            streakEmoji = level3;
+        else if (streak < 10)
+            streakEmoji = level4;
+        else if (streak < 20)
+            streakEmoji = level5;
+        else if (streak < 30)
+            streakEmoji = level6;
+        else
+            streakEmoji = level7;
+        streakEmoji = streakEmoji[Math.floor(streakEmoji.length * Math.random())];
+        // console.log(streakEmoji);
+        // if(window.twemoji)
+        // {
+        //     streakEmoji = window.twemoji.parse(streakEmoji);
+        //     console.log(streakEmoji);
+        // }
+        streaklabel = `${streak}&nbsp;${streakEmoji}`;
+    
         // days ago
-        if(days == 0)
+        if (days == 0)
             tracked = 'today';
-        else if(days == -1)
+        else if (days == -1)
             tracked = 'yesterday';
         else
             tracked = mLastPoint.from(mToday);
-        
+
         // style
-        console.log(days);
-        if(days == 0)
+        // console.log(days);
+        if (days == 0)
             trackedClass = 'text-success';
         // else if(days >= -1)
         //     trackedClass = 'text-dark';
-        else if(days >= -3)
+        else if (days >= -3)
             trackedClass = 'text-warning';
         else
             trackedClass = 'text-danger';
-        
+
         // value
         // value = `${oLastPoint.y} (${unit})`;
         value = `${oLastPoint.y}`;
     }
-    else
-    {
+    else {
         tracked = 'never tracked';
         value = 'N/A';
+        streaklabel = '';
     }
 
     var sTimes = numPoints == 1 ? 'time' : 'times';
 
     var outputs = [
         `Last: ${value} (<span class="${trackedClass}">${tracked}</span>)`,
-        `Tracked ${numPoints} ${sTimes}`
+        `Streak: ${streak}`,
+        `Tracked ${numPoints} ${sTimes}`,
     ];
     this._stats.innerHTML = outputs.join('<br />');
 
-    this._detailLink.innerHTML = `${this._dataset.name} (${unit})`;
+    this._streak.innerHTML = streaklabel;
+
+    this._detailLink.innerHTML = this._dataset.name; //`${this._dataset.name} (${unit})`;
 };
 
 // module.exports = ModuleChartOverview;
