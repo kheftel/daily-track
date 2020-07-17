@@ -327,14 +327,20 @@ p.updateStats = function () {
             else
                 break;
         }
-        var level0 = ['😭','🙃','😱','😬','🤪','🤨','🤭','😐','😑','🥺'];
-        var level1 = ['🙂','😏','😗','😀'];
-        var level2 = ['😊','😃','😙','😚'];
-        var level3 = ['😇','😘','😄','😍'];
-        var level4 = ['😋','😁','🤗','🥰'];
-        var level5 = ['😻','🤠','🤑'];
-        var level6 = ['😎','🤩'];
-        var level7 = ['🥳','👽'];
+        // '😘''😗''😄''😙''😚'
+        var level0 = ['😭', '🙃', '😱', '😬', '🤪', '🤨', '🤭', '😐', '😑', '🥺'];
+        var level1 = ['🙂'];
+        var level2 = ['😊', '😏'];
+        var level3 = ['😇', '😍'];
+        var level4 = ['🤗', '🥰'];
+        var level5 = ['😋', '😁'];
+        var level6 = ['😎'];
+        var level7 = ['🤠'];
+        var level8 = ['😻'];
+        var level9 = ['🤑'];
+        var level10 = ['🤩'];
+        var level11 = ['🥳'];
+        var level12 = ['👽'];
         if (streak == 0)
             streakEmoji = level0;
         else if (streak < 2)
@@ -343,14 +349,24 @@ p.updateStats = function () {
             streakEmoji = level2;
         else if (streak < 6)
             streakEmoji = level3;
-        else if (streak < 10)
+        else if (streak < 8)
             streakEmoji = level4;
-        else if (streak < 20)
+        else if (streak < 10)
             streakEmoji = level5;
-        else if (streak < 30)
+        else if (streak < 13)
             streakEmoji = level6;
-        else
+        else if (streak < 16)
             streakEmoji = level7;
+        else if (streak < 20)
+            streakEmoji = level8;
+        else if (streak < 23)
+            streakEmoji = level9;
+        else if (streak < 26)
+            streakEmoji = level10;
+        else if (streak < 30)
+            streakEmoji = level11;
+        else
+            streakEmoji = level12;
         streakEmoji = streakEmoji[Math.floor(streakEmoji.length * Math.random())];
         // console.log(streakEmoji);
         // if(window.twemoji)
@@ -359,7 +375,7 @@ p.updateStats = function () {
         //     console.log(streakEmoji);
         // }
         streaklabel = `${streak}&nbsp;${streakEmoji}`;
-    
+
         // days ago
         if (days == 0)
             tracked = 'today';
