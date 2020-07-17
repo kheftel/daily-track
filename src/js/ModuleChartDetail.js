@@ -262,69 +262,6 @@ var ModuleChartDetail = function (container, datapointModal, ids = null) {
         }
     });
 
-    /** get/set colorOffset within the color scheme. does NOT update chart, you must do that manually */
-    Object.defineProperty(ModuleChartDetail.prototype, 'colorOffset', {
-        get() {
-            return this._colorOffset;
-        },
-        set(i) {
-            this._colorOffset = i;
-
-            this.refreshColorsFromScheme();
-        }
-    });
-
-    /** global options object from chart (readonly) */
-    Object.defineProperty(ModuleChartDetail.prototype, 'chartOptions', {
-        get() {
-            return this._chart.options;
-        }
-    });
-
-    /** global type from chart. does NOT update chart, you must do that manually */
-    Object.defineProperty(ModuleChartDetail.prototype, 'chartType', {
-        get() {
-            return this.chartOptions.type;
-        },
-        set(val) {
-            this.chartOptions.type = val;
-        }
-    });
-
-    /** xAxis config object from chart (readonly) */
-    Object.defineProperty(ModuleChartDetail.prototype, 'xAxis', {
-        get() {
-            return this._chart.options.scales.xAxes[0];
-        }
-    });
-
-    /** xAxisLabel from chart. does NOT update chart, you must do that manually */
-    Object.defineProperty(ModuleChartDetail.prototype, 'xAxisLabel', {
-        get() {
-            return this.xAxis.scaleLabel.labelString;
-        },
-        set(val) {
-            this.xAxis.scaleLabel.labelString = val;
-        }
-    });
-
-    /** yAxis config object from chart (readonly) */
-    Object.defineProperty(ModuleChartDetail.prototype, 'yAxis', {
-        get() {
-            return this._chart.options.scales.yAxes[0];
-        }
-    });
-
-    /** yAxisLabel from chart. does NOT update chart, you must do that manually */
-    Object.defineProperty(ModuleChartDetail.prototype, 'yAxisLabel', {
-        get() {
-            return this.yAxis.scaleLabel.labelString;
-        },
-        set(val) {
-            this.yAxis.scaleLabel.labelString = val;
-        }
-    });
-
     /** 
      * current timeScale object for this zoom level (readonly) 
      */
@@ -336,6 +273,71 @@ var ModuleChartDetail = function (container, datapointModal, ids = null) {
 
 };
 
+// properties
+
+/** get/set colorOffset within the color scheme. does NOT update chart, you must do that manually */
+Object.defineProperty(ModuleChartDetail.prototype, 'colorOffset', {
+    get() {
+        return this._colorOffset;
+    },
+    set(i) {
+        this._colorOffset = i;
+
+        this.refreshColorsFromScheme();
+    }
+});
+
+/** global options object from chart (readonly) */
+Object.defineProperty(ModuleChartDetail.prototype, 'chartOptions', {
+    get() {
+        return this._chart.options;
+    }
+});
+
+/** global type from chart. does NOT update chart, you must do that manually */
+Object.defineProperty(ModuleChartDetail.prototype, 'chartType', {
+    get() {
+        return this.chartOptions.type;
+    },
+    set(val) {
+        this.chartOptions.type = val;
+    }
+});
+
+/** xAxis config object from chart (readonly) */
+Object.defineProperty(ModuleChartDetail.prototype, 'xAxis', {
+    get() {
+        return this._chart.options.scales.xAxes[0];
+    }
+});
+
+/** xAxisLabel from chart. does NOT update chart, you must do that manually */
+Object.defineProperty(ModuleChartDetail.prototype, 'xAxisLabel', {
+    get() {
+        return this.xAxis.scaleLabel.labelString;
+    },
+    set(val) {
+        this.xAxis.scaleLabel.labelString = val;
+    }
+});
+
+/** yAxis config object from chart (readonly) */
+Object.defineProperty(ModuleChartDetail.prototype, 'yAxis', {
+    get() {
+        return this._chart.options.scales.yAxes[0];
+    }
+});
+
+/** yAxisLabel from chart. does NOT update chart, you must do that manually */
+Object.defineProperty(ModuleChartDetail.prototype, 'yAxisLabel', {
+    get() {
+        return this.yAxis.scaleLabel.labelString;
+    },
+    set(val) {
+        this.yAxis.scaleLabel.labelString = val;
+    }
+});
+
 // INSTANCE METHODS ////////////////////////////////////////////////////////////
 
 /**
@@ -345,12 +347,15 @@ var ModuleChartDetail = function (container, datapointModal, ids = null) {
  */
 function newZoom(level) {
 
-    var data = ChartConfig.zoomData[level];
+    var zdata = ChartConfig.zoomData[level];
+    var today = moment().startOf('day');
+    var viewportMax = moment(today).add({ day: 1 });
+    var viewportMin = moment(today).add(zdata.viewport);
 
-    this._chart.options.scales.xAxes[0].time.unit = data.unit;
-    this._chart.options.scales.xAxes[0].time.min = moment(ChartConfig.today).add(data.viewport).format('YYYY-MM-DD');
-    this._chart.options.scales.xAxes[0].time.max = ChartConfig.today.format('YYYY-MM-DD');
-    this._chart.data.labels = data.labels;
+    this.xAxis.time.unit = zdata.unit;
+    this.xAxis.time.min = viewportMin.format('YYYY-MM-DD');
+    this.xAxis.time.max = viewportMax.format('YYYY-MM-DD');
+    this._chart.data.labels = zdata.labels;
 
     this._chart.update();
 
@@ -552,7 +557,7 @@ function addDatasetFromModel(dataset, complete) {
         }
 
         // pad after existing data points
-        curDate.add({days: 1});
+        curDate.add({ days: 1 });
         curDateFormatted = curDate.format('YYYY-MM-DD');
         while (newData.length < totalPointsNeeded) {
             newData.push({ x: curDateFormatted, y: null });
@@ -942,8 +947,8 @@ ModuleChartDetail.prototype.getTagCloud = getTagCloud;
 function updateTagCloud() {
     if (!this.datasets) return;
 
-    let min = this._chart.options.scales.xAxes[0].time.min;
-    let max = this._chart.options.scales.xAxes[0].time.max;
+    let min = this.xAxis.time.min;
+    let max = this.xAxis.time.max;
     let output = '';
     this.datasets.forEach((dataset, i) => {
         let tagData = this.getTagCloud(min, max, i);

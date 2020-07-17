@@ -99,7 +99,7 @@ function siteController(backend) {
         },
         overview() {
             return (req, res, next) => {
-                controller.getDatasetsForUser(req.user._id, (err, datasets) => {
+                controller.getDatasetsForUserSortedByUnit(req.user._id, (err, datasets) => {
                     if (err) return next(logger.verror(err, 'Error getting datasets'));
 
                     res.locals.datasets = datasets;

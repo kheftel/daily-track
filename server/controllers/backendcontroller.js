@@ -12,19 +12,23 @@ function backendController(backend) {
             });
         },
         getDatasetsForUser(id, cb) {
+            controller.getDatasetsForUserSortedBy(id, { name: 'asc' }, cb);
+        },
+        getDatasetsForUserSortedBy(id, sort, cb) {
             Dataset.find({
-                    owner: id
-                })
-                .sort({
-                    name: 'asc'
-                })
+                owner: id
+            })
+                .sort(sort)
                 .exec(cb);
+        },
+        getDatasetsForUserSortedByUnit(id, cb) {
+            controller.getDatasetsForUserSortedBy(id, { yAxisLabel: 'asc' }, cb);
         },
         getDatasetsForUserAndLabel(id, label, cb) {
             Dataset.find({
-                    owner: id,
-                    yAxisLabel: label,
-                })
+                owner: id,
+                yAxisLabel: label,
+            })
                 .sort({
                     name: 'asc'
                 })
@@ -39,8 +43,8 @@ function backendController(backend) {
 
                 // populate its datapoints
                 Datapoint.find({
-                        'dataset': dataset._id,
-                    })
+                    'dataset': dataset._id,
+                })
                     .sort({
                         x: 'asc'
                     })
@@ -94,8 +98,8 @@ function backendController(backend) {
 
                 // check nonempty
                 Datapoint.findOne({
-                        dataset: datasetid
-                    })
+                    dataset: datasetid
+                })
                     .exec((err, datapoint) => {
                         if (err) return cb(err);
 
@@ -110,9 +114,9 @@ function backendController(backend) {
         },
         createOrUpdateDatapointForDataset(datasetid, options, cb) {
             Datapoint.findOne({
-                    dataset: datasetid,
-                    x: options.x
-                })
+                dataset: datasetid,
+                x: options.x
+            })
                 .exec((err, datapoint) => {
                     if (err) return cb(err);
 
@@ -146,9 +150,9 @@ function backendController(backend) {
         },
         deleteDatapoint(datasetid, options, cb) {
             Datapoint.findOne({
-                    dataset: datasetid,
-                    x: options.x
-                })
+                dataset: datasetid,
+                x: options.x
+            })
                 .exec((err, datapoint) => {
                     if (err) return cb(err);
 

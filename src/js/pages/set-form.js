@@ -101,7 +101,7 @@ $('#set-form').submit(function (event) {
                 });
 
                 // redirect to homepage with a timeout so you can see the message
-                // setTimeout(() => window.location.href = '/', 500);
+                setTimeout(() => window.location.href = '/', 1000);
             }
         })
         .fail(function (xhr) {
