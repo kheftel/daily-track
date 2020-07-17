@@ -24,6 +24,42 @@ function BackendController(backend) {
         getDatasetsForUserSortedByUnit(id, cb) {
             controller.getDatasetsForUserSortedBy(id, { yAxisLabel: 'asc' }, cb);
         },
+        getUnitsForUser(id, cb) {
+            controller.getDatasetsForUserSortedByUnit(id, (err, datasets) => {
+                if (err) return cb(err);
+
+                // compute a list of unique units
+                var uniqueUnits = [];
+                for (let i = 0; i < datasets.length; i++) {
+                    if (uniqueUnits.indexOf(datasets[i].yAxisLabel) < 0)
+                        uniqueUnits.push(datasets[i].yAxisLabel);
+                }
+                cb(null, uniqueUnits);
+            });
+
+        },
+        getGroupedDatasetsForUser(id, cb) {
+            controller.getUnitsForUser(id, (err, units) => {
+                if (err) return cb(err);
+
+                var result = {};
+                var numProcessed = 0;
+
+                // get the datasets for each unit
+                units.forEach((unit) => {
+                    controller.getDatasetsForUserAndLabel(id, unit, (err, datasets) => {
+                        if (err) return cb(err);
+
+                        result[unit] = datasets;
+
+                        numProcessed++;
+
+                        if(numProcessed == units.length)
+                            cb(null, result);
+                    });
+                });
+            });
+        },
         getDatasetsForUserAndLabel(id, label, cb) {
             Dataset.find({
                 owner: id,

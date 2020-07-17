@@ -4,10 +4,16 @@ block content
     //- each set, i in datasets
     //-     .chartholder.mb-2(data-setid=set._id data-setname=set.name)
     #overview-container.container-fluid.p-0
-        .row.m-0
-            each set, i in datasets
-                .col-6.col-lg-4.col-xl-3.p-1
-                    .module-chart-overview(data-setid=set._id data-setname=set.name)
+        each key in keys
+
+            .row.m-1.bg-primary.rounded
+                .col-12.p-1
+                    h5.m-0.p-1.text-shadow= key
+            .row.m-0
+                - var datasets = groups[key];
+                each set, i in datasets
+                    .col-6.col-lg-4.col-xl-3.p-1
+                        .module-chart-overview(data-setid=set._id data-setname=set.name)
 
                 //- .card.border-light.shadow-rb(style="height: " + style.chartRowHeight)
                 //-     .card-header.p-2
@@ -19,9 +25,12 @@ block content
                 //-     .card-body(style="position: relative;")
                 //-         .chartcontainer(id="set-" + i + "-" + set._id data-setid=set._id)
 
-            //- one extra for creating a new set
-            .col-6.col-lg-4.col-xl-3.p-1
-                .module-chart-overview
+        //- one extra for creating a new set
+        .row.m-1.bg-primary.rounded
+            .col-12.p-1
+                h5.m-0.p-1.text-shadow New Dataset
+        .col-6.col-lg-4.col-xl-3.p-1
+            .module-chart-overview
     include modals/datapoint-form
 
 block pagescript

@@ -281,8 +281,9 @@ describe('siteController', function () {
             stubResWithOptions({
                 render: function (template) { // not arrow func
                     assert(template == 'overview');
-                    // this == subbed res
-                    assert(this.locals.datasets.length == 2);
+                    // this == stubbed res
+                    var unit = 'hours';
+                    assert(this.locals.groups[unit].length == 2);
                     done();
                 }
             }),

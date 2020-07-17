@@ -99,10 +99,12 @@ function SiteController(backendService) {
         },
         overview() {
             return (req, res, next) => {
-                backendController.getDatasetsForUserSortedByUnit(req.user._id, (err, datasets) => {
+                // getDatasetsForUserSortedByUnit
+                backendController.getGroupedDatasetsForUser(req.user._id, (err, groups) => {
                     if (err) return next(logger.verror(err, 'Error getting datasets'));
 
-                    res.locals.datasets = datasets;
+                    res.locals.groups = groups;
+                    res.locals.keys = Object.keys(groups);
                     res.render('overview');
                 });
             };
