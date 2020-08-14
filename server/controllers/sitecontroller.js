@@ -99,6 +99,7 @@ function SiteController(backendService) {
         },
         overview() {
             return (req, res, next) => {
+                log('overview, getting datasets');
                 // getDatasetsForUserSortedByUnit
                 backendController.getGroupedDatasetsForUser(req.user._id, (err, groups) => {
                     if (err) return next(logger.verror(err, 'Error getting datasets'));

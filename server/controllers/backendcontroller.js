@@ -1,5 +1,7 @@
 const moment = require('moment');
 const VError = require('verror');
+const logger = require('../logger');
+const log = logger.log.extend('BackendController');
 
 function BackendController(backend) {
     const Dataset = backend.getModel('Dataset');
@@ -44,6 +46,12 @@ function BackendController(backend) {
 
                 var result = {};
                 var numProcessed = 0;
+
+                // no units?
+                if(units.length === 0) {
+                    cb(null, result);
+                    return;
+                }
 
                 // get the datasets for each unit
                 units.forEach((unit) => {
