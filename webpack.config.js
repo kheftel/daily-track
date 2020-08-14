@@ -19,7 +19,8 @@ const PATHS = {
     app: path.join(__dirname, "src"),
 };
 
-var baseConfig = merge([{
+var baseConfig = merge([
+    {
         entry: {
             // base: './src/base.js',
             // charting: './src/charting.js',
@@ -65,17 +66,6 @@ var baseConfig = merge([{
             },
             namedModules: true,
             namedChunks: true,
-        },
-        module: {
-            rules: [{
-                test: /\.(woff|woff2|eot|ttf|otf|svg)$/,
-                use: [{
-                    loader: 'file-loader',
-                    options: {
-                        name: 'webfonts/[name].[ext]',
-                    },
-                }]
-            }]
         },
         plugins: [
             new CleanWebpackPlugin(),
@@ -126,6 +116,8 @@ var baseConfig = merge([{
             new webpack.IgnorePlugin(/^\.\/locale$/, /moment$/)
         ]
     },
+    utils.webmanifest(),
+    utils.webFonts(),
     utils.exposeJQuery(),
     utils.favicon(),
     utils.loadJS({
@@ -145,7 +137,8 @@ var devConfig = merge([
     })
 ]);
 
-var prodConfig = merge([{
+var prodConfig = merge([
+    {
         output: {
             filename: '[name].[contenthash].js',
             path: path.resolve(__dirname, 'dist'),

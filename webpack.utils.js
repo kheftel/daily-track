@@ -22,6 +22,36 @@ exports.exposeJQuery = () => ({
     }
 });
 
+exports.webmanifest = () => ({
+    // webmanifest file
+    module: {
+        rules: [{
+            test: /site\.webmanifest$/,
+            use: [{
+                loader: 'file-loader',
+                options: {
+                    name: '[name].[ext]',
+                },
+            }]
+        }]
+    }
+});
+
+exports.webFonts = () => ({
+    // web fonts
+    module: {
+        rules: [{
+            test: /\.(woff|woff2|eot|ttf|otf|svg)$/,
+            use: [{
+                loader: 'file-loader',
+                options: {
+                    name: 'webfonts/[name].[ext]',
+                },
+            }]
+        }]
+    }
+});
+
 exports.favicon = () => ({
     module: {
         rules: [{
@@ -58,7 +88,7 @@ exports.emitCSS = ({
                     sourceMap: true
                 }
             }],
-        }, ],
+        },],
     },
 });
 
@@ -83,7 +113,7 @@ exports.inlineCSS = ({
                     sourceMap: true
                 }
             }],
-        }, ],
+        },],
     },
 });
 
@@ -97,23 +127,23 @@ exports.inlineLESS = ({
             include,
             exclude,
             use: [{
-                    loader: 'style-loader',
-                    options: {
-                        sourceMap: true
-                    }
-                },
-                {
-                    loader: 'css-loader',
-                    options: {
-                        sourceMap: true
-                    }
-                },
-                {
-                    loader: 'less-loader',
-                    options: {
-                        sourceMap: true
-                    }
+                loader: 'style-loader',
+                options: {
+                    sourceMap: true
                 }
+            },
+            {
+                loader: 'css-loader',
+                options: {
+                    sourceMap: true
+                }
+            },
+            {
+                loader: 'less-loader',
+                options: {
+                    sourceMap: true
+                }
+            }
             ]
         }]
     }
@@ -164,29 +194,29 @@ exports.less = () => ({
         rules: [{
             test: /\.less$/,
             use: [{
-                    loader: MiniCssExtractPlugin.loader,
-                    options: {
-                        sourceMap: true
-                    }
-                },
-                {
-                    loader: 'css-loader',
-                    options: {
-                        sourceMap: true
-                    }
-                },
-                {
-                    loader: "postcss-loader",
-                    options: {
-                        plugins: () => [require("autoprefixer")()],
-                    },
-                },
-                {
-                    loader: 'less-loader',
-                    options: {
-                        sourceMap: true
-                    }
+                loader: MiniCssExtractPlugin.loader,
+                options: {
+                    sourceMap: true
                 }
+            },
+            {
+                loader: 'css-loader',
+                options: {
+                    sourceMap: true
+                }
+            },
+            {
+                loader: "postcss-loader",
+                options: {
+                    plugins: () => [require("autoprefixer")()],
+                },
+            },
+            {
+                loader: 'less-loader',
+                options: {
+                    sourceMap: true
+                }
+            }
             ]
         }]
     }
@@ -213,7 +243,7 @@ exports.loadImages = ({
                 loader: "url-loader",
                 options,
             },
-        }, ],
+        },],
     },
 });
 
@@ -227,7 +257,7 @@ exports.loadJS = ({
             include,
             exclude,
             use: "babel-loader",
-        }, ],
+        },],
     },
 });
 

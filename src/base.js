@@ -18,9 +18,12 @@ import './js/pageinit';
 
 // assets
 import './favicon.ico';
+import "./site.webmanifest";
 import "./img/touch-icon-iphone.png";
 import "./img/touch-icon-ipad.png";
 import "./img/touch-icon-iphone-retina.png";
 import "./img/touch-icon-ipad-retina.png";
 import "./img/dailytracklogo.png";
 import "./img/dailytracklogolong.png";
+import "./img/android-chrome-192x192.png";
+import "./img/android-chrome-512x512.png";
