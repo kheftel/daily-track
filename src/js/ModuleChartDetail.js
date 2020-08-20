@@ -225,7 +225,7 @@ var ModuleChartDetail = function (container, datapointModal, ids = null) {
 
     this.colorSchemes = {
         vividRainbow: ['#00AAEE', '#A6D608', '#FFE302', '#FF5F00', '#F70D1A', '#9F00FF'],
-        darkly: ["#3498DB", "#00bc8c", "#ffef00", /*"#F39C12",*/ "#fd7e14", "#E74C3C", "#e83e8c", "#6f42c1", "#6610f2", "#375a7f"],
+        darkly: ["#3498DB", "#00bc8c", "#ffef00", /*"#F39C12",*/ "#fd7e14", "#E74C3C", "#e83e8c", "#6f42c1", "#c29dff", "#375a7f"],
         chartjs: [chartColors.red, chartColors.orange, chartColors.yellow, chartColors.green, chartColors.blue, chartColors.purple, chartColors.grey]
     };
 
