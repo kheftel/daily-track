@@ -131,7 +131,7 @@ var ModuleChartDetail = function (container, datapointModal, ids = null) {
 
     // color schemes
     this._colorOffset = 0;
-    this.defaultColorScheme = 'darkly';
+    this.defaultColorScheme = 'default';
     this._colorScheme = this.defaultColorScheme;
 
     // create chart
@@ -226,6 +226,7 @@ var ModuleChartDetail = function (container, datapointModal, ids = null) {
     this.colorSchemes = {
         vividRainbow: ['#00AAEE', '#A6D608', '#FFE302', '#FF5F00', '#F70D1A', '#9F00FF'],
         darkly: ["#3498DB", "#00bc8c", "#ffef00", /*"#F39C12",*/ "#fd7e14", "#E74C3C", "#e83e8c", "#6f42c1", "#c29dff", "#375a7f"],
+        default: ['#0084db', '#00bc8c', '#55d600', '#ffef02', '#feb400', '#fd7400', '#e83c3c', '#e8006b', '#b14aa6', '#8057e7'],
         chartjs: [chartColors.red, chartColors.orange, chartColors.yellow, chartColors.green, chartColors.blue, chartColors.purple, chartColors.grey]
     };
 
