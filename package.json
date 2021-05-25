@@ -81,7 +81,7 @@
     "autoprefixer": "^9.8.6",
     "babel-loader": "^8.1.0",
     "browserify": "^16.5.2",
-    "browserslist": "^4.13.0",
+    "browserslist": "^4.16.5",
     "bundle-buddy": "^0.2.2",
     "chai": "^4.2.0",
     "clean-webpack-plugin": "^2.0.2",
